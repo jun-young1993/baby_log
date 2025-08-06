@@ -1,0 +1,207 @@
+{
+  "master": {
+    "tasks": [
+      {
+        "id": 1,
+        "title": "Setup Project Repository",
+        "description": "Initialize the project repository with Flutter and stacked-cli.",
+        "details": "Create a new Flutter project using the latest stable version. Set up the project structure using stacked-cli to ensure a clean architecture. Initialize version control with Git and create a remote repository on GitHub for collaboration.",
+        "testStrategy": "Verify that the project builds successfully and the initial setup runs without errors.",
+        "priority": "medium",
+        "dependencies": [],
+        "status": "done",
+        "subtasks": []
+      },
+      {
+        "id": 2,
+        "title": "Implement Home Screen UI",
+        "description": "Develop the home screen UI with emotion summary and recent video list.",
+        "details": "Use Flutter to create a responsive home screen. Implement reusable components for emotion statistics and video list. Ensure the UI follows the design guidelines and integrates with the stacked ViewModel for state management.",
+        "testStrategy": "Test the UI on multiple devices to ensure responsiveness and check that the components render correctly.",
+        "priority": "medium",
+        "dependencies": [
+          1
+        ],
+        "status": "done",
+        "subtasks": []
+      },
+      {
+        "id": 3,
+        "title": "Develop Video Upload Feature",
+        "description": "Create the video upload functionality with file selection and recording options.",
+        "details": "Implement video file selection and recording using Flutter plugins like image_picker and camera. Integrate with the Azure Face API for emotion analysis. Display emotion results and tags after analysis.",
+        "testStrategy": "Test video upload and recording on different devices. Verify that the emotion analysis results are displayed correctly.",
+        "priority": "medium",
+        "dependencies": [
+          1
+        ],
+        "status": "pending",
+        "subtasks": []
+      },
+      {
+        "id": 4,
+        "title": "Integrate Emotion Analysis API",
+        "description": "Connect the app to the Microsoft Azure Face API for emotion analysis.",
+        "details": "Set up API calls to Microsoft Azure Face API using HTTP requests. Handle authentication and error responses. Parse the emotion analysis results and update the UI accordingly.",
+        "testStrategy": "Mock API responses to test the integration and ensure the app handles different scenarios like network errors.",
+        "priority": "medium",
+        "dependencies": [
+          3
+        ],
+        "status": "pending",
+        "subtasks": []
+      },
+      {
+        "id": 5,
+        "title": "Implement Video Detail View",
+        "description": "Develop the video detail view to display video playback and emotion analysis results.",
+        "details": "Create a detailed view for video playback using Flutter's video_player package. Display emotion analysis results and allow users to add or edit tags. Implement sharing functionality using Firebase Dynamic Links.",
+        "testStrategy": "Test video playback and ensure emotion results are displayed. Verify that sharing links are generated correctly.",
+        "priority": "medium",
+        "dependencies": [
+          3,
+          4
+        ],
+        "status": "pending",
+        "subtasks": []
+      },
+      {
+        "id": 6,
+        "title": "Design Emotion Diary UI",
+        "description": "Create the emotion diary interface with a calendar view and daily emotion emojis.",
+        "details": "Use Flutter's calendar packages to implement a calendar view. Display emotion emojis for each day based on the analysis results. Ensure the UI is intuitive and easy to navigate.",
+        "testStrategy": "Test the calendar navigation and emoji display for accuracy and responsiveness.",
+        "priority": "medium",
+        "dependencies": [
+          2
+        ],
+        "status": "pending",
+        "subtasks": []
+      },
+      {
+        "id": 7,
+        "title": "Implement Family Sharing Feature",
+        "description": "Develop the family sharing functionality with invitation and acceptance flows.",
+        "details": "Use Firebase Dynamic Links to implement invitation links. Create UI for managing family members and setting sharing permissions. Ensure secure handling of user data and permissions.",
+        "testStrategy": "Test the invitation flow and verify that family members can access shared content according to permissions.",
+        "priority": "medium",
+        "dependencies": [
+          5
+        ],
+        "status": "pending",
+        "subtasks": []
+      },
+      {
+        "id": 8,
+        "title": "Setup User Settings Screen",
+        "description": "Develop the settings screen for user information and app preferences.",
+        "details": "Create a settings UI to allow users to update their information, check cloud storage usage, and send feedback. Use Flutter's form widgets for input handling and validation.",
+        "testStrategy": "Test form submissions and ensure data is updated correctly. Verify cloud storage usage displays accurately.",
+        "priority": "medium",
+        "dependencies": [
+          1
+        ],
+        "status": "pending",
+        "subtasks": []
+      },
+      {
+        "id": 9,
+        "title": "Implement Cloud Storage Management",
+        "description": "Integrate cloud storage management to track and display usage.",
+        "details": "Use Supabase or Firebase for cloud storage management. Implement functionality to track storage usage and display it in the settings screen.",
+        "testStrategy": "Test storage tracking and ensure the usage is updated and displayed correctly.",
+        "priority": "medium",
+        "dependencies": [
+          8
+        ],
+        "status": "pending",
+        "subtasks": []
+      },
+      {
+        "id": 10,
+        "title": "Develop Feedback Submission Feature",
+        "description": "Create a feedback submission form for user feedback.",
+        "details": "Implement a feedback form using Flutter's form widgets. Allow users to submit feedback which is sent to a designated email or stored in a database for review.",
+        "testStrategy": "Test feedback submission and ensure it is received correctly.",
+        "priority": "medium",
+        "dependencies": [
+          8
+        ],
+        "status": "pending",
+        "subtasks": []
+      },
+      {
+        "id": 11,
+        "title": "Setup Authentication System",
+        "description": "Implement user authentication using Supabase or Firebase Auth.",
+        "details": "Set up user authentication with email/password and social login options. Ensure secure handling of user credentials and session management.",
+        "testStrategy": "Test login and registration flows for different authentication methods. Verify session persistence and logout functionality.",
+        "priority": "medium",
+        "dependencies": [
+          1
+        ],
+        "status": "pending",
+        "subtasks": []
+      },
+      {
+        "id": 12,
+        "title": "Implement Video Processing with FFmpeg",
+        "description": "Set up video processing using FFmpeg for thumbnail extraction and frame capture.",
+        "details": "Integrate FFmpeg to process uploaded videos for thumbnail extraction and frame capture. Ensure compatibility with different video formats.",
+        "testStrategy": "Test video processing on various formats and verify that thumbnails and frames are extracted correctly.",
+        "priority": "medium",
+        "dependencies": [
+          3
+        ],
+        "status": "pending",
+        "subtasks": []
+      },
+      {
+        "id": 13,
+        "title": "Develop Notification System",
+        "description": "Implement a notification system for app updates and family sharing alerts.",
+        "details": "Use Firebase Cloud Messaging to send notifications for app updates and sharing alerts. Ensure notifications are handled correctly in the app.",
+        "testStrategy": "Test notification delivery and handling on different devices and scenarios.",
+        "priority": "medium",
+        "dependencies": [
+          7
+        ],
+        "status": "pending",
+        "subtasks": []
+      },
+      {
+        "id": 14,
+        "title": "Optimize App Performance",
+        "description": "Optimize the app for performance and responsiveness.",
+        "details": "Profile the app using Flutter's performance tools. Optimize UI rendering and API calls to reduce latency and improve user experience.",
+        "testStrategy": "Use performance profiling tools to identify bottlenecks and verify improvements.",
+        "priority": "medium",
+        "dependencies": [
+          2,
+          5,
+          6
+        ],
+        "status": "pending",
+        "subtasks": []
+      },
+      {
+        "id": 15,
+        "title": "Conduct User Acceptance Testing",
+        "description": "Perform user acceptance testing to ensure the app meets user needs and expectations.",
+        "details": "Organize testing sessions with target users. Collect feedback and identify areas for improvement. Ensure the app is intuitive and meets all functional requirements.",
+        "testStrategy": "Conduct structured testing sessions and gather user feedback to validate app functionality and usability.",
+        "priority": "medium",
+        "dependencies": [
+          14
+        ],
+        "status": "pending",
+        "subtasks": []
+      }
+    ],
+    "metadata": {
+      "created": "2025-08-06T07:33:50.160Z",
+      "updated": "2025-08-06T09:26:40.565Z",
+      "description": "Tasks for master context"
+    }
+  }
+}
