@@ -6,21 +6,17 @@ import 'package:stacked_services/stacked_services.dart';
 import 'package:get_it/get_it.dart';
 
 import '../ui/views/home/home_view.dart';
-import '../ui/views/home/home_viewmodel.dart';
 
 @StackedApp(
-  routes: [MaterialRoute(page: HomeView, initial: true)],
+  routes: [
+    MaterialRoute(page: HomeView, initial: true),
+  ],
   dependencies: [
     LazySingleton(classType: NavigationService),
     LazySingleton(classType: DialogService),
   ],
 )
 class App {}
-
-void main() {
-  setupLocator();
-  runApp(const MyApp());
-}
 
 class MyApp extends StatelessWidget {
   const MyApp({super.key});

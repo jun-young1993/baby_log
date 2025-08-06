@@ -84,7 +84,7 @@ class EmotionSummaryCard extends StatelessWidget {
         crossAxisCount: 2,
         crossAxisSpacing: 12,
         mainAxisSpacing: 12,
-        childAspectRatio: 2.5,
+        childAspectRatio: 2.2,
       ),
       itemCount: emotions.length,
       itemBuilder: (context, index) {
@@ -107,24 +107,26 @@ class EmotionSummaryCard extends StatelessWidget {
       ),
       child: Row(
         children: [
-          Text(emoji, style: const TextStyle(fontSize: 24)),
+          Text(emoji, style: const TextStyle(fontSize: 20)),
           const SizedBox(width: 8),
           Expanded(
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.start,
               mainAxisAlignment: MainAxisAlignment.center,
+              mainAxisSize: MainAxisSize.min,
               children: [
                 Text(
                   emotion,
                   style: TextStyle(
-                    fontSize: 14,
+                    fontSize: 13,
                     fontWeight: FontWeight.w600,
                     color: color,
                   ),
+                  overflow: TextOverflow.ellipsis,
                 ),
                 Text(
                   '$count회',
-                  style: TextStyle(fontSize: 12, color: color.withOpacity(0.7)),
+                  style: TextStyle(fontSize: 11, color: color.withOpacity(0.7)),
                 ),
               ],
             ),
