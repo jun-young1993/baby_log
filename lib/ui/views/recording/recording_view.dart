@@ -14,6 +14,15 @@ class RecordingView extends StackedView<RecordingViewModel> {
     RecordingViewModel viewModel,
     Widget? child,
   ) {
+    // 카메라가 준비되지 않았으면 초기화 시도
+    if (!viewModel.isCameraReady &&
+        !viewModel.isBusy &&
+        viewModel.errorMessage == null) {
+      WidgetsBinding.instance.addPostFrameCallback((_) {
+        viewModel.initializeCamera(context);
+      });
+    }
+
     return Scaffold(
       backgroundColor: Colors.black,
       body: SafeArea(
@@ -46,11 +55,6 @@ class RecordingView extends StackedView<RecordingViewModel> {
   RecordingViewModel viewModelBuilder(BuildContext context) =>
       RecordingViewModel();
 
-  @override
-  void onViewModelReady(RecordingViewModel viewModel) {
-    viewModel.initializeCamera();
-  }
-
   Widget _buildCameraPreview(RecordingViewModel viewModel) {
     if (!viewModel.isCameraReady) {
       return Container(
@@ -64,6 +68,63 @@ class RecordingView extends StackedView<RecordingViewModel> {
               Text(
                 '카메라를 초기화하는 중...',
                 style: TextStyle(color: Colors.white, fontSize: 16),
+              ),
+            ],
+          ),
+        ),
+      );
+    }
+
+    // 시뮬레이터 모드인 경우
+    if (viewModel.cameraService.isSimulatorMode) {
+      return Container(
+        color: Colors.black,
+        child: Center(
+          child: Column(
+            mainAxisAlignment: MainAxisAlignment.center,
+            children: [
+              Icon(
+                Icons.camera_alt,
+                color: Colors.white,
+                size: 80,
+              ),
+              const SizedBox(height: 16),
+              const Text(
+                '시뮬레이터 모드',
+                style: TextStyle(
+                  color: Colors.white,
+                  fontSize: 24,
+                  fontWeight: FontWeight.bold,
+                ),
+              ),
+              const SizedBox(height: 8),
+              const Text(
+                '실제 기기에서 카메라 기능을 테스트하세요',
+                style: TextStyle(
+                  color: Colors.white70,
+                  fontSize: 16,
+                ),
+                textAlign: TextAlign.center,
+              ),
+              const SizedBox(height: 24),
+              Container(
+                padding: const EdgeInsets.symmetric(
+                  horizontal: 20,
+                  vertical: 12,
+                ),
+                decoration: BoxDecoration(
+                  color: Colors.blue.withOpacity(0.2),
+                  borderRadius: BorderRadius.circular(20),
+                  border: Border.all(color: Colors.blue),
+                ),
+                child: const Text(
+                  '시뮬레이션 녹화 가능',
+                  style: TextStyle(
+                    color: Colors.white,
+                    fontSize: 14,
+                    fontWeight: FontWeight.w500,
+                  ),
+                ),
               ),
             ],
           ),

@@ -3,6 +3,8 @@ import 'package:camera/camera.dart';
 import 'package:permission_handler/permission_handler.dart';
 import 'package:stacked/stacked.dart';
 import 'package:get_it/get_it.dart';
+import 'package:flutter/material.dart';
+import 'dart:io';
 
 import 'emotion_analysis_service.dart';
 
@@ -12,11 +14,13 @@ class CameraService with ListenableServiceMixin {
   final ReactiveValue<bool> _isInitialized = ReactiveValue<bool>(false);
   final ReactiveValue<bool> _hasPermission = ReactiveValue<bool>(false);
   final ReactiveValue<String?> _errorMessage = ReactiveValue<String?>(null);
+  final ReactiveValue<bool> _isSimulatorMode = ReactiveValue<bool>(false);
 
   CameraController? get cameraController => _cameraController.value;
   bool get isInitialized => _isInitialized.value;
   bool get hasPermission => _hasPermission.value;
   String? get errorMessage => _errorMessage.value;
+  bool get isSimulatorMode => _isSimulatorMode.value;
 
   CameraService() {
     listenToReactiveValues([
@@ -24,33 +28,196 @@ class CameraService with ListenableServiceMixin {
       _isInitialized,
       _hasPermission,
       _errorMessage,
+      _isSimulatorMode,
     ]);
   }
 
-  /// 카메라 권한 요청 및 확인
-  Future<bool> requestCameraPermission() async {
-    try {
-      final status = await Permission.camera.request();
-      _hasPermission.value = status.isGranted;
+  /// 시뮬레이터 환경인지 확인
+  bool get _isSimulator {
+    return Platform.isIOS && !Platform.environment.containsKey('FLUTTER_TEST');
+  }
 
-      if (!status.isGranted) {
-        _errorMessage.value = '카메라 권한이 필요합니다. 설정에서 권한을 허용해주세요.';
+  /// 카메라 권한 상태 확인
+  Future<PermissionStatus> checkCameraPermission() async {
+    return await Permission.camera.status;
+  }
+
+  /// 카메라 권한 요청 및 확인 (사용자 친화적)
+  Future<bool> requestCameraPermission(BuildContext context) async {
+    try {
+      // 시뮬레이터 환경에서는 권한을 자동으로 허용
+      if (_isSimulator) {
+        _hasPermission.value = true;
+        _isSimulatorMode.value = true;
+        return true;
+      }
+
+      // 현재 권한 상태 확인
+      final status = await Permission.camera.status;
+
+      if (status.isGranted) {
+        _hasPermission.value = true;
+        return true;
+      }
+
+      if (status.isDenied) {
+        // 권한 요청 다이얼로그 표시
+        final granted = await _showPermissionDialog(context);
+        if (granted) {
+          _hasPermission.value = true;
+          return true;
+        }
         return false;
       }
 
-      return true;
+      if (status.isPermanentlyDenied) {
+        // 설정으로 이동하는 다이얼로그 표시
+        await _showSettingsDialog(context);
+        return false;
+      }
+
+      return false;
     } catch (e) {
       _errorMessage.value = '카메라 권한 요청 중 오류가 발생했습니다: $e';
       return false;
     }
   }
 
+  /// 권한 요청 다이얼로그 표시
+  Future<bool> _showPermissionDialog(BuildContext context) async {
+    return await showDialog<bool>(
+          context: context,
+          barrierDismissible: false,
+          builder: (context) => AlertDialog(
+            shape: RoundedRectangleBorder(
+              borderRadius: BorderRadius.circular(16),
+            ),
+            title: Row(
+              children: [
+                Icon(Icons.camera_alt, color: Colors.blue[600], size: 28),
+                const SizedBox(width: 12),
+                const Expanded(
+                  child: Text(
+                    '카메라 권한이 필요합니다',
+                    style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold),
+                  ),
+                ),
+              ],
+            ),
+            content: Column(
+              mainAxisSize: MainAxisSize.min,
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                const Text(
+                  '아기의 감정을 분석하기 위해 카메라 접근 권한이 필요합니다.',
+                  style: TextStyle(fontSize: 14, color: Colors.black87),
+                ),
+                const SizedBox(height: 16),
+                Container(
+                  padding: const EdgeInsets.all(12),
+                  decoration: BoxDecoration(
+                    color: Colors.blue[50],
+                    borderRadius: BorderRadius.circular(8),
+                    border: Border.all(color: Colors.blue[200]!),
+                  ),
+                  child: Row(
+                    children: [
+                      Icon(
+                        Icons.info_outline,
+                        color: Colors.blue[600],
+                        size: 20,
+                      ),
+                      const SizedBox(width: 8),
+                      Expanded(
+                        child: Text(
+                          '이 권한은 아기의 감정을 분석하기 위해 필요합니다.',
+                          style: TextStyle(
+                            fontSize: 12,
+                            color: Colors.blue[700],
+                          ),
+                        ),
+                      ),
+                    ],
+                  ),
+                ),
+              ],
+            ),
+            actions: [
+              TextButton(
+                onPressed: () {
+                  Navigator.of(context).pop(false);
+                },
+                child: const Text('나중에', style: TextStyle(color: Colors.grey)),
+              ),
+              ElevatedButton(
+                onPressed: () async {
+                  Navigator.of(context).pop();
+
+                  // 권한 요청
+                  final status = await Permission.camera.request();
+
+                  if (status.isGranted) {
+                    Navigator.of(context).pop(true);
+                  } else {
+                    // 권한이 거부된 경우 설정으로 이동하는 다이얼로그 표시
+                    if (context.mounted) {
+                      await _showSettingsDialog(context);
+                    }
+                    Navigator.of(context).pop(false);
+                  }
+                },
+                style: ElevatedButton.styleFrom(
+                  backgroundColor: Colors.blue[600],
+                  foregroundColor: Colors.white,
+                  shape: RoundedRectangleBorder(
+                    borderRadius: BorderRadius.circular(8),
+                  ),
+                ),
+                child: const Text('권한 허용'),
+              ),
+            ],
+          ),
+        ) ??
+        false;
+  }
+
+  /// 설정으로 이동하는 다이얼로그 표시
+  Future<void> _showSettingsDialog(BuildContext context) async {
+    return await showDialog(
+      context: context,
+      builder: (context) => AlertDialog(
+        title: const Text('권한이 필요합니다'),
+        content: const Text('카메라 권한이 거부되었습니다. 앱 설정에서 권한을 허용해주세요.'),
+        actions: [
+          TextButton(
+            onPressed: () => Navigator.of(context).pop(),
+            child: const Text('취소'),
+          ),
+          ElevatedButton(
+            onPressed: () {
+              Navigator.of(context).pop();
+              openAppSettings();
+            },
+            child: const Text('설정으로 이동'),
+          ),
+        ],
+      ),
+    );
+  }
+
   /// 카메라 초기화
-  Future<bool> initializeCamera() async {
+  Future<bool> initializeCamera(BuildContext context) async {
     try {
-      // 권한 확인
-      if (!await requestCameraPermission()) {
+      // 권한 확인 및 요청
+      if (!await requestCameraPermission(context)) {
         return false;
+      }
+
+      // 시뮬레이터 모드인 경우
+      if (_isSimulatorMode.value) {
+        _isInitialized.value = true;
+        _errorMessage.value = null;
+        return true;
       }
 
       // 사용 가능한 카메라 목록 가져오기

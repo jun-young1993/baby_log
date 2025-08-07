@@ -65,6 +65,7 @@ class HomeView extends StackedView<HomeViewModel> {
             bottom: 0,
             right: 0,
             child: FloatingActionButton(
+              heroTag: 'diary_fab', // 고유한 Hero 태그 추가
               onPressed: viewModel.onDiaryPressed,
               backgroundColor: Colors.green[600],
               child: const Icon(
@@ -79,6 +80,7 @@ class HomeView extends StackedView<HomeViewModel> {
             bottom: 0,
             right: 70,
             child: FloatingActionButton(
+              heroTag: 'add_video_fab', // 고유한 Hero 태그 추가
               onPressed: viewModel.onAddVideoPressed,
               backgroundColor: Colors.blue[600],
               child: const Icon(Icons.add, color: Colors.white, size: 28),

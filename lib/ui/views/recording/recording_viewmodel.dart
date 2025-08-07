@@ -4,6 +4,7 @@ import 'package:get_it/get_it.dart';
 import 'package:camera/camera.dart';
 import 'package:path_provider/path_provider.dart';
 import 'package:path/path.dart' as path;
+import 'package:flutter/material.dart';
 
 import '../../../services/camera_service.dart';
 import '../../../services/emotion_analysis_service.dart';
@@ -39,10 +40,10 @@ class RecordingViewModel extends BaseViewModel {
   String? get errorMessage => _cameraService.errorMessage;
 
   /// 카메라 초기화
-  Future<void> initializeCamera() async {
+  Future<void> initializeCamera(BuildContext context) async {
     setBusy(true);
     try {
-      final success = await _cameraService.initializeCamera();
+      final success = await _cameraService.initializeCamera(context);
       if (!success) {
         await _showErrorDialog(
           '카메라 초기화 실패',
@@ -63,6 +64,24 @@ class RecordingViewModel extends BaseViewModel {
     try {
       setBusy(true);
 
+      // 시뮬레이터 모드인 경우
+      if (_cameraService.isSimulatorMode) {
+        // 시뮬레이션 녹화 시작
+        _isRecording = true;
+        _recordingDuration = Duration.zero;
+        _emotionService.clearResults();
+
+        // 시뮬레이션 감정 분석 시작
+        _startEmotionAnalysis();
+
+        // 시뮬레이션 녹화 시간 타이머 시작
+        _startRecordingTimer();
+
+        setBusy(false);
+        return;
+      }
+
+      // 실제 녹화 시작
       // 녹화 파일 경로 설정
       final directory = await getTemporaryDirectory();
       final timestamp = DateTime.now().millisecondsSinceEpoch;
@@ -94,6 +113,44 @@ class RecordingViewModel extends BaseViewModel {
     try {
       setBusy(true);
 
+      // 시뮬레이터 모드인 경우
+      if (_cameraService.isSimulatorMode) {
+        // 시뮬레이션 녹화 중지
+        _isRecording = false;
+        _recordingPath = 'simulation_recording.mp4';
+
+        // 감정 분석 중지
+        _stopEmotionAnalysis();
+
+        // 시뮬레이션 결과 저장
+        final success = await _storageService.saveRecordingResult(
+          videoPath: _recordingPath!,
+          emotions: currentEmotions,
+          duration: _recordingDuration,
+        );
+
+        if (success) {
+          // 결과 화면으로 이동
+          await _navigationService.navigateTo(
+            '/recording-result',
+            arguments: {
+              'videoPath': _recordingPath,
+              'emotions': currentEmotions,
+              'duration': _recordingDuration,
+            },
+          );
+        } else {
+          await _showErrorDialog(
+            '저장 실패',
+            _storageService.errorMessage ?? '녹화 결과를 저장할 수 없습니다.',
+          );
+        }
+
+        setBusy(false);
+        return;
+      }
+
+      // 실제 녹화 중지
       // 녹화 중지
       final videoFile = await _cameraService.cameraController!
           .stopVideoRecording();
