@@ -58,10 +58,16 @@ dependencies:
   # Image & Video
   image_picker: ^1.0.7
   video_player: ^2.8.3
+  camera: ^0.10.5+9
+  permission_handler: ^11.3.0
   
   # Utils
   intl: ^0.19.0
   uuid: ^4.3.3
+  
+  # Calendar & Charts
+  table_calendar: ^3.0.9
+  fl_chart: ^0.66.2
 
 dev_dependencies:
   flutter_test:
@@ -93,7 +99,8 @@ flutter:
   uses-material-design: true
 
   # To add assets to your application, add an assets section, like this:
-  # assets:
+  assets:
+    - assets/images/
   #   - images/a_dot_burr.jpeg
   #   - images/a_dot_ham.jpeg
 

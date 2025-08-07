@@ -1,6 +1,7 @@
 import 'package:stacked/stacked.dart';
 import 'package:stacked_services/stacked_services.dart';
 import 'package:get_it/get_it.dart';
+import '../../../app/app.router.dart';
 
 class HomeViewModel extends BaseViewModel {
   final NavigationService _navigationService = GetIt.I<NavigationService>();
@@ -52,14 +53,26 @@ class HomeViewModel extends BaseViewModel {
 
   // 영상 추가 버튼 클릭
   void onAddVideoPressed() {
-    // TODO: 영상 업로드 화면으로 이동
-    _navigationService.navigateTo('/upload');
+    // 녹화 화면으로 이동
+    _navigationService.navigateTo(Routes.recordingView);
+  }
+
+  // 감정 다이어리 버튼 클릭
+  void onDiaryPressed() {
+    // 감정 다이어리 화면으로 이동
+    _navigationService.navigateTo(Routes.diaryView);
   }
 
   // 영상 아이템 클릭
   void onVideoPressed(String videoId) {
-    // TODO: 영상 상세 보기 화면으로 이동
-    _navigationService.navigateTo('/video/$videoId');
+    // TODO: 영상 상세 보기 화면으로 이동 (아직 구현되지 않음)
+    // _navigationService.navigateTo('/video/$videoId');
+
+    // 임시로 다이얼로그 표시
+    _dialogService.showDialog(
+      title: '영상 상세 보기',
+      description: '영상 ID: $videoId\n이 기능은 아직 개발 중입니다.',
+    );
   }
 
   // 감정 통계 새로고침

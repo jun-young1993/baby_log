@@ -58,10 +58,33 @@ class HomeView extends StackedView<HomeViewModel> {
                 ),
               ),
             ),
-      floatingActionButton: FloatingActionButton(
-        onPressed: viewModel.onAddVideoPressed,
-        backgroundColor: Colors.blue[600],
-        child: const Icon(Icons.add, color: Colors.white),
+      floatingActionButton: Stack(
+        children: [
+          // 감정 다이어리 버튼
+          Positioned(
+            bottom: 0,
+            right: 0,
+            child: FloatingActionButton(
+              onPressed: viewModel.onDiaryPressed,
+              backgroundColor: Colors.green[600],
+              child: const Icon(
+                Icons.calendar_today,
+                color: Colors.white,
+                size: 24,
+              ),
+            ),
+          ),
+          // 영상 추가 버튼
+          Positioned(
+            bottom: 0,
+            right: 70,
+            child: FloatingActionButton(
+              onPressed: viewModel.onAddVideoPressed,
+              backgroundColor: Colors.blue[600],
+              child: const Icon(Icons.add, color: Colors.white, size: 28),
+            ),
+          ),
+        ],
       ),
     );
   }

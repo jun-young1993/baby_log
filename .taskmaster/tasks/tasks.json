@@ -28,15 +28,78 @@
       {
         "id": 3,
         "title": "Develop Video Upload Feature",
-        "description": "Create the video upload functionality with file selection and recording options.",
-        "details": "Implement video file selection and recording using Flutter plugins like image_picker and camera. Integrate with the Azure Face API for emotion analysis. Display emotion results and tags after analysis.",
-        "testStrategy": "Test video upload and recording on different devices. Verify that the emotion analysis results are displayed correctly.",
-        "priority": "medium",
+        "description": "Create the video recording and emotion analysis functionality using real-time camera streaming.",
+        "status": "done",
         "dependencies": [
           1
         ],
-        "status": "pending",
-        "subtasks": []
+        "priority": "medium",
+        "details": "Implement real-time video recording using the camera package for live streaming. Manage camera permissions with permission_handler. Perform real-time emotion analysis using Azure Face API during recording. Display live emotion results during recording and summarize results after completion.",
+        "testStrategy": "Test real-time video recording and emotion analysis on different devices. Verify that live emotion results are displayed correctly during recording and that final results are accurate.",
+        "subtasks": [
+          {
+            "id": 1,
+            "title": "Manage Camera Permissions and Initialization",
+            "description": "Set up and manage camera permissions using the permission_handler package.",
+            "dependencies": [],
+            "details": "Implement permission checks and request camera access from the user.",
+            "status": "done",
+            "testStrategy": "Verify that camera permissions are requested and granted correctly on various devices."
+          },
+          {
+            "id": 2,
+            "title": "Process Real-Time Camera Stream",
+            "description": "Implement real-time video recording using the camera package.",
+            "dependencies": [
+              "3.1"
+            ],
+            "details": "Set up the camera package to handle live streaming and recording of video.",
+            "status": "done",
+            "testStrategy": "Test video recording functionality across different devices to ensure smooth streaming."
+          },
+          {
+            "id": 3,
+            "title": "Integrate Real-Time Emotion Analysis API",
+            "description": "Connect and use Azure Face API for real-time emotion analysis during video recording.",
+            "dependencies": [
+              "3.2"
+            ],
+            "details": "Implement API calls to Azure Face API to analyze emotions in real-time.",
+            "status": "done",
+            "testStrategy": "Verify that emotion data is accurately captured and processed during recording."
+          },
+          {
+            "id": 4,
+            "title": "Update UI in Real-Time During Recording",
+            "description": "Display live emotion results on the UI during video recording.",
+            "dependencies": [
+              "3.3"
+            ],
+            "details": "Develop UI components to show real-time emotion analysis results to the user.",
+            "status": "done",
+            "testStrategy": "Ensure that the UI updates correctly and displays emotion data without lag."
+          },
+          {
+            "id": 5,
+            "title": "Save Results After Recording Completion",
+            "description": "Store video and emotion analysis results after recording is finished.",
+            "dependencies": [
+              "3.4"
+            ],
+            "details": "Implement functionality to save video files and emotion data securely.",
+            "status": "done",
+            "testStrategy": "Test that all data is saved correctly and can be retrieved for later use."
+          },
+          {
+            "id": 6,
+            "title": "Implement Error Handling and User Feedback",
+            "description": "Develop error handling mechanisms and provide feedback to users.",
+            "dependencies": [],
+            "details": "Create error handling routines and user notifications for any issues during recording.",
+            "status": "done",
+            "testStrategy": "Simulate errors and verify that appropriate feedback is given to the user."
+          }
+        ]
       },
       {
         "id": 4,
@@ -75,8 +138,62 @@
         "dependencies": [
           2
         ],
-        "status": "pending",
-        "subtasks": []
+        "status": "in-progress",
+        "subtasks": [
+          {
+            "id": 1,
+            "title": "Add Calendar Package and Implement Basic Calendar View",
+            "description": "Integrate a Flutter calendar package and create a basic calendar view for the emotion diary.",
+            "dependencies": [],
+            "details": "Research and select a suitable Flutter calendar package. Implement the basic calendar view to display dates.",
+            "status": "done",
+            "testStrategy": "Verify the calendar displays correctly and is responsive across different devices."
+          },
+          {
+            "id": 2,
+            "title": "Implement Daily Emotion Data Model and Service",
+            "description": "Create a data model and service to handle daily emotion data for the diary.",
+            "dependencies": [
+              "6.1"
+            ],
+            "details": "Design a data model to store daily emotions and implement a service to manage data retrieval and storage.",
+            "status": "done",
+            "testStrategy": "Test data retrieval and storage functionality to ensure accuracy and reliability."
+          },
+          {
+            "id": 3,
+            "title": "Develop Emotion Emoji Display and Visualization Widget",
+            "description": "Create a widget to display emotion emojis for each day based on analysis results.",
+            "dependencies": [
+              "6.2"
+            ],
+            "details": "Design and implement a widget that visualizes emotion emojis on the calendar view.",
+            "status": "done",
+            "testStrategy": "Ensure emojis are displayed correctly for each day and update dynamically based on data changes."
+          },
+          {
+            "id": 4,
+            "title": "Create Emotion Statistics Chart and Summary Screen",
+            "description": "Develop a screen to display emotion statistics and summaries using charts.",
+            "dependencies": [
+              "6.3"
+            ],
+            "details": "Implement charts to visualize emotion trends and summaries over time.",
+            "status": "done",
+            "testStrategy": "Test the accuracy and responsiveness of the charts and ensure they reflect the correct data."
+          },
+          {
+            "id": 5,
+            "title": "Set Up Navigation and Routing",
+            "description": "Configure navigation and routing for the emotion diary UI.",
+            "dependencies": [
+              "6.4"
+            ],
+            "details": "Implement navigation logic to allow users to move between the calendar, statistics, and other screens.",
+            "status": "in-progress",
+            "testStrategy": "Verify that navigation is intuitive and routes are correctly set up between different UI components."
+          }
+        ]
       },
       {
         "id": 7,
@@ -200,7 +317,7 @@
     ],
     "metadata": {
       "created": "2025-08-06T07:33:50.160Z",
-      "updated": "2025-08-06T09:26:40.565Z",
+      "updated": "2025-08-07T05:36:53.504Z",
       "description": "Tasks for master context"
     }
   }
