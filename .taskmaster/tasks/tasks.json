@@ -4,320 +4,1041 @@
       {
         "id": 1,
         "title": "Setup Project Repository",
-        "description": "Initialize the project repository with Flutter and stacked-cli.",
-        "details": "Create a new Flutter project using the latest stable version. Set up the project structure using stacked-cli to ensure a clean architecture. Initialize version control with Git and create a remote repository on GitHub for collaboration.",
-        "testStrategy": "Verify that the project builds successfully and the initial setup runs without errors.",
+        "description": "Initialize the Flutter project repository with necessary configurations and dependencies.",
+        "details": "Create a new Flutter project using the latest stable version of Flutter. Set up version control with Git and initialize a repository on GitHub. Add necessary dependencies such as riverpod, go_router, cached_network_image, photo_view, image_picker, permission_handler, flutter_svg, lottie, shimmer, flutter_staggered_grid_view, intl, shared_preferences, path_provider, and uuid. Configure the project for both Android and iOS platforms.",
+        "testStrategy": "Verify that the project builds successfully on both Android and iOS simulators/emulators.",
         "priority": "medium",
         "dependencies": [],
         "status": "done",
-        "subtasks": []
-      },
-      {
-        "id": 2,
-        "title": "Implement Home Screen UI",
-        "description": "Develop the home screen UI with emotion summary and recent video list.",
-        "details": "Use Flutter to create a responsive home screen. Implement reusable components for emotion statistics and video list. Ensure the UI follows the design guidelines and integrates with the stacked ViewModel for state management.",
-        "testStrategy": "Test the UI on multiple devices to ensure responsiveness and check that the components render correctly.",
-        "priority": "medium",
-        "dependencies": [
-          1
-        ],
-        "status": "done",
-        "subtasks": []
-      },
-      {
-        "id": 3,
-        "title": "Develop Video Upload Feature",
-        "description": "Create the video recording and emotion analysis functionality using real-time camera streaming.",
-        "status": "done",
-        "dependencies": [
-          1
-        ],
-        "priority": "medium",
-        "details": "Implement real-time video recording using the camera package for live streaming. Manage camera permissions with permission_handler. Perform real-time emotion analysis using Azure Face API during recording. Display live emotion results during recording and summarize results after completion.",
-        "testStrategy": "Test real-time video recording and emotion analysis on different devices. Verify that live emotion results are displayed correctly during recording and that final results are accurate.",
         "subtasks": [
           {
             "id": 1,
-            "title": "Manage Camera Permissions and Initialization",
-            "description": "Set up and manage camera permissions using the permission_handler package.",
+            "title": "Create Flutter Project",
+            "description": "Initialize a new Flutter project using the latest stable version.",
             "dependencies": [],
-            "details": "Implement permission checks and request camera access from the user.",
+            "details": "Use the Flutter CLI to create a new project with default settings.",
             "status": "done",
-            "testStrategy": "Verify that camera permissions are requested and granted correctly on various devices."
+            "testStrategy": "Ensure the project builds successfully with no errors."
           },
           {
             "id": 2,
-            "title": "Process Real-Time Camera Stream",
-            "description": "Implement real-time video recording using the camera package.",
+            "title": "Set Up Version Control",
+            "description": "Initialize Git and create a repository on GitHub.",
             "dependencies": [
-              "3.1"
+              "1.1"
             ],
-            "details": "Set up the camera package to handle live streaming and recording of video.",
+            "details": "Initialize a local Git repository and push it to a new GitHub repository.",
             "status": "done",
-            "testStrategy": "Test video recording functionality across different devices to ensure smooth streaming."
+            "testStrategy": "Verify that the repository is accessible on GitHub and contains the initial commit."
           },
           {
             "id": 3,
-            "title": "Integrate Real-Time Emotion Analysis API",
-            "description": "Connect and use Azure Face API for real-time emotion analysis during video recording.",
+            "title": "Add Project Dependencies",
+            "description": "Include necessary dependencies in the Flutter project.",
             "dependencies": [
-              "3.2"
+              "1.1"
             ],
-            "details": "Implement API calls to Azure Face API to analyze emotions in real-time.",
+            "details": "Add dependencies such as riverpod, go_router, cached_network_image, and others to pubspec.yaml.",
             "status": "done",
-            "testStrategy": "Verify that emotion data is accurately captured and processed during recording."
+            "testStrategy": "Run 'flutter pub get' and ensure all dependencies are resolved without errors."
           },
           {
             "id": 4,
-            "title": "Update UI in Real-Time During Recording",
-            "description": "Display live emotion results on the UI during video recording.",
+            "title": "Configure Platforms",
+            "description": "Set up the project for Android and iOS platforms.",
             "dependencies": [
-              "3.3"
+              "1.1",
+              "1.3"
             ],
-            "details": "Develop UI components to show real-time emotion analysis results to the user.",
+            "details": "Configure Android and iOS settings, including permissions and platform-specific configurations.",
             "status": "done",
-            "testStrategy": "Ensure that the UI updates correctly and displays emotion data without lag."
+            "testStrategy": "Build the project for both Android and iOS to ensure configurations are correct."
           },
           {
             "id": 5,
-            "title": "Save Results After Recording Completion",
-            "description": "Store video and emotion analysis results after recording is finished.",
+            "title": "Verify Project Setup",
+            "description": "Ensure the project is correctly set up with all configurations and dependencies.",
             "dependencies": [
-              "3.4"
+              "1.2",
+              "1.3",
+              "1.4"
             ],
-            "details": "Implement functionality to save video files and emotion data securely.",
+            "details": "Perform a final check to verify that the project builds and runs on both platforms.",
             "status": "done",
-            "testStrategy": "Test that all data is saved correctly and can be retrieved for later use."
+            "testStrategy": "Run the project on Android and iOS simulators/emulators to confirm successful setup."
+          }
+        ]
+      },
+      {
+        "id": 2,
+        "title": "Implement Onboarding Flow",
+        "description": "Develop the onboarding flow including splash screen, permission requests, family setup, and theme selection.",
+        "details": "Use Flutter's Material Design 3 components to create a splash screen with the app logo and loading animation. Implement permission requests using the permission_handler package for camera, storage, and notifications. Design a family setup screen to register initial family members and a theme selection screen for light/dark mode using Riverpod for state management.",
+        "testStrategy": "Conduct user testing to ensure smooth navigation through the onboarding flow and correct handling of permissions.",
+        "priority": "medium",
+        "dependencies": [
+          1
+        ],
+        "status": "done",
+        "subtasks": [
+          {
+            "id": 1,
+            "title": "Create Splash Screen",
+            "description": "Develop the splash screen using Flutter's Material Design 3 components with the app logo and loading animation.",
+            "dependencies": [],
+            "details": "Use Flutter's Material Design 3 components to create a visually appealing splash screen that includes the app logo and a loading animation.",
+            "status": "done",
+            "testStrategy": "Verify the splash screen displays correctly on app launch and transitions smoothly to the next screen."
           },
           {
-            "id": 6,
-            "title": "Implement Error Handling and User Feedback",
-            "description": "Develop error handling mechanisms and provide feedback to users.",
-            "dependencies": [],
-            "details": "Create error handling routines and user notifications for any issues during recording.",
+            "id": 2,
+            "title": "Implement Permission Requests",
+            "description": "Implement permission requests for camera, storage, and notifications using the permission_handler package.",
+            "dependencies": [
+              "2.1"
+            ],
+            "details": "Utilize the permission_handler package to request necessary permissions for camera, storage, and notifications during the onboarding process.",
             "status": "done",
-            "testStrategy": "Simulate errors and verify that appropriate feedback is given to the user."
+            "testStrategy": "Test permission requests on various devices to ensure correct handling and user prompts."
+          },
+          {
+            "id": 3,
+            "title": "Design Family Setup Screen",
+            "description": "Create a screen to register initial family members during onboarding.",
+            "dependencies": [
+              "2.2"
+            ],
+            "details": "Design a user-friendly interface for registering initial family members, ensuring ease of use and clarity.",
+            "status": "done",
+            "testStrategy": "Conduct user testing to ensure the family setup process is intuitive and error-free."
+          },
+          {
+            "id": 4,
+            "title": "Develop Theme Selection Screen",
+            "description": "Implement a theme selection screen for choosing between light and dark modes using Riverpod for state management.",
+            "dependencies": [
+              "2.3"
+            ],
+            "details": "Create a theme selection interface that allows users to choose between light and dark modes, utilizing Riverpod for managing state changes.",
+            "status": "done",
+            "testStrategy": "Test theme selection functionality to ensure seamless switching between light and dark modes."
+          },
+          {
+            "id": 5,
+            "title": "Conduct User Testing for Onboarding Flow",
+            "description": "Perform user testing to ensure smooth navigation and correct handling of permissions throughout the onboarding flow.",
+            "dependencies": [
+              "2.4"
+            ],
+            "details": "Organize user testing sessions to evaluate the overall onboarding experience, focusing on navigation and permission handling.",
+            "status": "done",
+            "testStrategy": "Gather feedback from users to identify any issues or areas for improvement in the onboarding flow."
+          }
+        ]
+      },
+      {
+        "id": 3,
+        "title": "Design Main Dashboard UI",
+        "description": "Create the main dashboard interface with photo grid view, statistics card, quick actions, and search bar.",
+        "details": "Utilize flutter_staggered_grid_view for the photo grid layout. Implement statistics cards using CustomCard components to display monthly/weekly photo counts and emotion analysis results. Add quick action buttons for photo capture, album creation, and sharing. Integrate a search bar using CustomTextField for photo search and filtering.",
+        "testStrategy": "Perform UI tests to ensure all components are displayed correctly and are responsive across different devices.",
+        "priority": "medium",
+        "dependencies": [
+          1
+        ],
+        "status": "done",
+        "subtasks": [
+          {
+            "id": 1,
+            "title": "Design Photo Grid View",
+            "description": "Create a photo grid layout using flutter_staggered_grid_view.",
+            "dependencies": [],
+            "details": "Utilize flutter_staggered_grid_view to implement a responsive photo grid layout for displaying images.\n<info added on 2025-09-15T07:43:15.464Z>\nPhoto grid view implementation completed:\n\n1. Added flutter_staggered_grid_view package: Dependency added to pubspec.yaml.\n2. Created PhotoGridView widget:\n   - Responsive grid layout using MasonryGridView.\n   - Integrated search functionality (searchQuery parameter).\n   - Implemented empty state UI (guidance message when no photos).\n   - Structure allows testing with mock data.\n\n3. Implemented PhotoCard widget:\n   - Displays images and handles errors.\n   - Gradient overlay for improved text readability.\n   - Displays 'First Moment' badge.\n   - Shows emotion icons.\n   - Formats dates (Today, Yesterday, N days ago).\n   - Navigates to detail page on tap.\n\n4. Defined PhotoData model: Structure for photo data.\n5. Search filtering: Searchable by title and emotion.\n6. Responsive design: Adapts to various screen sizes.\n\nAll implemented features function correctly and adhere to Material Design 3 theme consistency.\n</info added on 2025-09-15T07:43:15.464Z>",
+            "status": "done",
+            "testStrategy": "Verify the grid layout is responsive and displays images correctly across different screen sizes."
+          },
+          {
+            "id": 2,
+            "title": "Implement Statistics Cards",
+            "description": "Develop statistics cards using CustomCard components.",
+            "dependencies": [
+              "3.1"
+            ],
+            "details": "Use CustomCard components to display monthly and weekly photo counts along with emotion analysis results.",
+            "status": "done",
+            "testStrategy": "Ensure statistics cards display accurate data and are visually consistent with the design."
+          },
+          {
+            "id": 3,
+            "title": "Add Quick Action Buttons",
+            "description": "Integrate quick action buttons for photo capture, album creation, and sharing.",
+            "dependencies": [
+              "3.1"
+            ],
+            "details": "Implement buttons for quick actions such as capturing photos, creating albums, and sharing content.",
+            "status": "done",
+            "testStrategy": "Test the functionality of each quick action button to ensure they perform the intended actions."
+          },
+          {
+            "id": 4,
+            "title": "Integrate Search Bar",
+            "description": "Add a search bar using CustomTextField for photo search and filtering.",
+            "dependencies": [
+              "3.1"
+            ],
+            "details": "Use CustomTextField to implement a search bar that allows users to search and filter photos.",
+            "status": "done",
+            "testStrategy": "Test the search functionality to ensure it filters photos correctly based on user input."
+          },
+          {
+            "id": 5,
+            "title": "Perform UI Testing",
+            "description": "Conduct UI tests to ensure all components are displayed correctly and are responsive.",
+            "dependencies": [
+              "3.1",
+              "3.2",
+              "3.3",
+              "3.4"
+            ],
+            "details": "Perform comprehensive UI testing to verify the layout, responsiveness, and functionality of the dashboard components.",
+            "status": "done",
+            "testStrategy": "Ensure all UI elements are correctly displayed and functional across various devices and screen sizes."
           }
         ]
       },
       {
         "id": 4,
-        "title": "Integrate Emotion Analysis API",
-        "description": "Connect the app to the Microsoft Azure Face API for emotion analysis.",
-        "details": "Set up API calls to Microsoft Azure Face API using HTTP requests. Handle authentication and error responses. Parse the emotion analysis results and update the UI accordingly.",
-        "testStrategy": "Mock API responses to test the integration and ensure the app handles different scenarios like network errors.",
+        "title": "Setup Navigation System",
+        "description": "Implement the navigation system using GoRouter with named routes and deep linking support.",
+        "details": "Configure GoRouter for declarative routing with named routes for each screen. Implement deep linking to support external links. Ensure type-safe navigation between screens and handle back navigation correctly.",
+        "testStrategy": "Test navigation flows manually and ensure deep links open the correct screens.",
         "priority": "medium",
         "dependencies": [
-          3
+          1
         ],
-        "status": "pending",
-        "subtasks": []
-      },
-      {
-        "id": 5,
-        "title": "Implement Video Detail View",
-        "description": "Develop the video detail view to display video playback and emotion analysis results.",
-        "details": "Create a detailed view for video playback using Flutter's video_player package. Display emotion analysis results and allow users to add or edit tags. Implement sharing functionality using Firebase Dynamic Links.",
-        "testStrategy": "Test video playback and ensure emotion results are displayed. Verify that sharing links are generated correctly.",
-        "priority": "medium",
-        "dependencies": [
-          3,
-          4
-        ],
-        "status": "pending",
-        "subtasks": []
-      },
-      {
-        "id": 6,
-        "title": "Design Emotion Diary UI",
-        "description": "Create the emotion diary interface with a calendar view and daily emotion emojis.",
-        "details": "Use Flutter's calendar packages to implement a calendar view. Display emotion emojis for each day based on the analysis results. Ensure the UI is intuitive and easy to navigate.",
-        "testStrategy": "Test the calendar navigation and emoji display for accuracy and responsiveness.",
-        "priority": "medium",
-        "dependencies": [
-          2
-        ],
-        "status": "in-progress",
+        "status": "done",
         "subtasks": [
           {
             "id": 1,
-            "title": "Add Calendar Package and Implement Basic Calendar View",
-            "description": "Integrate a Flutter calendar package and create a basic calendar view for the emotion diary.",
+            "title": "Configure GoRouter for Named Routes",
+            "description": "Set up GoRouter with named routes for each screen in the application.",
             "dependencies": [],
-            "details": "Research and select a suitable Flutter calendar package. Implement the basic calendar view to display dates.",
+            "details": "Define a GoRouter configuration that includes named routes for all screens, ensuring each route is uniquely identifiable.",
             "status": "done",
-            "testStrategy": "Verify the calendar displays correctly and is responsive across different devices."
+            "testStrategy": "Verify that each named route correctly navigates to the intended screen."
           },
           {
             "id": 2,
-            "title": "Implement Daily Emotion Data Model and Service",
-            "description": "Create a data model and service to handle daily emotion data for the diary.",
+            "title": "Implement Deep Linking Support",
+            "description": "Enable deep linking to allow external links to open specific screens within the app.",
             "dependencies": [
-              "6.1"
+              "4.1"
             ],
-            "details": "Design a data model to store daily emotions and implement a service to manage data retrieval and storage.",
+            "details": "Configure GoRouter to handle deep links, mapping external URLs to the appropriate named routes.",
             "status": "done",
-            "testStrategy": "Test data retrieval and storage functionality to ensure accuracy and reliability."
+            "testStrategy": "Test deep links by opening URLs from external sources and ensuring they navigate to the correct screens."
           },
           {
             "id": 3,
-            "title": "Develop Emotion Emoji Display and Visualization Widget",
-            "description": "Create a widget to display emotion emojis for each day based on analysis results.",
+            "title": "Ensure Type-Safe Navigation",
+            "description": "Implement type-safe navigation between screens to prevent runtime errors.",
             "dependencies": [
-              "6.2"
+              "4.1"
             ],
-            "details": "Design and implement a widget that visualizes emotion emojis on the calendar view.",
+            "details": "Use Dart's type system to enforce type safety in navigation, ensuring that all route parameters are correctly typed.",
             "status": "done",
-            "testStrategy": "Ensure emojis are displayed correctly for each day and update dynamically based on data changes."
+            "testStrategy": "Check for type errors during navigation and ensure all parameters are passed correctly."
           },
           {
             "id": 4,
-            "title": "Create Emotion Statistics Chart and Summary Screen",
-            "description": "Develop a screen to display emotion statistics and summaries using charts.",
+            "title": "Handle Back Navigation",
+            "description": "Implement correct handling of back navigation to ensure a seamless user experience.",
             "dependencies": [
-              "6.3"
+              "4.1"
             ],
-            "details": "Implement charts to visualize emotion trends and summaries over time.",
+            "details": "Configure GoRouter to manage back stack behavior, ensuring users can navigate back through screens as expected.",
             "status": "done",
-            "testStrategy": "Test the accuracy and responsiveness of the charts and ensure they reflect the correct data."
+            "testStrategy": "Test back navigation across all screens to ensure it behaves as expected, including edge cases."
           },
           {
             "id": 5,
-            "title": "Set Up Navigation and Routing",
-            "description": "Configure navigation and routing for the emotion diary UI.",
+            "title": "Manual Testing of Navigation Flows",
+            "description": "Conduct manual testing of all navigation flows and deep linking functionality.",
             "dependencies": [
+              "4.1",
+              "4.2",
+              "4.3",
+              "4.4"
+            ],
+            "details": "Perform manual tests to verify that all navigation flows and deep links function correctly and as intended.",
+            "status": "done",
+            "testStrategy": "Manually test each navigation path and deep link scenario to ensure they open the correct screens and handle navigation smoothly."
+          }
+        ]
+      },
+      {
+        "id": 5,
+        "title": "Develop Photo Capture Screen",
+        "description": "Create the photo capture screen with camera preview, controls, and real-time emotion analysis.",
+        "details": "Use the image_picker package to access the device camera and display a live preview. Implement controls for capturing photos, toggling flash, and switching cameras. Integrate a real-time emotion analysis feature using a placeholder for future backend integration.",
+        "testStrategy": "Test the camera functionality on multiple devices to ensure compatibility and performance.",
+        "priority": "medium",
+        "dependencies": [
+          2,
+          3
+        ],
+        "status": "pending",
+        "subtasks": [
+          {
+            "id": 1,
+            "title": "Implement Camera Access and Preview",
+            "description": "Use the image_picker package to access the device camera and display a live preview on the screen.",
+            "dependencies": [],
+            "details": "Set up the camera access permissions and initialize the camera preview using the image_picker package.",
+            "status": "pending",
+            "testStrategy": "Test the camera preview on multiple devices to ensure it displays correctly and performs well."
+          },
+          {
+            "id": 2,
+            "title": "Develop Photo Capture and Control Features",
+            "description": "Implement controls for capturing photos, toggling flash, and switching between front and back cameras.",
+            "dependencies": [
+              "5.1"
+            ],
+            "details": "Add UI elements for photo capture, flash toggle, and camera switch. Ensure these controls are responsive and functional.",
+            "status": "pending",
+            "testStrategy": "Verify that all controls work as expected across different devices and camera configurations."
+          },
+          {
+            "id": 3,
+            "title": "Integrate Real-time Emotion Analysis Placeholder",
+            "description": "Set up a placeholder for future integration of real-time emotion analysis during photo capture.",
+            "dependencies": [
+              "5.1"
+            ],
+            "details": "Create a placeholder function or module that simulates emotion analysis, ready for future backend integration.",
+            "status": "pending",
+            "testStrategy": "Ensure the placeholder does not interfere with the photo capture process and can be easily replaced with actual analysis."
+          },
+          {
+            "id": 4,
+            "title": "Design User Interface for Photo Capture Screen",
+            "description": "Design the layout and user interface elements for the photo capture screen, ensuring a user-friendly experience.",
+            "dependencies": [
+              "5.1",
+              "5.2"
+            ],
+            "details": "Create a visually appealing and intuitive UI for the photo capture screen, including all necessary controls and indicators.",
+            "status": "pending",
+            "testStrategy": "Conduct usability tests to ensure the interface is intuitive and easy to navigate."
+          },
+          {
+            "id": 5,
+            "title": "Conduct Compatibility and Performance Testing",
+            "description": "Test the entire photo capture screen functionality on various devices to ensure compatibility and performance.",
+            "dependencies": [
+              "5.1",
+              "5.2",
+              "5.3",
+              "5.4"
+            ],
+            "details": "Perform thorough testing across different devices and operating systems to identify and resolve any compatibility or performance issues.",
+            "status": "pending",
+            "testStrategy": "Use a range of devices to test the photo capture screen, focusing on performance, responsiveness, and user experience."
+          }
+        ]
+      },
+      {
+        "id": 6,
+        "title": "Build Photo Detail View",
+        "description": "Develop the photo detail view with full-screen viewer, metadata display, and editing tools.",
+        "details": "Implement a full-screen photo viewer using the photo_view package with pinch zoom and swipe navigation. Display photo metadata such as capture time, location, and emotion analysis results. Add basic editing tools for cropping, filtering, and adjusting brightness/contrast.",
+        "testStrategy": "Conduct usability tests to ensure smooth interaction with the photo viewer and editing tools.",
+        "priority": "medium",
+        "dependencies": [
+          3,
+          5
+        ],
+        "status": "pending",
+        "subtasks": [
+          {
+            "id": 1,
+            "title": "Implement Full-Screen Photo Viewer",
+            "description": "Develop a full-screen photo viewer using the photo_view package with pinch zoom and swipe navigation.",
+            "dependencies": [],
+            "details": "Use the photo_view package to create a full-screen viewer that supports pinch-to-zoom and swipe navigation for browsing photos.",
+            "status": "pending",
+            "testStrategy": "Test the viewer on various devices to ensure smooth zooming and swiping interactions."
+          },
+          {
+            "id": 2,
+            "title": "Display Photo Metadata",
+            "description": "Display photo metadata such as capture time, location, and emotion analysis results.",
+            "dependencies": [
+              "6.1"
+            ],
+            "details": "Fetch and display metadata including capture time, location, and emotion analysis results below the photo viewer.",
+            "status": "pending",
+            "testStrategy": "Verify that metadata is correctly displayed for different photos and formats."
+          },
+          {
+            "id": 3,
+            "title": "Develop Basic Photo Editing Tools",
+            "description": "Add basic editing tools for cropping, filtering, and adjusting brightness/contrast.",
+            "dependencies": [
+              "6.1"
+            ],
+            "details": "Implement tools for cropping, applying filters, and adjusting brightness/contrast within the photo detail view.",
+            "status": "pending",
+            "testStrategy": "Conduct usability tests to ensure editing tools are intuitive and responsive."
+          },
+          {
+            "id": 4,
+            "title": "Integrate Emotion Analysis Results",
+            "description": "Integrate emotion analysis results into the photo detail view.",
+            "dependencies": [
+              "6.2"
+            ],
+            "details": "Display emotion analysis results prominently in the metadata section, ensuring they are updated in real-time if applicable.",
+            "status": "pending",
+            "testStrategy": "Test the integration with mock data to ensure accurate display of emotion analysis results."
+          },
+          {
+            "id": 5,
+            "title": "Conduct Usability Testing",
+            "description": "Conduct usability tests to ensure smooth interaction with the photo viewer and editing tools.",
+            "dependencies": [
+              "6.1",
+              "6.2",
+              "6.3",
               "6.4"
             ],
-            "details": "Implement navigation logic to allow users to move between the calendar, statistics, and other screens.\n<info added on 2025-08-07T12:54:13.245Z>\nHero animation tag conflict issue has been resolved. In home_view.dart, two FloatingActionButtons were using the same default Hero tag, causing a conflict. Unique heroTags have been added to each button to resolve this:\n- Emotion Diary Button: heroTag: 'diary_fab'\n- Add Video Button: heroTag: 'add_video_fab'\n\nThis will prevent Hero animation conflict errors when navigating to the camera screen.\n</info added on 2025-08-07T12:54:13.245Z>\n<info added on 2025-08-07T12:56:57.786Z>\nImplemented a user-friendly camera permission dialog:\n\n1. Created `lib/ui/widgets/permission_dialog.dart` for an intuitive UI with a camera icon and description, offering \"Later\" and \"Allow Permission\" buttons.\n\n2. Enhanced camera service in `lib/services/camera_service.dart` by adding logic to check permission status (granted, denied, permanently denied) and integrating the permission request dialog. Added a dialog to redirect to settings if permission is denied.\n\n3. Modified `RecordingViewModel` and `RecordingView` to pass BuildContext for displaying the permission request dialog and improved the permission request flow during camera initialization.\n\nNow, when users enter the camera screen:\n- A friendly dialog is shown if permission is not granted.\n- Camera initialization proceeds upon permission approval.\n- An option to go to settings is provided if permission is denied.\n</info added on 2025-08-07T12:56:57.786Z>\n<info added on 2025-08-07T13:11:39.041Z>\nImplemented simulation mode for testing camera functionality on the iPhone simulator:\n\n1. **Simulator Detection and Automatic Mode Switching**:\n   - Detects `Platform.isIOS` environment.\n   - Automatically grants camera permissions in the simulator.\n   - Manages simulation state with an `isSimulatorMode` flag.\n\n2. **Simulation UI Implementation**:\n   - Displays a simulator mode screen instead of the camera preview.\n   - Includes a camera icon and \"Simulator Mode\" text.\n   - Provides a message indicating \"Simulation Recording Available\".\n\n3. **Simulation Recording Functionality**:\n   - Allows starting/stopping recording without a real camera.\n   - Simulates emotion analysis and timer operation.\n   - Saves recording results and navigates to the results screen.\n\nNow, the app can run on the iPhone simulator without camera permission errors, enabling testing of simulation recording and emotion analysis and storage functionalities.\n</info added on 2025-08-07T13:11:39.041Z>",
-            "status": "in-progress",
-            "testStrategy": "Verify that navigation is intuitive and routes are correctly set up between different UI components."
+            "details": "Organize and conduct usability testing sessions to gather feedback on the photo detail view's functionality and user experience.",
+            "status": "pending",
+            "testStrategy": "Collect user feedback and make necessary adjustments to improve the overall user experience."
           }
         ]
       },
       {
         "id": 7,
-        "title": "Implement Family Sharing Feature",
-        "description": "Develop the family sharing functionality with invitation and acceptance flows.",
-        "details": "Use Firebase Dynamic Links to implement invitation links. Create UI for managing family members and setting sharing permissions. Ensure secure handling of user data and permissions.",
-        "testStrategy": "Test the invitation flow and verify that family members can access shared content according to permissions.",
-        "priority": "medium",
-        "dependencies": [
-          5
-        ],
-        "status": "pending",
-        "subtasks": []
-      },
-      {
-        "id": 8,
-        "title": "Setup User Settings Screen",
-        "description": "Develop the settings screen for user information and app preferences.",
-        "details": "Create a settings UI to allow users to update their information, check cloud storage usage, and send feedback. Use Flutter's form widgets for input handling and validation.",
-        "testStrategy": "Test form submissions and ensure data is updated correctly. Verify cloud storage usage displays accurately.",
-        "priority": "medium",
-        "dependencies": [
-          1
-        ],
-        "status": "pending",
-        "subtasks": []
-      },
-      {
-        "id": 9,
-        "title": "Implement Cloud Storage Management",
-        "description": "Integrate cloud storage management to track and display usage.",
-        "details": "Use Supabase or Firebase for cloud storage management. Implement functionality to track storage usage and display it in the settings screen.",
-        "testStrategy": "Test storage tracking and ensure the usage is updated and displayed correctly.",
-        "priority": "medium",
-        "dependencies": [
-          8
-        ],
-        "status": "pending",
-        "subtasks": []
-      },
-      {
-        "id": 10,
-        "title": "Develop Feedback Submission Feature",
-        "description": "Create a feedback submission form for user feedback.",
-        "details": "Implement a feedback form using Flutter's form widgets. Allow users to submit feedback which is sent to a designated email or stored in a database for review.",
-        "testStrategy": "Test feedback submission and ensure it is received correctly.",
-        "priority": "medium",
-        "dependencies": [
-          8
-        ],
-        "status": "pending",
-        "subtasks": []
-      },
-      {
-        "id": 11,
-        "title": "Setup Authentication System",
-        "description": "Implement user authentication using Supabase or Firebase Auth.",
-        "details": "Set up user authentication with email/password and social login options. Ensure secure handling of user credentials and session management.",
-        "testStrategy": "Test login and registration flows for different authentication methods. Verify session persistence and logout functionality.",
-        "priority": "medium",
-        "dependencies": [
-          1
-        ],
-        "status": "pending",
-        "subtasks": []
-      },
-      {
-        "id": 12,
-        "title": "Implement Video Processing with FFmpeg",
-        "description": "Set up video processing using FFmpeg for thumbnail extraction and frame capture.",
-        "details": "Integrate FFmpeg to process uploaded videos for thumbnail extraction and frame capture. Ensure compatibility with different video formats.",
-        "testStrategy": "Test video processing on various formats and verify that thumbnails and frames are extracted correctly.",
+        "title": "Implement Album Management",
+        "description": "Create the album management interface with album list, creation, and sharing features.",
+        "details": "Design an album list screen displaying both auto-generated and user-created albums. Implement album creation and management features, allowing users to create custom albums and manage them. Add sharing functionality to share albums with family members.",
+        "testStrategy": "Verify album creation, management, and sharing features through integration tests.",
         "priority": "medium",
         "dependencies": [
           3
         ],
         "status": "pending",
-        "subtasks": []
+        "subtasks": [
+          {
+            "id": 1,
+            "title": "Design Album List Screen",
+            "description": "Create a screen to display both auto-generated and user-created albums.",
+            "dependencies": [],
+            "details": "Design the UI for the album list screen, ensuring it can display a mix of auto-generated and user-created albums.",
+            "status": "pending",
+            "testStrategy": "Verify the UI displays albums correctly and handles different album types."
+          },
+          {
+            "id": 2,
+            "title": "Implement Album Creation Feature",
+            "description": "Develop functionality to allow users to create custom albums.",
+            "dependencies": [
+              "7.1"
+            ],
+            "details": "Implement the backend and frontend logic for creating new albums, including input validation and storage.",
+            "status": "pending",
+            "testStrategy": "Test album creation with various inputs to ensure robustness and error handling."
+          },
+          {
+            "id": 3,
+            "title": "Develop Album Management Features",
+            "description": "Enable users to manage their custom albums, including editing and deleting.",
+            "dependencies": [
+              "7.2"
+            ],
+            "details": "Implement features for editing album details and deleting albums, ensuring changes are reflected in the UI.",
+            "status": "pending",
+            "testStrategy": "Verify that album management actions are correctly executed and reflected in the UI."
+          },
+          {
+            "id": 4,
+            "title": "Add Album Sharing Functionality",
+            "description": "Implement sharing features to allow users to share albums with family members.",
+            "dependencies": [
+              "7.3"
+            ],
+            "details": "Develop the logic for sharing albums, including selecting family members and managing permissions.",
+            "status": "pending",
+            "testStrategy": "Test sharing functionality with different user accounts to ensure correct permission handling."
+          },
+          {
+            "id": 5,
+            "title": "Integration Testing for Album Management",
+            "description": "Conduct integration tests for album creation, management, and sharing features.",
+            "dependencies": [
+              "7.4"
+            ],
+            "details": "Perform comprehensive integration testing to ensure all album management features work seamlessly together.",
+            "status": "pending",
+            "testStrategy": "Execute integration tests covering all aspects of album management to verify functionality and performance."
+          }
+        ]
       },
       {
-        "id": 13,
-        "title": "Develop Notification System",
-        "description": "Implement a notification system for app updates and family sharing alerts.",
-        "details": "Use Firebase Cloud Messaging to send notifications for app updates and sharing alerts. Ensure notifications are handled correctly in the app.",
-        "testStrategy": "Test notification delivery and handling on different devices and scenarios.",
+        "id": 8,
+        "title": "Develop Family Sharing Screen",
+        "description": "Implement the family sharing screen with member list, permission management, and activity feed.",
+        "details": "Create a screen to display registered family members and manage their access permissions. Implement a feature to invite new family members. Design an activity feed to show recent activities of family members.",
+        "testStrategy": "Test the family sharing features with multiple user accounts to ensure correct permission handling and activity tracking.",
         "priority": "medium",
         "dependencies": [
           7
         ],
         "status": "pending",
-        "subtasks": []
+        "subtasks": [
+          {
+            "id": 1,
+            "title": "Design Family Sharing Screen Layout",
+            "description": "Create the layout for the family sharing screen including sections for member list, permissions, and activity feed.",
+            "dependencies": [],
+            "details": "Use Flutter's layout widgets to design a responsive screen that accommodates all required sections.",
+            "status": "pending",
+            "testStrategy": "Verify the layout on different screen sizes to ensure responsiveness."
+          },
+          {
+            "id": 2,
+            "title": "Implement Member List Display",
+            "description": "Develop the functionality to display registered family members on the screen.",
+            "dependencies": [
+              "8.1"
+            ],
+            "details": "Fetch and display family member data using a ListView widget.",
+            "status": "pending",
+            "testStrategy": "Test with various numbers of family members to ensure correct display and scrolling."
+          },
+          {
+            "id": 3,
+            "title": "Develop Permission Management Feature",
+            "description": "Implement the feature to manage access permissions for each family member.",
+            "dependencies": [
+              "8.2"
+            ],
+            "details": "Create a UI for setting and updating permissions, and integrate with backend APIs.",
+            "status": "pending",
+            "testStrategy": "Test permission changes with different user roles to ensure correct access control."
+          },
+          {
+            "id": 4,
+            "title": "Create Activity Feed",
+            "description": "Design and implement an activity feed to show recent activities of family members.",
+            "dependencies": [
+              "8.1"
+            ],
+            "details": "Use a ListView to display activity logs fetched from the server.",
+            "status": "pending",
+            "testStrategy": "Ensure activities are displayed in chronological order and update in real-time."
+          },
+          {
+            "id": 5,
+            "title": "Implement Invite Family Member Feature",
+            "description": "Develop the feature to invite new family members to join the family sharing.",
+            "dependencies": [
+              "8.2"
+            ],
+            "details": "Create a form to input new member details and send invitations via email.",
+            "status": "pending",
+            "testStrategy": "Test the invitation process to ensure emails are sent and new members can join successfully."
+          }
+        ]
+      },
+      {
+        "id": 9,
+        "title": "Design Settings Screen",
+        "description": "Develop the settings screen for profile management, app settings, storage management, and backup options.",
+        "details": "Implement profile management features for updating user information and avatars. Add app settings for theme, language, and notifications. Design storage management tools to monitor local storage usage and cleanup. Provide options for cloud backup settings.",
+        "testStrategy": "Perform functional tests to ensure all settings are saved and applied correctly.",
+        "priority": "medium",
+        "dependencies": [
+          3
+        ],
+        "status": "pending",
+        "subtasks": [
+          {
+            "id": 1,
+            "title": "Implement Profile Management",
+            "description": "Develop features for updating user information and avatars.",
+            "dependencies": [],
+            "details": "Create UI components for user profile updates, including fields for name, email, and avatar upload.",
+            "status": "pending",
+            "testStrategy": "Perform functional tests to ensure user information is updated and saved correctly."
+          },
+          {
+            "id": 2,
+            "title": "Add App Settings",
+            "description": "Integrate app settings for theme, language, and notifications.",
+            "dependencies": [
+              "9.1"
+            ],
+            "details": "Design UI for selecting app theme, language preferences, and notification settings.",
+            "status": "pending",
+            "testStrategy": "Verify that changes in settings are applied immediately and persist across sessions."
+          },
+          {
+            "id": 3,
+            "title": "Design Storage Management Tools",
+            "description": "Create tools to monitor local storage usage and cleanup.",
+            "dependencies": [
+              "9.2"
+            ],
+            "details": "Implement features to display storage usage and provide options for clearing cache and managing files.",
+            "status": "pending",
+            "testStrategy": "Test storage monitoring accuracy and functionality of cleanup options."
+          },
+          {
+            "id": 4,
+            "title": "Provide Cloud Backup Options",
+            "description": "Develop options for configuring cloud backup settings.",
+            "dependencies": [
+              "9.3"
+            ],
+            "details": "Design UI for enabling and configuring cloud backups, including frequency and data selection.",
+            "status": "pending",
+            "testStrategy": "Ensure backup settings are saved correctly and backups are performed as scheduled."
+          },
+          {
+            "id": 5,
+            "title": "Integrate Settings Screen",
+            "description": "Combine all settings features into a cohesive settings screen.",
+            "dependencies": [
+              "9.1",
+              "9.2",
+              "9.3",
+              "9.4"
+            ],
+            "details": "Assemble all individual settings components into a single, user-friendly settings screen.",
+            "status": "pending",
+            "testStrategy": "Conduct end-to-end testing to ensure all settings are accessible and function as expected."
+          }
+        ]
+      },
+      {
+        "id": 10,
+        "title": "Create Custom UI Components",
+        "description": "Develop custom UI components such as buttons, cards, text fields, and app bars.",
+        "details": "Create reusable CustomButton, CustomCard, CustomTextField, and CustomAppBar components following Material Design 3 guidelines. Ensure components are customizable and support theming.",
+        "testStrategy": "Conduct component tests to verify customization options and theming support.",
+        "priority": "medium",
+        "dependencies": [
+          1
+        ],
+        "status": "pending",
+        "subtasks": [
+          {
+            "id": 1,
+            "title": "Design CustomButton Component",
+            "description": "Create a reusable CustomButton component following Material Design 3 guidelines.",
+            "dependencies": [],
+            "details": "Ensure the button is customizable with different styles, sizes, and supports theming.",
+            "status": "pending",
+            "testStrategy": "Test button customization options and theming support."
+          },
+          {
+            "id": 2,
+            "title": "Design CustomCard Component",
+            "description": "Develop a reusable CustomCard component adhering to Material Design 3 principles.",
+            "dependencies": [],
+            "details": "Allow customization of card content, elevation, and theming options.",
+            "status": "pending",
+            "testStrategy": "Verify card customization and theming through component tests."
+          },
+          {
+            "id": 3,
+            "title": "Design CustomTextField Component",
+            "description": "Implement a CustomTextField component based on Material Design 3.",
+            "dependencies": [],
+            "details": "Support various input types, validation, and theming capabilities.",
+            "status": "pending",
+            "testStrategy": "Test text field input handling, validation, and theming."
+          },
+          {
+            "id": 4,
+            "title": "Design CustomAppBar Component",
+            "description": "Create a CustomAppBar component following Material Design 3 guidelines.",
+            "dependencies": [],
+            "details": "Ensure the app bar is customizable with different styles, actions, and supports theming.",
+            "status": "pending",
+            "testStrategy": "Test app bar customization options and theming support."
+          },
+          {
+            "id": 5,
+            "title": "Integrate Components into Project",
+            "description": "Integrate all custom components into the project and ensure they work together seamlessly.",
+            "dependencies": [
+              "10.1",
+              "10.2",
+              "10.3",
+              "10.4"
+            ],
+            "details": "Ensure all components are properly integrated and support the overall theming of the application.",
+            "status": "pending",
+            "testStrategy": "Conduct integration tests to verify component interactions and theming consistency."
+          }
+        ]
+      },
+      {
+        "id": 11,
+        "title": "Implement Animation Components",
+        "description": "Develop animation components for transitions and interactive elements.",
+        "details": "Create animation components using FadeTransition, SlideTransition, ScaleTransition, and HeroAnimation for smooth page transitions and interactive elements. Ensure animations are GPU-accelerated and maintain 60fps.",
+        "testStrategy": "Test animations on various devices to ensure smooth performance and responsiveness.",
+        "priority": "medium",
+        "dependencies": [
+          10
+        ],
+        "status": "pending",
+        "subtasks": [
+          {
+            "id": 1,
+            "title": "Develop FadeTransition Component",
+            "description": "Create a reusable FadeTransition component for smooth fade-in and fade-out animations.",
+            "dependencies": [],
+            "details": "Implement the FadeTransition component using Flutter's animation library to ensure smooth transitions between UI elements.",
+            "status": "pending",
+            "testStrategy": "Test the FadeTransition component on various devices to ensure consistent fade effects and performance."
+          },
+          {
+            "id": 2,
+            "title": "Develop SlideTransition Component",
+            "description": "Create a reusable SlideTransition component for sliding animations.",
+            "dependencies": [],
+            "details": "Implement the SlideTransition component to enable sliding animations for page transitions and interactive elements.",
+            "status": "pending",
+            "testStrategy": "Verify the SlideTransition component on different screen sizes to ensure smooth sliding animations."
+          },
+          {
+            "id": 3,
+            "title": "Develop ScaleTransition Component",
+            "description": "Create a reusable ScaleTransition component for scaling animations.",
+            "dependencies": [],
+            "details": "Implement the ScaleTransition component to provide scaling effects for interactive elements.",
+            "status": "pending",
+            "testStrategy": "Test the ScaleTransition component to ensure scaling animations are smooth and maintain 60fps."
+          },
+          {
+            "id": 4,
+            "title": "Develop HeroAnimation Component",
+            "description": "Create a reusable HeroAnimation component for shared element transitions.",
+            "dependencies": [],
+            "details": "Implement the HeroAnimation component to enable shared element transitions between pages.",
+            "status": "pending",
+            "testStrategy": "Ensure the HeroAnimation component works seamlessly across different pages and maintains performance."
+          },
+          {
+            "id": 5,
+            "title": "Optimize Animations for GPU Acceleration",
+            "description": "Ensure all animation components are optimized for GPU acceleration.",
+            "dependencies": [
+              "11.1",
+              "11.2",
+              "11.3",
+              "11.4"
+            ],
+            "details": "Review and optimize the animation components to leverage GPU acceleration and maintain 60fps.",
+            "status": "pending",
+            "testStrategy": "Conduct performance testing on various devices to verify GPU acceleration and consistent frame rates."
+          }
+        ]
+      },
+      {
+        "id": 12,
+        "title": "Optimize Performance",
+        "description": "Implement performance optimizations for images, animations, and memory management.",
+        "details": "Apply lazy loading and caching strategies for images using cached_network_image. Optimize animations with GPU acceleration and ensure they run at 60fps. Implement memory management techniques such as the dispose pattern and weak references to prevent memory leaks.",
+        "testStrategy": "Conduct performance benchmarks to measure improvements in loading times and resource usage.",
+        "priority": "medium",
+        "dependencies": [
+          5,
+          6,
+          11
+        ],
+        "status": "pending",
+        "subtasks": [
+          {
+            "id": 1,
+            "title": "Implement Lazy Loading for Images",
+            "description": "Apply lazy loading techniques to defer image loading until they are needed.",
+            "dependencies": [],
+            "details": "Use the cached_network_image package to implement lazy loading for images to improve initial load times.",
+            "status": "pending",
+            "testStrategy": "Measure image loading times before and after implementation to ensure improvements."
+          },
+          {
+            "id": 2,
+            "title": "Implement Image Caching Strategies",
+            "description": "Optimize image caching to reduce redundant network requests.",
+            "dependencies": [
+              "12.1"
+            ],
+            "details": "Configure caching strategies using cached_network_image to store images locally and reduce network usage.",
+            "status": "pending",
+            "testStrategy": "Verify that images are cached and loaded from cache on subsequent requests."
+          },
+          {
+            "id": 3,
+            "title": "Optimize Animations with GPU Acceleration",
+            "description": "Ensure animations are GPU-accelerated and run smoothly at 60fps.",
+            "dependencies": [],
+            "details": "Utilize GPU acceleration techniques for animations to enhance performance and responsiveness.",
+            "status": "pending",
+            "testStrategy": "Test animations on various devices to confirm they maintain 60fps."
+          },
+          {
+            "id": 4,
+            "title": "Implement Memory Management Techniques",
+            "description": "Apply memory management techniques to prevent memory leaks.",
+            "dependencies": [],
+            "details": "Use the dispose pattern and weak references to manage memory effectively and prevent leaks.",
+            "status": "pending",
+            "testStrategy": "Monitor memory usage before and after implementation to ensure reductions in memory leaks."
+          },
+          {
+            "id": 5,
+            "title": "Conduct Performance Benchmarks",
+            "description": "Measure performance improvements in loading times and resource usage.",
+            "dependencies": [
+              "12.1",
+              "12.2",
+              "12.3",
+              "12.4"
+            ],
+            "details": "Conduct benchmarks to evaluate the effectiveness of optimizations applied to images, animations, and memory management.",
+            "status": "pending",
+            "testStrategy": "Compare benchmark results with baseline metrics to quantify performance gains."
+          }
+        ]
+      },
+      {
+        "id": 13,
+        "title": "Enhance Accessibility",
+        "description": "Improve accessibility features including screen reader support and visual accessibility.",
+        "details": "Add semantic labels to all UI elements for screen reader compatibility. Implement focus management for keyboard navigation. Design high contrast themes and support dynamic font sizes to meet WCAG guidelines.",
+        "testStrategy": "Perform accessibility tests using screen readers and evaluate compliance with WCAG standards.",
+        "priority": "medium",
+        "dependencies": [
+          10
+        ],
+        "status": "pending",
+        "subtasks": [
+          {
+            "id": 1,
+            "title": "Add Semantic Labels",
+            "description": "Add semantic labels to all UI elements for screen reader compatibility.",
+            "dependencies": [],
+            "details": "Ensure all interactive elements have appropriate ARIA labels to improve screen reader support.",
+            "status": "pending",
+            "testStrategy": "Use screen readers to verify that all UI elements are correctly labeled and accessible."
+          },
+          {
+            "id": 2,
+            "title": "Implement Focus Management",
+            "description": "Implement focus management for keyboard navigation.",
+            "dependencies": [
+              "13.1"
+            ],
+            "details": "Ensure that keyboard users can navigate through the application using tab and arrow keys, with a logical focus order.",
+            "status": "pending",
+            "testStrategy": "Test keyboard navigation to ensure focus moves correctly between elements."
+          },
+          {
+            "id": 3,
+            "title": "Design High Contrast Themes",
+            "description": "Design high contrast themes to meet WCAG guidelines.",
+            "dependencies": [],
+            "details": "Create themes with high contrast color schemes to improve visibility for users with visual impairments.",
+            "status": "pending",
+            "testStrategy": "Evaluate the contrast ratios to ensure compliance with WCAG standards."
+          },
+          {
+            "id": 4,
+            "title": "Support Dynamic Font Sizes",
+            "description": "Implement support for dynamic font sizes.",
+            "dependencies": [
+              "13.3"
+            ],
+            "details": "Allow users to adjust font sizes within the application to improve readability.",
+            "status": "pending",
+            "testStrategy": "Test the application with various font sizes to ensure text remains legible and UI elements are not distorted."
+          },
+          {
+            "id": 5,
+            "title": "Conduct Accessibility Testing",
+            "description": "Perform comprehensive accessibility tests.",
+            "dependencies": [
+              "13.1",
+              "13.2",
+              "13.3",
+              "13.4"
+            ],
+            "details": "Use tools and manual testing to evaluate the application's compliance with accessibility standards.",
+            "status": "pending",
+            "testStrategy": "Conduct tests using screen readers, keyboard navigation, and visual checks to ensure all accessibility features are functioning correctly."
+          }
+        ]
       },
       {
         "id": 14,
-        "title": "Optimize App Performance",
-        "description": "Optimize the app for performance and responsiveness.",
-        "details": "Profile the app using Flutter's performance tools. Optimize UI rendering and API calls to reduce latency and improve user experience.",
-        "testStrategy": "Use performance profiling tools to identify bottlenecks and verify improvements.",
+        "title": "Implement Internationalization",
+        "description": "Add internationalization support for multiple languages and regional formats.",
+        "details": "Use the intl package to support Korean, English, and Japanese languages. Implement localization for date, number, and currency formats. Ensure all text elements are translatable and contextually appropriate.",
+        "testStrategy": "Test the app in different languages and regions to verify correct localization and formatting.",
         "priority": "medium",
         "dependencies": [
-          2,
-          5,
-          6
+          9
         ],
         "status": "pending",
-        "subtasks": []
+        "subtasks": [
+          {
+            "id": 1,
+            "title": "Set Up intl Package",
+            "description": "Integrate the intl package into the project to support internationalization.",
+            "dependencies": [],
+            "details": "Add the intl package to the project's dependencies and configure it for use in the application.",
+            "status": "pending",
+            "testStrategy": "Verify that the intl package is correctly installed and accessible within the project."
+          },
+          {
+            "id": 2,
+            "title": "Implement Language Support",
+            "description": "Add support for Korean, English, and Japanese languages.",
+            "dependencies": [
+              "14.1"
+            ],
+            "details": "Create language files for Korean, English, and Japanese. Ensure all text elements are translatable.",
+            "status": "pending",
+            "testStrategy": "Switch between languages in the app and verify that all text elements are translated correctly."
+          },
+          {
+            "id": 3,
+            "title": "Localize Date, Number, and Currency Formats",
+            "description": "Implement localization for date, number, and currency formats.",
+            "dependencies": [
+              "14.2"
+            ],
+            "details": "Use the intl package to format dates, numbers, and currencies according to the selected language and region.",
+            "status": "pending",
+            "testStrategy": "Test the app with different regional settings to ensure correct formatting of dates, numbers, and currencies."
+          },
+          {
+            "id": 4,
+            "title": "Ensure Contextual Appropriateness",
+            "description": "Review translations for contextual appropriateness and cultural relevance.",
+            "dependencies": [
+              "14.2"
+            ],
+            "details": "Work with native speakers to ensure translations are contextually appropriate and culturally relevant.",
+            "status": "pending",
+            "testStrategy": "Conduct user testing with native speakers to verify the appropriateness of translations."
+          },
+          {
+            "id": 5,
+            "title": "Test Internationalization Implementation",
+            "description": "Conduct comprehensive testing of the internationalization features.",
+            "dependencies": [
+              "14.3",
+              "14.4"
+            ],
+            "details": "Test the app in different languages and regions to verify correct localization and formatting.",
+            "status": "pending",
+            "testStrategy": "Perform end-to-end testing to ensure all internationalization features work as expected across different languages and regions."
+          }
+        ]
       },
       {
         "id": 15,
-        "title": "Conduct User Acceptance Testing",
-        "description": "Perform user acceptance testing to ensure the app meets user needs and expectations.",
-        "details": "Organize testing sessions with target users. Collect feedback and identify areas for improvement. Ensure the app is intuitive and meets all functional requirements.",
-        "testStrategy": "Conduct structured testing sessions and gather user feedback to validate app functionality and usability.",
+        "title": "Conduct Final Testing",
+        "description": "Perform comprehensive testing including unit, integration, and usability tests.",
+        "details": "Execute unit tests for individual widgets, integration tests for screen interactions, and golden tests for UI snapshots. Conduct A/B testing and gather user feedback for usability improvements. Perform performance testing to ensure the app meets benchmarks.",
+        "testStrategy": "Review test results and user feedback to identify and fix any remaining issues before release.",
         "priority": "medium",
         "dependencies": [
+          2,
+          3,
+          4,
+          5,
+          6,
+          7,
+          8,
+          9,
+          10,
+          11,
+          12,
+          13,
           14
         ],
         "status": "pending",
-        "subtasks": []
+        "subtasks": [
+          {
+            "id": 1,
+            "title": "Execute Unit Tests",
+            "description": "Perform unit tests for individual widgets to ensure each component functions correctly.",
+            "dependencies": [],
+            "details": "Use automated testing frameworks to run unit tests on all individual widgets.",
+            "status": "pending",
+            "testStrategy": "Verify that all unit tests pass without errors and cover all widget functionalities."
+          },
+          {
+            "id": 2,
+            "title": "Conduct Integration Tests",
+            "description": "Perform integration tests to verify interactions between different screens and components.",
+            "dependencies": [
+              "15.1"
+            ],
+            "details": "Test the interactions between screens to ensure seamless navigation and data flow.",
+            "status": "pending",
+            "testStrategy": "Ensure all integration tests pass and identify any issues in screen interactions."
+          },
+          {
+            "id": 3,
+            "title": "Perform Golden Tests",
+            "description": "Execute golden tests to verify UI snapshots against expected designs.",
+            "dependencies": [
+              "15.1",
+              "15.2"
+            ],
+            "details": "Capture UI snapshots and compare them with reference images to detect visual regressions.",
+            "status": "pending",
+            "testStrategy": "Ensure all UI elements match the expected design specifications."
+          },
+          {
+            "id": 4,
+            "title": "Conduct Usability Testing",
+            "description": "Perform A/B testing and gather user feedback to improve usability.",
+            "dependencies": [
+              "15.3"
+            ],
+            "details": "Set up A/B tests to compare different UI/UX designs and collect user feedback.",
+            "status": "pending",
+            "testStrategy": "Analyze user feedback and A/B test results to identify usability improvements."
+          },
+          {
+            "id": 5,
+            "title": "Execute Performance Testing",
+            "description": "Perform performance testing to ensure the app meets benchmarks.",
+            "dependencies": [
+              "15.4"
+            ],
+            "details": "Test the app's performance under various conditions to ensure it meets speed and efficiency benchmarks.",
+            "status": "pending",
+            "testStrategy": "Conduct performance benchmarks and optimize any identified bottlenecks."
+          }
+        ]
       }
     ],
     "metadata": {
       "created": "2025-08-06T07:33:50.160Z",
-      "updated": "2025-08-07T05:36:53.504Z",
+      "updated": "2025-09-15T07:43:34.650Z",
       "description": "Tasks for master context"
     }
   }

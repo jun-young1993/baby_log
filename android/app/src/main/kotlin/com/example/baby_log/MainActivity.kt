@@ -1,4 +1,4 @@
-package com.example.baby_log
+package juny.baby_log
 
 import io.flutter.embedding.android.FlutterActivity
 
