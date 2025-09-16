@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:go_router/go_router.dart';
 
 class DashboardPage extends StatefulWidget {
   const DashboardPage({super.key});
@@ -32,14 +33,14 @@ class _DashboardPageState extends State<DashboardPage> {
         actions: [
           IconButton(
             onPressed: () {
-              Navigator.pushNamed(context, '/family');
+              context.push('/family');
             },
             icon: const Icon(Icons.family_restroom),
             tooltip: '가족 공유',
           ),
           IconButton(
             onPressed: () {
-              Navigator.pushNamed(context, '/settings');
+              context.push('/settings');
             },
             icon: const Icon(Icons.settings),
             tooltip: '설정',
@@ -75,7 +76,7 @@ class _DashboardPageState extends State<DashboardPage> {
       ),
       floatingActionButton: FloatingActionButton.extended(
         onPressed: () {
-          Navigator.pushNamed(context, '/photo-capture');
+          context.push('/photo-capture');
         },
         icon: const Icon(Icons.camera_alt),
         label: const Text('사진 촬영'),
@@ -246,7 +247,7 @@ class _DashboardPageState extends State<DashboardPage> {
                 icon: Icons.camera_alt,
                 color: Theme.of(context).colorScheme.primary,
                 onTap: () {
-                  Navigator.pushNamed(context, '/photo-capture');
+                  context.push('/photo-capture');
                 },
               ),
             ),
@@ -257,7 +258,7 @@ class _DashboardPageState extends State<DashboardPage> {
                 icon: Icons.photo_album,
                 color: Colors.orange,
                 onTap: () {
-                  Navigator.pushNamed(context, '/albums');
+                  context.push('/albums');
                 },
               ),
             ),
@@ -268,7 +269,7 @@ class _DashboardPageState extends State<DashboardPage> {
                 icon: Icons.family_restroom,
                 color: Colors.green,
                 onTap: () {
-                  Navigator.pushNamed(context, '/family');
+                  context.push('/family');
                 },
               ),
             ),
@@ -355,7 +356,7 @@ class _DashboardPageState extends State<DashboardPage> {
 
     return InkWell(
       onTap: () {
-        Navigator.pushNamed(context, '/photo-detail/$index');
+        context.push('/photo-detail/$index');
       },
       borderRadius: BorderRadius.circular(12),
       child: Container(

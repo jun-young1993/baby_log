@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:go_router/go_router.dart';
 
 class OnboardingPage extends StatefulWidget {
   const OnboardingPage({super.key});
@@ -31,7 +32,7 @@ class _OnboardingPageState extends State<OnboardingPage> {
                 children: [
                   TextButton(
                     onPressed: () {
-                      Navigator.pushReplacementNamed(context, '/dashboard');
+                      context.go('/dashboard');
                     },
                     child: const Text('건너뛰기'),
                   ),
@@ -120,10 +121,7 @@ class _OnboardingPageState extends State<OnboardingPage> {
                                 curve: Curves.easeInOut,
                               );
                             } else {
-                              Navigator.pushReplacementNamed(
-                                context,
-                                '/dashboard',
-                              );
+                              context.go('/dashboard');
                             }
                           },
                           child: Text(_currentPage < 2 ? '다음' : '시작하기'),

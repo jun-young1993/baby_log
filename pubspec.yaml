@@ -61,7 +61,7 @@ dependencies:
   permission_handler: ^11.3.0
   
   # Utils
-  intl: ^0.19.0
+  intl: ^0.20.2
   uuid: ^4.3.3
   
   # Calendar & Charts
