@@ -3,7 +3,6 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 
 import 'core/theme/app_theme.dart';
 import 'core/router/app_router.dart';
-import 'features/onboarding/presentation/pages/onboarding_page.dart';
 
 class BabyPhotoVaultApp extends ConsumerWidget {
   const BabyPhotoVaultApp({super.key});
@@ -13,7 +12,7 @@ class BabyPhotoVaultApp extends ConsumerWidget {
     final router = ref.watch(routerProvider);
 
     return MaterialApp.router(
-      title: 'Baby Photo Vault',
+      title: 'Baby Log',
       debugShowCheckedModeBanner: false,
       theme: AppTheme.lightTheme,
       darkTheme: AppTheme.darkTheme,

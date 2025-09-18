@@ -10,7 +10,6 @@ plugins {
 
 android {
     namespace = "juny.baby_log"
-    // compileSdk = flutter.compileSdkVersion
     compileSdk = 36
     //ndkVersion = flutter.ndkVersion
     ndkVersion = "27.0.12077973"
