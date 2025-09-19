@@ -1,4 +1,7 @@
 import 'package:flutter/material.dart';
+import 'package:flutter_common/extensions/app_exception.dart';
+import 'package:flutter_common/flutter_common.dart';
+import 'package:flutter_common/widgets/error_view.dart';
 import 'package:go_router/go_router.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
@@ -26,7 +29,19 @@ final routerProvider = Provider<GoRouter>((ref) {
       GoRoute(
         path: '/dashboard',
         name: 'dashboard',
-        builder: (context, state) => const DashboardPage(),
+        builder: (context, state) => UserInfoSelector((user) {
+          final userBloc = context.read<UserBloc>();
+          if (user == null) {
+            return ErrorView<AppException>(
+              error: AppException.unauthorized('User not found'),
+              onRetry: () {
+                userBloc.add(UserEvent.clearError());
+                userBloc.add(UserEvent.initialize());
+              },
+            );
+          }
+          return DashboardPage(user: user);
+        }),
       ),
 
       // Photo capture
@@ -38,11 +53,11 @@ final routerProvider = Provider<GoRouter>((ref) {
 
       // Photo detail
       GoRoute(
-        path: '/photo-detail/:photoId',
+        path: '/photo-detail',
         name: 'photo-detail',
         builder: (context, state) {
-          final photoId = state.pathParameters['photoId']!;
-          return PhotoDetailPage(photoId: photoId);
+          // final photoId = state.pathParameters['photoId']!;
+          return PhotoDetailPage();
         },
       ),
 

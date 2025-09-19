@@ -1,8 +1,13 @@
 import 'package:flutter/material.dart';
+import 'package:flutter_common/models/aws/s3/s3_object.dart';
+import 'package:flutter_common/utils/date_formatter.dart';
+import 'package:flutter_common/widgets/loader/loading_overay.dart';
 import 'package:go_router/go_router.dart';
+import 'package:flutter_common/flutter_common.dart';
 
 class DashboardPage extends StatefulWidget {
-  const DashboardPage({super.key});
+  final User user;
+  const DashboardPage({super.key, required this.user});
 
   @override
   State<DashboardPage> createState() => _DashboardPageState();
@@ -10,8 +15,17 @@ class DashboardPage extends StatefulWidget {
 
 class _DashboardPageState extends State<DashboardPage> {
   final TextEditingController _searchController = TextEditingController();
+  S3ObjectBloc get s3ObjectBloc => context.read<S3ObjectBloc>();
 
   String _searchQuery = '';
+  final maxRecentPhotoCount = 6;
+  @override
+  void initState() {
+    super.initState();
+    s3ObjectBloc.add(
+      S3ObjectEvent.getS3Objects(widget.user, 0, maxRecentPhotoCount),
+    );
+  }
 
   @override
   void dispose() {
@@ -23,8 +37,8 @@ class _DashboardPageState extends State<DashboardPage> {
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
-        title: const Text(
-          'Baby Photo Vault',
+        title: Text(
+          Tr.app.babyLog.tr(),
           style: TextStyle(fontWeight: FontWeight.bold),
         ),
         centerTitle: true,
@@ -319,45 +333,51 @@ class _DashboardPageState extends State<DashboardPage> {
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
         Text(
-          '최근 사진',
+          Tr.photo.recentPhotos.tr(),
           style: Theme.of(
             context,
           ).textTheme.titleLarge?.copyWith(fontWeight: FontWeight.bold),
         ),
         const SizedBox(height: 16),
-        GridView.builder(
-          shrinkWrap: true,
-          physics: const NeverScrollableScrollPhysics(),
-          gridDelegate: const SliverGridDelegateWithFixedCrossAxisCount(
-            crossAxisCount: 2,
-            mainAxisSpacing: 8,
-            crossAxisSpacing: 8,
-            childAspectRatio: 0.75,
-          ),
-          itemCount: 6,
-          itemBuilder: (context, index) {
-            return _buildPhotoCard(index);
-          },
-        ),
+        S3ObjectIsLoadingSelector((isLoading) {
+          return LoadingOverlay(
+            isLoading: isLoading,
+            child: S3ObjectsSelector((s3Objects) {
+              return GridView.builder(
+                shrinkWrap: true,
+                physics: const NeverScrollableScrollPhysics(),
+                gridDelegate: const SliverGridDelegateWithFixedCrossAxisCount(
+                  crossAxisCount: 2,
+                  mainAxisSpacing: 8,
+                  crossAxisSpacing: 8,
+                  childAspectRatio: 0.75,
+                ),
+                itemCount: maxRecentPhotoCount,
+                itemBuilder: (context, index) {
+                  final s3Object = s3Objects.length > index
+                      ? s3Objects[index]
+                      : null;
+                  return _buildPhotoCard(s3Object);
+                },
+              );
+            }),
+          );
+        }),
       ],
     );
   }
 
-  Widget _buildPhotoCard(int index) {
-    final photos = [
-      {'title': '첫 미소', 'emotion': 'happy', 'isFirst': true},
-      {'title': '놀이 시간', 'emotion': 'excited', 'isFirst': false},
-      {'title': '잠자는 모습', 'emotion': 'calm', 'isFirst': false},
-      {'title': '첫 이유식', 'emotion': 'curious', 'isFirst': true},
-      {'title': '산책 중', 'emotion': 'happy', 'isFirst': false},
-      {'title': '가족과 함께', 'emotion': 'loving', 'isFirst': false},
-    ];
+  Widget _buildPhotoCard(S3Object? s3Object) {
+    return _buildPhotoCardWithParams(s3Object: s3Object);
+  }
 
-    final photo = photos[index % photos.length];
-
+  Widget _buildPhotoCardWithParams({S3Object? s3Object}) {
     return InkWell(
       onTap: () {
-        context.push('/photo-detail/$index');
+        if (s3Object != null) {
+          s3ObjectBloc.add(S3ObjectEvent.findOneOrFail(s3Object.id));
+          context.push('/photo-detail');
+        }
       },
       borderRadius: BorderRadius.circular(12),
       child: Container(
@@ -379,11 +399,31 @@ class _DashboardPageState extends State<DashboardPage> {
               Container(
                 color: Theme.of(context).colorScheme.surfaceVariant,
                 child: Center(
-                  child: Icon(
-                    Icons.photo,
-                    size: 48,
-                    color: Theme.of(context).colorScheme.onSurfaceVariant,
-                  ),
+                  child: s3Object?.url == null
+                      ? Icon(
+                          Icons.photo,
+                          size: 48,
+                          color: Theme.of(context).colorScheme.onSurfaceVariant,
+                        )
+                      : Image.network(
+                          s3Object!.url!,
+                          fit: BoxFit.cover,
+                          loadingBuilder: (context, child, loadingProgress) {
+                            if (loadingProgress == null) return child;
+                            return const Center(
+                              child: CircularProgressIndicator(),
+                            );
+                          },
+                          errorBuilder: (context, error, stackTrace) {
+                            return Icon(
+                              Icons.broken_image,
+                              size: 48,
+                              color: Theme.of(
+                                context,
+                              ).colorScheme.onSurfaceVariant,
+                            );
+                          },
+                        ),
                 ),
               ),
 
@@ -409,42 +449,11 @@ class _DashboardPageState extends State<DashboardPage> {
                     mainAxisSize: MainAxisSize.min,
                     children: [
                       // First moment badge
-                      if (photo['isFirst'] == true)
-                        Container(
-                          padding: const EdgeInsets.symmetric(
-                            horizontal: 8,
-                            vertical: 4,
-                          ),
-                          decoration: BoxDecoration(
-                            color: Colors.amber,
-                            borderRadius: BorderRadius.circular(12),
-                          ),
-                          child: Row(
-                            mainAxisSize: MainAxisSize.min,
-                            children: [
-                              const Icon(
-                                Icons.star,
-                                size: 12,
-                                color: Colors.white,
-                              ),
-                              const SizedBox(width: 4),
-                              Text(
-                                '첫 순간',
-                                style: Theme.of(context).textTheme.labelSmall
-                                    ?.copyWith(
-                                      color: Colors.white,
-                                      fontWeight: FontWeight.bold,
-                                    ),
-                              ),
-                            ],
-                          ),
-                        ),
-
                       const SizedBox(height: 8),
 
                       // Title
                       Text(
-                        photo['title'] as String,
+                        s3Object != null ? s3Object.originalName ?? '' : '',
                         style: Theme.of(context).textTheme.bodyMedium?.copyWith(
                           color: Colors.white,
                           fontWeight: FontWeight.w500,
@@ -457,7 +466,11 @@ class _DashboardPageState extends State<DashboardPage> {
 
                       // Date
                       Text(
-                        '${index + 1}일 전',
+                        s3Object != null
+                            ? DateFormatter.getRelativeTime(
+                                s3Object.createdAt ?? DateTime.now(),
+                              )
+                            : Tr.photo.noPhoto.tr(),
                         style: Theme.of(context).textTheme.bodySmall?.copyWith(
                           color: Colors.white.withOpacity(0.8),
                         ),
@@ -478,7 +491,7 @@ class _DashboardPageState extends State<DashboardPage> {
                     borderRadius: BorderRadius.circular(20),
                   ),
                   child: Icon(
-                    _getEmotionIcon(photo['emotion'] as String),
+                    Icons.sentiment_neutral,
                     color: Colors.white,
                     size: 16,
                   ),
@@ -503,6 +516,8 @@ class _DashboardPageState extends State<DashboardPage> {
         return Icons.psychology;
       case 'loving':
         return Icons.favorite;
+      case 'not_found':
+        return Icons.sentiment_neutral;
       default:
         return Icons.sentiment_neutral;
     }
