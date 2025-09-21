@@ -1,6 +1,8 @@
 import 'package:flutter/material.dart';
 
 import 'package:flutter_common/flutter_common.dart';
+import 'package:flutter_common/repositories/user_group_repository.dart';
+import 'package:flutter_common/state/user_group/user_group_bloc.dart';
 
 import 'package:hive_flutter/hive_flutter.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
@@ -76,6 +78,9 @@ void main() async {
         RepositoryProvider<AwsS3Repository>(
           create: (context) => AwsS3DefaultRepository(dioClient: dioClient),
         ),
+        RepositoryProvider<UserGroupRepository>(
+          create: (context) => UserGroupDefaultRepository(dioClient: dioClient),
+        ),
       ],
       child: MultiBlocProvider(
         providers: [
@@ -117,6 +122,11 @@ void main() async {
             create: (context) => S3ObjectBloc(
               s3ObjectRepository: context.read<AwsS3Repository>(),
               appKeys: appKey,
+            ),
+          ),
+          BlocProvider(
+            create: (context) => UserGroupBloc(
+              userGroupRepository: context.read<UserGroupRepository>(),
             ),
           ),
         ],

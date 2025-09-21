@@ -284,7 +284,7 @@ class PhotoDetailPage extends StatelessWidget {
   }
 
   String _formatDate(DateTime? date) {
-    if (date == null) return Tr.common.noDate.tr();
+    if (date == null) return Tr.app.noDate.tr();
     return DateFormatter.getRelativeTime(date);
   }
 
@@ -317,7 +317,7 @@ class PhotoDetailPage extends StatelessWidget {
             ),
             const SizedBox(height: 20),
             Text(
-              Tr.common.share.tr(),
+              Tr.app.share.tr(),
               style: TextStyle(
                 color: Colors.white,
                 fontSize: 18,
