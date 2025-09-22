@@ -1,5 +1,6 @@
 import 'dart:io';
 import 'package:flutter/material.dart';
+import 'package:flutter_common/flutter_common.dart';
 import 'package:go_router/go_router.dart';
 import '../../../../core/services/photo_service.dart';
 import '../../../../core/models/photo_model.dart';
@@ -13,6 +14,8 @@ class PhotoCapturePage extends StatefulWidget {
 
 class _PhotoCapturePageState extends State<PhotoCapturePage> {
   final PhotoService _photoService = PhotoService();
+  S3ObjectBloc get s3ObjectBloc => context.read<S3ObjectBloc>();
+  UserBloc get userBloc => context.read<UserBloc>();
   bool _isLoading = false;
   PhotoModel? _capturedPhoto;
 
@@ -115,7 +118,13 @@ class _PhotoCapturePageState extends State<PhotoCapturePage> {
             width: double.infinity,
             height: 56,
             child: OutlinedButton.icon(
-              onPressed: _pickFromGallery,
+              onPressed: () {
+                final user = userBloc.state.user;
+                if (user == null) {
+                  return;
+                }
+                _pickFromGallery(user);
+              },
               icon: const Icon(Icons.photo_library),
               label: const Text('갤러리에서 선택'),
               style: OutlinedButton.styleFrom(
@@ -274,7 +283,7 @@ class _PhotoCapturePageState extends State<PhotoCapturePage> {
     }
   }
 
-  Future<void> _pickFromGallery() async {
+  Future<void> _pickFromGallery(User user) async {
     setState(() {
       _isLoading = true;
     });
@@ -285,6 +294,7 @@ class _PhotoCapturePageState extends State<PhotoCapturePage> {
         setState(() {
           _capturedPhoto = photo;
         });
+        s3ObjectBloc.add(S3ObjectEvent.uploadFile(File(photo.filePath), user));
       } else {
         _showSnackBar('사진 선택이 취소되었습니다.');
       }

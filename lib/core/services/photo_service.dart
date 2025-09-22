@@ -53,7 +53,7 @@ class PhotoService {
       // 갤러리에서 사진 선택
       final XFile? image = await _imagePicker.pickImage(
         source: ImageSource.gallery,
-        imageQuality: 85,
+        imageQuality: 100,
         maxWidth: 1920,
         maxHeight: 1920,
       );
@@ -88,14 +88,14 @@ class PhotoService {
       final fileExtension = image.path.split('.').last;
       final fileName = '${_uuid.v4()}.$fileExtension';
       final filePath = '${photosDir.path}/$fileName';
-      final thumbnailPath = '${thumbnailsDir.path}/$fileName';
+      // final thumbnailPath = '${thumbnailsDir.path}/$fileName';
 
       // 원본 이미지 복사
       final originalFile = File(image.path);
       final savedFile = await originalFile.copy(filePath);
 
       // 썸네일 생성
-      await _createThumbnail(image.path, thumbnailPath);
+      // await _createThumbnail(image.path, thumbnailPath);
 
       // 파일 정보 가져오기
       final fileSize = await savedFile.length();
@@ -109,30 +109,11 @@ class PhotoService {
         createdAt: DateTime.now(),
         takenAt: fileStat.modified,
         fileSize: fileSize,
-        thumbnailPath: thumbnailPath,
+        thumbnailPath: null,
       );
     } catch (e) {
       debugPrint('이미지 처리 오류: $e');
       rethrow;
-    }
-  }
-
-  /// 썸네일 생성
-  Future<void> _createThumbnail(
-    String originalPath,
-    String thumbnailPath,
-  ) async {
-    try {
-      // 간단한 썸네일 생성 - 원본 파일을 복사하여 썸네일로 사용
-      // 실제 프로덕션에서는 이미지 리사이징 라이브러리를 사용하는 것이 좋습니다
-      final originalFile = File(originalPath);
-      final thumbnailFile = File(thumbnailPath);
-
-      // 원본 파일을 썸네일로 복사 (실제로는 리사이징이 필요하지만 여기서는 간단히 복사)
-      await originalFile.copy(thumbnailPath);
-    } catch (e) {
-      debugPrint('썸네일 생성 오류: $e');
-      // 썸네일 생성 실패해도 원본은 저장되므로 계속 진행
     }
   }
 

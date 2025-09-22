@@ -1,5 +1,8 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_common/models/aws/s3/s3_object.dart';
+import 'package:flutter_common/state/user_group/user_group_bloc.dart';
+import 'package:flutter_common/state/user_group/user_group_event.dart';
+import 'package:flutter_common/state/user_group/user_group_selector.dart';
 import 'package:flutter_common/utils/date_formatter.dart';
 import 'package:flutter_common/widgets/loader/loading_overay.dart';
 import 'package:go_router/go_router.dart';
@@ -13,23 +16,56 @@ class DashboardPage extends StatefulWidget {
   State<DashboardPage> createState() => _DashboardPageState();
 }
 
-class _DashboardPageState extends State<DashboardPage> {
+class _DashboardPageState extends State<DashboardPage>
+    with TickerProviderStateMixin {
   final TextEditingController _searchController = TextEditingController();
   S3ObjectBloc get s3ObjectBloc => context.read<S3ObjectBloc>();
+  UserGroupBloc get userGroupBloc => context.read<UserGroupBloc>();
+
+  bool isShowUserGroupGuide = false;
 
   String _searchQuery = '';
   final maxRecentPhotoCount = 6;
+  late AnimationController _animationController;
+  late Animation<double> _scaleAnimation;
+  late Animation<double> _opacityAnimation;
   @override
   void initState() {
     super.initState();
     s3ObjectBloc.add(
       S3ObjectEvent.getS3Objects(widget.user, 0, maxRecentPhotoCount),
     );
+    userGroupBloc.add(UserGroupEvent.findAll());
+    s3ObjectBloc.add(S3ObjectEvent.count());
+
+    // 애니메이션 컨트롤러 초기화
+    _animationController = AnimationController(
+      duration: const Duration(milliseconds: 1200),
+      vsync: this,
+    );
+
+    // 크기 애니메이션 (0.9 ~ 1.3) - 더 역동적으로
+    _scaleAnimation = Tween<double>(begin: 0.9, end: 1.3).animate(
+      CurvedAnimation(parent: _animationController, curve: Curves.elasticOut),
+    );
+
+    // 투명도 애니메이션 (0.6 ~ 1.0) - 덜 깜박이게
+    _opacityAnimation = Tween<double>(begin: 0.6, end: 1.0).animate(
+      CurvedAnimation(parent: _animationController, curve: Curves.easeInOut),
+    );
+
+    // 애니메이션 반복 시작 (약간의 지연 후)
+    Future.delayed(const Duration(milliseconds: 500), () {
+      if (mounted) {
+        _animationController.repeat(reverse: true);
+      }
+    });
   }
 
   @override
   void dispose() {
     _searchController.dispose();
+    _animationController.dispose();
     super.dispose();
   }
 
@@ -46,19 +82,72 @@ class _DashboardPageState extends State<DashboardPage> {
         backgroundColor: Theme.of(context).colorScheme.surface,
         foregroundColor: Theme.of(context).colorScheme.onSurface,
         actions: [
-          IconButton(
-            onPressed: () {
-              context.push('/family');
-            },
-            icon: const Icon(Icons.family_restroom),
-            tooltip: '가족 공유',
-          ),
+          UserGroupFindSelector((userGroup) {
+            return Stack(
+              children: [
+                IconButton(
+                  onPressed: () {
+                    context.push('/family');
+                  },
+                  icon: Icon(
+                    Icons.family_restroom,
+                    color: userGroup != null
+                        ? null
+                        : Theme.of(
+                            context,
+                          ).colorScheme.onSurface.withOpacity(0.5),
+                  ),
+                  tooltip: userGroup != null ? '가족 공유' : '가족 그룹을 먼저 설정해주세요',
+                ),
+                if (userGroup == null)
+                  Positioned(
+                    left: -12,
+                    bottom: -12,
+                    child: AnimatedBuilder(
+                      animation: _animationController,
+                      builder: (context, child) {
+                        return Transform.translate(
+                          offset: Offset(
+                            _scaleAnimation.value * 2, // 좌우 움직임
+                            -_scaleAnimation.value *
+                                1, // 위아래 움직임 (아이콘을 가리키는 느낌)
+                          ),
+                          child: Container(
+                            decoration: BoxDecoration(
+                              shape: BoxShape.circle,
+                              boxShadow: [
+                                BoxShadow(
+                                  color: Colors.orange.withOpacity(
+                                    0.2 * _opacityAnimation.value,
+                                  ),
+                                  blurRadius: 10 * _scaleAnimation.value,
+                                  spreadRadius: 4 * _scaleAnimation.value,
+                                ),
+                              ],
+                            ),
+                            padding: const EdgeInsets.all(6),
+                            child: Transform.rotate(
+                              angle: -45 * (3.14159 / 25), // -45도 회전 (아이콘을 가리킴)
+                              child: Icon(
+                                Icons.arrow_upward,
+                                color: Colors.orange,
+                                size: 16 * _scaleAnimation.value,
+                              ),
+                            ),
+                          ),
+                        );
+                      },
+                    ),
+                  ),
+              ],
+            );
+          }),
           IconButton(
             onPressed: () {
               context.push('/settings');
             },
             icon: const Icon(Icons.settings),
-            tooltip: '설정',
+            tooltip: Tr.app.settings.tr(),
           ),
         ],
       ),
@@ -89,15 +178,19 @@ class _DashboardPageState extends State<DashboardPage> {
           ),
         ),
       ),
-      floatingActionButton: FloatingActionButton.extended(
-        onPressed: () {
-          context.push('/photo-capture');
-        },
-        icon: const Icon(Icons.camera_alt),
-        label: const Text('사진 촬영'),
-        backgroundColor: Theme.of(context).colorScheme.primary,
-        foregroundColor: Theme.of(context).colorScheme.onPrimary,
-      ),
+      floatingActionButton: UserInfoSelector((user) {
+        return user?.isAdmin ?? false
+            ? FloatingActionButton.extended(
+                onPressed: () {
+                  context.push('/photo-capture');
+                },
+                icon: const Icon(Icons.camera_alt),
+                label: const Text('사진 촬영'),
+                backgroundColor: Theme.of(context).colorScheme.primary,
+                foregroundColor: Theme.of(context).colorScheme.onPrimary,
+              )
+            : const SizedBox.shrink();
+      }),
     );
   }
 
@@ -115,13 +208,22 @@ class _DashboardPageState extends State<DashboardPage> {
         Row(
           children: [
             Expanded(
-              child: _buildStatCard(
-                title: '촬영한 사진',
-                value: '24',
-                unit: '장',
-                icon: Icons.photo_camera,
-                color: Theme.of(context).colorScheme.primary,
-              ),
+              child: S3ObjectAllCountSelector((count) {
+                return S3ObjectIsAllCountLoadingSelector((isLoading) {
+                  return AdaptiveLoadingBar(
+                    isLoading: isLoading,
+                    minHeight: 10,
+                    type: LoadingBarType.minimal,
+                    child: _buildStatCard(
+                      title: '촬영한 사진',
+                      value: count.toString(),
+                      unit: '장',
+                      icon: Icons.photo_camera,
+                      color: Theme.of(context).colorScheme.primary,
+                    ),
+                  );
+                });
+              }),
             ),
             const SizedBox(width: 12),
             Expanded(
@@ -319,6 +421,7 @@ class _DashboardPageState extends State<DashboardPage> {
               style: Theme.of(context).textTheme.bodyMedium?.copyWith(
                 fontWeight: FontWeight.w500,
                 color: color,
+                fontSize: 11,
               ),
               textAlign: TextAlign.center,
             ),
@@ -502,24 +605,5 @@ class _DashboardPageState extends State<DashboardPage> {
         ),
       ),
     );
-  }
-
-  IconData _getEmotionIcon(String emotion) {
-    switch (emotion) {
-      case 'happy':
-        return Icons.sentiment_very_satisfied;
-      case 'excited':
-        return Icons.celebration;
-      case 'calm':
-        return Icons.sentiment_satisfied;
-      case 'curious':
-        return Icons.psychology;
-      case 'loving':
-        return Icons.favorite;
-      case 'not_found':
-        return Icons.sentiment_neutral;
-      default:
-        return Icons.sentiment_neutral;
-    }
   }
 }
