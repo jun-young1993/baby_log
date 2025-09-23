@@ -12,6 +12,9 @@ import '../../features/photo_detail/presentation/pages/photo_detail_page.dart';
 import '../../features/album/presentation/pages/album_list_page.dart';
 import '../../features/family/presentation/pages/family_page.dart';
 import '../../features/settings/presentation/pages/settings_page.dart';
+import '../../features/gallery/presentation/pages/gallery_page.dart';
+import '../../features/gallery/presentation/pages/daily_record_page.dart';
+import '../../features/gallery/core/models/daily_record.dart';
 
 // Router configuration
 final routerProvider = Provider<GoRouter>((ref) {
@@ -49,6 +52,57 @@ final routerProvider = Provider<GoRouter>((ref) {
         path: '/photo-capture',
         name: 'photo-capture',
         builder: (context, state) => const PhotoCapturePage(),
+      ),
+
+      // Gallery
+      GoRoute(
+        path: '/gallery',
+        name: 'gallery',
+        builder: (context, state) => UserInfoSelector((user) {
+          final userBloc = context.read<UserBloc>();
+          if (user == null) {
+            return ErrorView<AppException>(
+              error: AppException.unauthorized('User not found'),
+              onRetry: () {
+                userBloc.add(UserEvent.clearError());
+                userBloc.add(UserEvent.initialize());
+              },
+            );
+          }
+          return GalleryPage(user: user);
+        }),
+      ),
+
+      // Daily Record
+      GoRoute(
+        path: '/daily-record/:date',
+        name: 'daily-record',
+        builder: (context, state) {
+          final userBloc = context.read<UserBloc>();
+          final noticeGroupBloc = context.read<NoticeGroupBloc>();
+          final user = userBloc.state.user;
+          final noticeGroup = noticeGroupBloc.state.noticeGroup;
+
+          if (user == null || noticeGroup == null) {
+            return ErrorView<AppException>(
+              error: AppException.unauthorized('User or NoticeGroup not found'),
+              onRetry: () {
+                userBloc.add(UserEvent.clearError());
+                userBloc.add(UserEvent.initialize());
+                if (user != null) {
+                  noticeGroupBloc.add(NoticeGroupEvent.initialize(user.id));
+                }
+              },
+            );
+          }
+          final dateString = state.pathParameters['date']!;
+          final date = DateTime.parse(dateString);
+          return DailyRecordPage(
+            date: date,
+            user: user,
+            noticeGroup: noticeGroup,
+          );
+        },
       ),
 
       // Photo detail

@@ -21,6 +21,7 @@ class _DashboardPageState extends State<DashboardPage>
   final TextEditingController _searchController = TextEditingController();
   S3ObjectBloc get s3ObjectBloc => context.read<S3ObjectBloc>();
   UserGroupBloc get userGroupBloc => context.read<UserGroupBloc>();
+  NoticeGroupBloc get noticeGroupBloc => context.read<NoticeGroupBloc>();
 
   bool isShowUserGroupGuide = false;
 
@@ -37,6 +38,7 @@ class _DashboardPageState extends State<DashboardPage>
     );
     userGroupBloc.add(UserGroupEvent.findAll());
     s3ObjectBloc.add(S3ObjectEvent.count());
+    noticeGroupBloc.add(NoticeGroupEvent.initialize(widget.user.id));
 
     // 애니메이션 컨트롤러 초기화
     _animationController = AnimationController(
@@ -73,10 +75,17 @@ class _DashboardPageState extends State<DashboardPage>
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
-        title: Text(
-          Tr.app.babyLog.tr(),
-          style: TextStyle(fontWeight: FontWeight.bold),
-        ),
+        title: UserGroupFindSelector((userGroup) {
+          return Text(
+            userGroup != null
+                ? userGroup.name ?? Tr.app.babyLog.tr()
+                : Tr.app.babyLog.tr(),
+            style: TextStyle(
+              fontWeight: FontWeight.bold,
+              overflow: TextOverflow.ellipsis,
+            ),
+          );
+        }),
         centerTitle: true,
         elevation: 0,
         backgroundColor: Theme.of(context).colorScheme.surface,
@@ -360,11 +369,11 @@ class _DashboardPageState extends State<DashboardPage>
           children: [
             Expanded(
               child: _buildActionButton(
-                title: '사진 촬영',
-                icon: Icons.camera_alt,
+                title: '갤러리',
+                icon: Icons.calendar_month,
                 color: Theme.of(context).colorScheme.primary,
                 onTap: () {
-                  context.push('/photo-capture');
+                  context.push('/gallery');
                 },
               ),
             ),

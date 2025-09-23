@@ -1,6 +1,5 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_common/flutter_common.dart';
-import 'package:flutter_common/state/aws/s3/s3_object_selector.dart';
 import 'package:flutter_common/utils/date_formatter.dart';
 import 'package:go_router/go_router.dart';
 
