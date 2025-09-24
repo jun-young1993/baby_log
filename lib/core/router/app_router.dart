@@ -131,7 +131,19 @@ final routerProvider = Provider<GoRouter>((ref) {
       GoRoute(
         path: '/albums',
         name: 'albums',
-        builder: (context, state) => const AlbumListPage(),
+        builder: (context, state) => UserInfoSelector((user) {
+          final userBloc = context.read<UserBloc>();
+          if (user == null) {
+            return ErrorView<AppException>(
+              error: AppException.unauthorized('User not found'),
+              onRetry: () {
+                userBloc.add(UserEvent.clearError());
+                userBloc.add(UserEvent.initialize());
+              },
+            );
+          }
+          return AlbumListPage(user: user);
+        }),
       ),
 
       // Family sharing
