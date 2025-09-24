@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_common/flutter_common.dart';
 import 'package:go_router/go_router.dart';
+import 'package:loading_animation_widget/loading_animation_widget.dart';
 
 class GalleryPage extends StatefulWidget {
   final User user;
@@ -307,6 +308,15 @@ class _GalleryPageState extends State<GalleryPage> {
       _selectedDate = date;
     });
 
+    noticeBloc.add(
+      NoticeEvent.findAllByDate(
+        widget.user.id,
+        date.year.toString(),
+        date.month.toString(),
+        date.day.toString(),
+      ),
+    );
+
     // 새로운 날짜의 데이터 가져오기
     s3ObjectBloc.add(
       S3ObjectEvent.getObjectsByDate(
@@ -489,7 +499,7 @@ class _GalleryPageState extends State<GalleryPage> {
                 );
               },
               icon: Icon(Icons.edit_note, color: Colors.white, size: 20),
-              label: const Text(
+              label: Text(
                 '일기 작성',
                 style: TextStyle(
                   color: Colors.white,
@@ -643,12 +653,18 @@ class _GalleryPageState extends State<GalleryPage> {
 
   Widget _buildDiaryForDate(DateTime date) {
     // 실제로는 해당 날짜의 일기들을 가져와서 표시
-    return Padding(
-      padding: const EdgeInsets.all(16),
-      child: Column(
-        children: [
-          // 일기 작성 안내
-          Container(
+    return NoticeIsNoticesByDateLoadingSelector((isLoading) {
+      if (isLoading) {
+        return Center(
+          child: LoadingAnimationWidget.staggeredDotsWave(
+            color: Colors.white,
+            size: 200,
+          ),
+        );
+      }
+      return NoticeNoticesByDateSelector((notices) {
+        if (notices == null || notices.isEmpty) {
+          return Container(
             width: double.infinity,
             padding: const EdgeInsets.all(20),
             decoration: BoxDecoration(
@@ -689,116 +705,114 @@ class _GalleryPageState extends State<GalleryPage> {
                 ),
               ],
             ),
-          ),
-
-          const SizedBox(height: 16),
-
-          // 기존 일기 목록 (예시)
-          Expanded(
-            child: ListView.builder(
-              itemCount: 2, // 예시 개수
-              itemBuilder: (context, index) {
-                return Container(
-                  margin: const EdgeInsets.only(bottom: 12),
-                  padding: const EdgeInsets.all(16),
-                  decoration: BoxDecoration(
-                    color: Theme.of(context).colorScheme.surface,
-                    borderRadius: BorderRadius.circular(12),
-                    border: Border.all(
-                      color: Theme.of(
-                        context,
-                      ).colorScheme.outline.withOpacity(0.2),
-                    ),
+          );
+        }
+        return Padding(
+          padding: const EdgeInsets.all(16),
+          child: ListView.builder(
+            itemCount: notices.length,
+            itemBuilder: (context, index) {
+              final notice = notices[index];
+              return Container(
+                margin: const EdgeInsets.only(bottom: 12),
+                padding: const EdgeInsets.all(16),
+                decoration: BoxDecoration(
+                  color: Theme.of(context).colorScheme.surface,
+                  borderRadius: BorderRadius.circular(12),
+                  border: Border.all(
+                    color: Theme.of(
+                      context,
+                    ).colorScheme.outline.withOpacity(0.2),
                   ),
-                  child: Column(
-                    crossAxisAlignment: CrossAxisAlignment.start,
-                    children: [
-                      Row(
-                        children: [
-                          Icon(
-                            Icons.auto_stories,
-                            size: 20,
-                            color: Theme.of(context).colorScheme.primary,
-                          ),
-                          const SizedBox(width: 8),
-                          Text(
-                            index == 0 ? '첫 걸음마!' : '오늘의 특별한 순간',
-                            style: TextStyle(
-                              fontSize: 16,
-                              fontWeight: FontWeight.w600,
-                              color: Theme.of(context).colorScheme.onSurface,
-                            ),
-                          ),
-                        ],
-                      ),
-                      const SizedBox(height: 8),
-                      Text(
-                        index == 0
-                            ? '아이가 처음으로 혼자서 걸음을 걸었어요! 엄마와 아빠가 옆에서 응원했고, 정말 뿌듯한 순간이었습니다.'
-                            : '아이가 새로운 장난감을 발견하고 계속 탐구하는 모습이 너무 귀여웠어요. 호기심이 많아지는 것 같아 기뻐요.',
-                        style: TextStyle(
-                          fontSize: 14,
-                          color: Theme.of(
-                            context,
-                          ).colorScheme.onSurface.withOpacity(0.8),
-                          height: 1.4,
+                ),
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    Row(
+                      children: [
+                        Icon(
+                          Icons.auto_stories,
+                          size: 20,
+                          color: Theme.of(context).colorScheme.primary,
                         ),
+                        const SizedBox(width: 8),
+                        Text(
+                          notice.title,
+                          style: TextStyle(
+                            fontSize: 16,
+                            fontWeight: FontWeight.w600,
+                            color: Theme.of(context).colorScheme.onSurface,
+                          ),
+                        ),
+                      ],
+                    ),
+                    const SizedBox(height: 8),
+                    Text(
+                      notice.content,
+                      style: TextStyle(
+                        fontSize: 14,
+                        color: Theme.of(
+                          context,
+                        ).colorScheme.onSurface.withOpacity(0.8),
+                        height: 1.4,
                       ),
-                      const SizedBox(height: 12),
-                      Row(
-                        children: [
-                          Container(
-                            padding: const EdgeInsets.symmetric(
-                              horizontal: 8,
-                              vertical: 4,
-                            ),
-                            decoration: BoxDecoration(
-                              color: Theme.of(
-                                context,
-                              ).colorScheme.primary.withOpacity(0.1),
-                              borderRadius: BorderRadius.circular(12),
-                            ),
-                            child: Text(
-                              index == 0 ? '#첫걸음' : '#성장',
-                              style: TextStyle(
-                                fontSize: 12,
-                                color: Theme.of(context).colorScheme.primary,
-                                fontWeight: FontWeight.w500,
-                              ),
+                    ),
+                    const SizedBox(height: 12),
+                    Row(
+                      children: [
+                        // 작성 시간 태그
+                        Container(
+                          padding: const EdgeInsets.symmetric(
+                            horizontal: 8,
+                            vertical: 4,
+                          ),
+                          decoration: BoxDecoration(
+                            color: Theme.of(
+                              context,
+                            ).colorScheme.primary.withOpacity(0.1),
+                            borderRadius: BorderRadius.circular(12),
+                          ),
+                          child: Text(
+                            '#${notice.createdAt.hour.toString().padLeft(2, '0')}:${notice.createdAt.minute.toString().padLeft(2, '0')}',
+                            style: TextStyle(
+                              fontSize: 12,
+                              color: Theme.of(context).colorScheme.primary,
+                              fontWeight: FontWeight.w500,
                             ),
                           ),
-                          const SizedBox(width: 8),
-                          Container(
-                            padding: const EdgeInsets.symmetric(
-                              horizontal: 8,
-                              vertical: 4,
-                            ),
-                            decoration: BoxDecoration(
-                              color: Theme.of(
-                                context,
-                              ).colorScheme.secondary.withOpacity(0.1),
-                              borderRadius: BorderRadius.circular(12),
-                            ),
-                            child: Text(
-                              index == 0 ? '#기쁨' : '#호기심',
-                              style: TextStyle(
-                                fontSize: 12,
-                                color: Theme.of(context).colorScheme.secondary,
-                                fontWeight: FontWeight.w500,
-                              ),
+                        ),
+                        const SizedBox(width: 8),
+                        // 제목 태그
+                        Container(
+                          padding: const EdgeInsets.symmetric(
+                            horizontal: 8,
+                            vertical: 4,
+                          ),
+                          decoration: BoxDecoration(
+                            color: Theme.of(
+                              context,
+                            ).colorScheme.secondary.withOpacity(0.1),
+                            borderRadius: BorderRadius.circular(12),
+                          ),
+                          child: Text(
+                            '#${notice.title.length > 10 ? notice.title.substring(0, 10) + '...' : notice.title}',
+                            style: TextStyle(
+                              fontSize: 12,
+                              color: Theme.of(context).colorScheme.secondary,
+                              fontWeight: FontWeight.w500,
                             ),
                           ),
-                        ],
-                      ),
-                    ],
-                  ),
-                );
-              },
-            ),
+                        ),
+                      ],
+                    ),
+                  ],
+                ),
+              );
+            },
           ),
-        ],
-      ),
-    );
+        );
+      });
+    });
   }
 
   void _previousMonth() {

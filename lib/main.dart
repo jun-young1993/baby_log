@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 
 import 'package:flutter_common/flutter_common.dart';
 import 'package:flutter_common/repositories/user_group_repository.dart';
+import 'package:flutter_common/state/aws/s3/s3_object_page_bloc.dart';
 import 'package:flutter_common/state/user_group/user_group_bloc.dart';
 
 import 'package:hive_flutter/hive_flutter.dart';
@@ -128,6 +129,11 @@ void main() async {
           BlocProvider(
             create: (context) => UserGroupBloc(
               userGroupRepository: context.read<UserGroupRepository>(),
+            ),
+          ),
+          BlocProvider(
+            create: (context) => S3ObjectPageBloc(
+              s3ObjectRepository: context.read<AwsS3Repository>(),
             ),
           ),
         ],

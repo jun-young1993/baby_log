@@ -80,6 +80,7 @@ final routerProvider = Provider<GoRouter>((ref) {
         builder: (context, state) {
           final userBloc = context.read<UserBloc>();
           final noticeGroupBloc = context.read<NoticeGroupBloc>();
+          final noticeBloc = context.read<NoticeBloc>();
           final user = userBloc.state.user;
           final noticeGroup = noticeGroupBloc.state.noticeGroup;
 
@@ -101,6 +102,17 @@ final routerProvider = Provider<GoRouter>((ref) {
             date: date,
             user: user,
             noticeGroup: noticeGroup,
+            onSaved: () {
+              Future.delayed(const Duration(seconds: 1), () {
+                noticeBloc.add(
+                  NoticeEvent.checkNoticeExistence(
+                    user.id,
+                    date.year.toString(),
+                    date.month.toString(),
+                  ),
+                );
+              });
+            },
           );
         },
       ),

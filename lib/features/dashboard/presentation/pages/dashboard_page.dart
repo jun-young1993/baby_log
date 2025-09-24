@@ -380,7 +380,7 @@ class _DashboardPageState extends State<DashboardPage>
             const SizedBox(width: 12),
             Expanded(
               child: _buildActionButton(
-                title: '앨범 만들기',
+                title: '앨범',
                 icon: Icons.photo_album,
                 color: Colors.orange,
                 onTap: () {
@@ -430,7 +430,7 @@ class _DashboardPageState extends State<DashboardPage>
               style: Theme.of(context).textTheme.bodyMedium?.copyWith(
                 fontWeight: FontWeight.w500,
                 color: color,
-                fontSize: 11,
+                fontSize: 12,
               ),
               textAlign: TextAlign.center,
             ),

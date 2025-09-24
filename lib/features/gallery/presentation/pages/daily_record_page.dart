@@ -8,6 +8,7 @@ class DailyRecordPage extends StatefulWidget {
   final DailyRecord? existingRecord;
   final User user;
   final NoticeGroup noticeGroup;
+  final VoidCallback onSaved;
 
   const DailyRecordPage({
     super.key,
@@ -15,6 +16,7 @@ class DailyRecordPage extends StatefulWidget {
     this.existingRecord,
     required this.user,
     required this.noticeGroup,
+    required this.onSaved,
   });
 
   @override
@@ -686,6 +688,7 @@ class _DailyRecordPageState extends State<DailyRecordPage> {
       );
       return;
     }
+
     noticeBloc.add(
       NoticeEvent.create(
         _titleController.text.trim(),
@@ -693,27 +696,10 @@ class _DailyRecordPageState extends State<DailyRecordPage> {
         'NORMAL',
         widget.noticeGroup.id,
         widget.user.id,
+        createdAt: widget.date.toIso8601String(),
       ),
     );
-
-    // 실제로는 여기서 데이터를 저장하고 갤러리로 돌아가기
-    // final record = DailyRecord(
-    //   id: widget.existingRecord?.id ?? DateTime.now().millisecondsSinceEpoch.toString(),
-    //   date: widget.date,
-    //   title: _titleController.text.trim(),
-    //   content: _contentController.text.trim(),
-    //   tags: _tags,
-    //   createdAt: widget.existingRecord?.createdAt ?? DateTime.now(),
-    //   updatedAt: DateTime.now(),
-    // );
-    noticeBloc.add(
-      NoticeEvent.checkNoticeExistence(
-        widget.user.id,
-        widget.date.year.toString(),
-        widget.date.month.toString(),
-      ),
-    );
-    // 저장 완료 메시지
+    widget.onSaved();
     ScaffoldMessenger.of(context).showSnackBar(
       SnackBar(
         content: Text(
@@ -722,8 +708,10 @@ class _DailyRecordPageState extends State<DailyRecordPage> {
         backgroundColor: Theme.of(context).colorScheme.primary,
       ),
     );
+    context.pop();
+
+    // 저장 완료 메시지
 
     // 갤러리로 돌아가기
-    context.pop();
   }
 }
