@@ -4,6 +4,7 @@ import 'package:flutter_common/models/aws/s3/s3_object.dart';
 import 'package:flutter_common/state/aws/s3/s3_object_page_bloc.dart';
 import 'package:infinite_scroll_pagination/infinite_scroll_pagination.dart';
 import 'package:cached_network_image/cached_network_image.dart';
+import 'package:loading_animation_widget/loading_animation_widget.dart';
 
 class AlbumListPage extends StatefulWidget {
   final User user;
@@ -43,89 +44,14 @@ class _AlbumListPageState extends State<AlbumListPage> {
         ),
         actions: [
           IconButton(
-            icon: const Icon(Icons.add_photo_alternate_outlined),
+            icon: const Icon(Icons.search),
             onPressed: () {
               // 사진 추가 기능
             },
           ),
         ],
       ),
-      body: Column(
-        children: [
-          _buildSearchAndFilter(),
-          Expanded(child: _buildAlbumGrid()),
-        ],
-      ),
-    );
-  }
-
-  Widget _buildSearchAndFilter() {
-    return Container(
-      padding: const EdgeInsets.all(16),
-      child: Column(
-        children: [
-          // 검색바
-          Container(
-            decoration: BoxDecoration(
-              color: Theme.of(
-                context,
-              ).colorScheme.surfaceVariant.withOpacity(0.5),
-              borderRadius: BorderRadius.circular(16),
-            ),
-            child: TextField(
-              onChanged: (value) {},
-              decoration: InputDecoration(
-                hintText: '앨범 검색...',
-                prefixIcon: Icon(
-                  Icons.search,
-                  color: Theme.of(context).colorScheme.onSurfaceVariant,
-                ),
-                border: InputBorder.none,
-                contentPadding: const EdgeInsets.symmetric(
-                  horizontal: 16,
-                  vertical: 12,
-                ),
-              ),
-            ),
-          ),
-          const SizedBox(height: 16),
-          // 필터 칩들
-          SingleChildScrollView(
-            scrollDirection: Axis.horizontal,
-            child: Row(
-              children: _filterOptions.map((filter) {
-                final isSelected = _selectedFilter == filter;
-                return Padding(
-                  padding: const EdgeInsets.only(right: 8),
-                  child: FilterChip(
-                    label: Text(filter),
-                    selected: isSelected,
-                    onSelected: (selected) {
-                      setState(() {
-                        _selectedFilter = filter;
-                      });
-                    },
-                    backgroundColor: Theme.of(
-                      context,
-                    ).colorScheme.surfaceVariant.withOpacity(0.5),
-                    selectedColor: Theme.of(
-                      context,
-                    ).colorScheme.primaryContainer,
-                    checkmarkColor: Theme.of(
-                      context,
-                    ).colorScheme.onPrimaryContainer,
-                    labelStyle: TextStyle(
-                      color: isSelected
-                          ? Theme.of(context).colorScheme.onPrimaryContainer
-                          : Theme.of(context).colorScheme.onSurfaceVariant,
-                    ),
-                  ),
-                );
-              }).toList(),
-            ),
-          ),
-        ],
-      ),
+      body: Column(children: [Expanded(child: _buildAlbumGrid())]),
     );
   }
 
@@ -149,16 +75,26 @@ class _AlbumListPageState extends State<AlbumListPage> {
           ),
           builderDelegate: PagedChildBuilderDelegate<S3Object>(
             itemBuilder: (context, item, index) => _buildAlbumCard(item),
-            firstPageProgressIndicatorBuilder: (_) => const Center(
+            firstPageProgressIndicatorBuilder: (_) => Center(
               child: Padding(
                 padding: EdgeInsets.all(16.0),
-                child: CircularProgressIndicator(),
+                child: Center(
+                  child: LoadingAnimationWidget.staggeredDotsWave(
+                    color: Theme.of(context).colorScheme.onSurface,
+                    size: 50,
+                  ),
+                ),
               ),
             ),
-            newPageProgressIndicatorBuilder: (_) => const Center(
+            newPageProgressIndicatorBuilder: (_) => Center(
               child: Padding(
                 padding: EdgeInsets.all(16.0),
-                child: CircularProgressIndicator(),
+                child: Center(
+                  child: LoadingAnimationWidget.staggeredDotsWave(
+                    color: Theme.of(context).colorScheme.onSurface,
+                    size: 50,
+                  ),
+                ),
               ),
             ),
             noMoreItemsIndicatorBuilder: (_) => Padding(
@@ -168,8 +104,15 @@ class _AlbumListPageState extends State<AlbumListPage> {
                 style: const TextStyle(color: Colors.grey),
               ),
             ),
-            noItemsFoundIndicatorBuilder: (_) =>
-                Center(child: Text(Tr.message.notFoundNotice.tr())),
+            noItemsFoundIndicatorBuilder: (_) => Center(
+              child: Text(
+                Tr.message.notFoundNotice.tr(),
+                style: TextStyle(
+                  color: Theme.of(context).colorScheme.onSurfaceVariant,
+                  fontSize: 8,
+                ),
+              ),
+            ),
           ),
         );
       },

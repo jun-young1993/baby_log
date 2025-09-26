@@ -123,7 +123,7 @@ class _PhotoCapturePageState extends State<PhotoCapturePage> {
                 if (user == null) {
                   return;
                 }
-                _pickFromGallery(user);
+                _pickFromGallery();
               },
               icon: const Icon(Icons.photo_library),
               label: const Text('갤러리에서 선택'),
@@ -211,7 +211,7 @@ class _PhotoCapturePageState extends State<PhotoCapturePage> {
               const SizedBox(width: 16),
               Expanded(
                 child: ElevatedButton.icon(
-                  onPressed: _savePhoto,
+                  onPressed: () => _savePhoto(userBloc.state.user!),
                   icon: const Icon(Icons.save),
                   label: const Text('저장'),
                   style: ElevatedButton.styleFrom(
@@ -283,7 +283,7 @@ class _PhotoCapturePageState extends State<PhotoCapturePage> {
     }
   }
 
-  Future<void> _pickFromGallery(User user) async {
+  Future<void> _pickFromGallery() async {
     setState(() {
       _isLoading = true;
     });
@@ -294,7 +294,6 @@ class _PhotoCapturePageState extends State<PhotoCapturePage> {
         setState(() {
           _capturedPhoto = photo;
         });
-        s3ObjectBloc.add(S3ObjectEvent.uploadFile(File(photo.filePath), user));
       } else {
         _showSnackBar('사진 선택이 취소되었습니다.');
       }
@@ -313,9 +312,12 @@ class _PhotoCapturePageState extends State<PhotoCapturePage> {
     });
   }
 
-  void _savePhoto() {
+  void _savePhoto(User user) {
     if (_capturedPhoto != null) {
       // TODO: 데이터베이스에 저장하는 로직 추가
+      s3ObjectBloc.add(
+        S3ObjectEvent.uploadFile(File(_capturedPhoto!.filePath), user),
+      );
       _showSnackBar('사진이 저장되었습니다!');
       context.pop(_capturedPhoto);
     }
