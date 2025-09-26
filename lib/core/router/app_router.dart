@@ -12,6 +12,7 @@ import '../../features/photo_detail/presentation/pages/photo_detail_page.dart';
 import '../../features/album/presentation/pages/album_list_page.dart';
 import '../../features/family/presentation/pages/family_page.dart';
 import '../../features/settings/presentation/pages/settings_page.dart';
+import '../../features/settings/presentation/pages/storage_usage_demo_page.dart';
 import '../../features/gallery/presentation/pages/gallery_page.dart';
 import '../../features/gallery/presentation/pages/daily_record_page.dart';
 import '../../features/gallery/core/models/daily_record.dart';
@@ -158,6 +159,13 @@ final routerProvider = Provider<GoRouter>((ref) {
         path: '/settings',
         name: 'settings',
         builder: (context, state) => const SettingsPage(),
+      ),
+
+      // Storage Usage Demo
+      GoRoute(
+        path: '/storage-demo',
+        name: 'storage-demo',
+        builder: (context, state) => const StorageUsageDemoPage(),
       ),
     ],
     errorBuilder: (context, state) => Scaffold(

@@ -3,6 +3,7 @@ import 'package:flutter_common/flutter_common.dart';
 import 'package:flutter_common/models/aws/s3/s3_object.dart';
 import 'package:flutter_common/state/aws/s3/s3_object_page_bloc.dart';
 import 'package:infinite_scroll_pagination/infinite_scroll_pagination.dart';
+import 'package:cached_network_image/cached_network_image.dart';
 
 class AlbumListPage extends StatefulWidget {
   final User user;
@@ -135,11 +136,17 @@ class _AlbumListPageState extends State<AlbumListPage> {
         print(state);
         // return Text('hi');
         // _buildAlbumCard(item)
-        return PagedListView<int, S3Object>(
+        return PagedGridView<int, S3Object>(
           state: state,
           fetchNextPage: () {
             s3ObjectPageBloc.add(FetchNextS3Object(widget.user));
           },
+          gridDelegate: const SliverGridDelegateWithFixedCrossAxisCount(
+            crossAxisCount: 3, // 인스타그램처럼 3열
+            childAspectRatio: 1.0, // 정사각형 비율
+            crossAxisSpacing: 2, // 인스타그램처럼 얇은 간격
+            mainAxisSpacing: 2,
+          ),
           builderDelegate: PagedChildBuilderDelegate<S3Object>(
             itemBuilder: (context, item, index) => _buildAlbumCard(item),
             firstPageProgressIndicatorBuilder: (_) => const Center(
@@ -170,167 +177,96 @@ class _AlbumListPageState extends State<AlbumListPage> {
   }
 
   Widget _buildAlbumCard(S3Object object) {
-    return GestureDetector(
+    return InkWell(
       onTap: () {
         // 앨범 상세 페이지로 이동
       },
-      child: Container(
-        decoration: BoxDecoration(
-          borderRadius: BorderRadius.circular(20),
-          boxShadow: [
-            BoxShadow(
-              color: Colors.black.withOpacity(0.1),
-              blurRadius: 10,
-              offset: const Offset(0, 4),
-            ),
-          ],
-        ),
-        child: ClipRRect(
-          borderRadius: BorderRadius.circular(20),
-          child: Container(
-            color: Theme.of(context).colorScheme.surface,
-            child: Column(
-              crossAxisAlignment: CrossAxisAlignment.start,
-              children: [
-                // 썸네일 - 고정 높이 사용
-                SizedBox(
-                  height: 130, // 고정 높이
-                  width: double.infinity,
-                  child: Stack(
-                    children: [
-                      Container(
-                        width: double.infinity,
-                        height: double.infinity,
-                        decoration: BoxDecoration(
-                          gradient: LinearGradient(
-                            begin: Alignment.topLeft,
-                            end: Alignment.bottomRight,
-                            colors: [
-                              Theme.of(
-                                context,
-                              ).colorScheme.primaryContainer.withOpacity(0.3),
-                              Theme.of(
-                                context,
-                              ).colorScheme.secondaryContainer.withOpacity(0.3),
-                            ],
-                          ),
-                        ),
-                        child: object.url != null
-                            ? ClipRRect(
-                                borderRadius: BorderRadius.circular(16),
-                                child: Container(
-                                  width: double.infinity,
-                                  height: double.infinity,
-                                  decoration: BoxDecoration(
-                                    color: Theme.of(context)
-                                        .colorScheme
-                                        .surfaceVariant
-                                        .withOpacity(0.3),
-                                  ),
-                                  child: Image.network(
-                                    object.url!,
-                                    fit: BoxFit.contain, // 비율 유지하면서 잘리지 않게
-                                    width: double.infinity,
-                                    height: double.infinity,
-                                    errorBuilder: (context, error, stackTrace) {
-                                      return _buildPlaceholderThumbnail(object);
-                                    },
-                                  ),
-                                ),
-                              )
-                            : _buildPlaceholderThumbnail(object),
-                      ),
-                      // 타입 아이콘
-                      Positioned(
-                        top: 8,
-                        right: 8,
-                        child: Container(
-                          padding: const EdgeInsets.all(6),
-                          decoration: BoxDecoration(
-                            color: Colors.black.withOpacity(0.6),
-                            borderRadius: BorderRadius.circular(8),
-                          ),
-                          child: Icon(
-                            object.isImage ? Icons.image : Icons.videocam,
-                            color: Colors.white,
-                            size: 16,
-                          ),
-                        ),
-                      ),
-                      // 재생 버튼 (비디오인 경우)
-                      if (object.isVideo)
-                        const Positioned(
-                          top: 0,
-                          left: 0,
-                          right: 0,
-                          bottom: 0,
-                          child: Center(
-                            child: Icon(
-                              Icons.play_circle_filled,
-                              color: Colors.white,
-                              size: 48,
+      borderRadius: BorderRadius.circular(0), // 인스타그램처럼 둥근 모서리 없음
+      splashColor: Colors.white.withOpacity(0.1),
+      highlightColor: Colors.white.withOpacity(0.05),
+      child: AnimatedContainer(
+        duration: const Duration(milliseconds: 200),
+        curve: Curves.easeInOut,
+        child: Stack(
+          children: [
+            // 메인 이미지 - 정사각형으로 꽉 채움
+            Container(
+              width: double.infinity,
+              height: double.infinity,
+              child: object.url != null
+                  ? CachedNetworkImage(
+                      imageUrl: object.url!,
+                      fit: BoxFit.cover, // 인스타그램처럼 꽉 채움
+                      width: double.infinity,
+                      height: double.infinity,
+                      placeholder: (context, url) => Container(
+                        color: Theme.of(
+                          context,
+                        ).colorScheme.surfaceVariant.withOpacity(0.3),
+                        child: Center(
+                          child: CircularProgressIndicator(
+                            strokeWidth: 2,
+                            valueColor: AlwaysStoppedAnimation<Color>(
+                              Theme.of(context).colorScheme.primary,
                             ),
                           ),
                         ),
-                    ],
+                      ),
+                      errorWidget: (context, url, error) =>
+                          _buildPlaceholderThumbnail(object),
+                    )
+                  : _buildPlaceholderThumbnail(object),
+            ),
+            // 비디오 재생 버튼 (비디오인 경우)
+            if (object.isVideo)
+              Positioned(
+                top: 0,
+                left: 0,
+                right: 0,
+                bottom: 0,
+                child: Center(
+                  child: AnimatedOpacity(
+                    opacity: 0.8,
+                    duration: const Duration(milliseconds: 300),
+                    child: Container(
+                      padding: const EdgeInsets.all(8),
+                      decoration: BoxDecoration(
+                        color: Colors.black.withOpacity(0.3),
+                        shape: BoxShape.circle,
+                      ),
+                      child: const Icon(
+                        Icons.play_circle_filled,
+                        color: Colors.white,
+                        size: 32, // 인스타그램처럼 작게
+                      ),
+                    ),
                   ),
                 ),
-                // 정보 - 고정 높이 사용
-                SizedBox(
-                  height: 90, // 고정 높이
-                  child: Padding(
-                    padding: const EdgeInsets.all(12),
-                    child: Column(
-                      crossAxisAlignment: CrossAxisAlignment.start,
-                      mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                      children: [
-                        Text(
-                          object.originalName ?? '이름 없음',
-                          style: Theme.of(context).textTheme.titleMedium
-                              ?.copyWith(fontWeight: FontWeight.w600),
-                          maxLines: 1,
-                          overflow: TextOverflow.ellipsis,
-                        ),
-                        Text(
-                          object.formattedDate,
-                          style: Theme.of(context).textTheme.bodySmall
-                              ?.copyWith(
-                                color: Theme.of(
-                                  context,
-                                ).colorScheme.onSurfaceVariant,
-                              ),
-                        ),
-                        Row(
-                          mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                          children: [
-                            Expanded(
-                              child: Text(
-                                object.fileSize,
-                                style: Theme.of(context).textTheme.bodySmall
-                                    ?.copyWith(
-                                      color: Theme.of(
-                                        context,
-                                      ).colorScheme.onSurfaceVariant,
-                                    ),
-                                overflow: TextOverflow.ellipsis,
-                              ),
-                            ),
-                            Icon(
-                              Icons.more_horiz,
-                              color: Theme.of(
-                                context,
-                              ).colorScheme.onSurfaceVariant,
-                              size: 20,
-                            ),
-                          ],
-                        ),
+              ),
+            // 하단 그라데이션 오버레이 (선택사항)
+            Positioned(
+              bottom: 0,
+              left: 0,
+              right: 0,
+              child: AnimatedOpacity(
+                opacity: 0.6,
+                duration: const Duration(milliseconds: 400),
+                child: Container(
+                  height: 30,
+                  decoration: BoxDecoration(
+                    gradient: LinearGradient(
+                      begin: Alignment.topCenter,
+                      end: Alignment.bottomCenter,
+                      colors: [
+                        Colors.transparent,
+                        Colors.black.withOpacity(0.3),
                       ],
                     ),
                   ),
                 ),
-              ],
+              ),
             ),
-          ),
+          ],
         ),
       ),
     );
@@ -340,21 +276,14 @@ class _AlbumListPageState extends State<AlbumListPage> {
     return Container(
       width: double.infinity,
       height: double.infinity,
-      decoration: BoxDecoration(
-        gradient: LinearGradient(
-          begin: Alignment.topLeft,
-          end: Alignment.bottomRight,
-          colors: [
-            Theme.of(context).colorScheme.primaryContainer.withOpacity(0.3),
-            Theme.of(context).colorScheme.secondaryContainer.withOpacity(0.3),
-          ],
-        ),
-      ),
+      color: Theme.of(context).colorScheme.surfaceVariant.withOpacity(0.3),
       child: Center(
         child: Icon(
           object.isImage ? Icons.image_outlined : Icons.videocam_outlined,
-          size: 48,
-          color: Theme.of(context).colorScheme.onSurfaceVariant,
+          size: 32, // 인스타그램처럼 작게
+          color: Theme.of(
+            context,
+          ).colorScheme.onSurfaceVariant.withOpacity(0.6),
         ),
       ),
     );

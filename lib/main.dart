@@ -2,8 +2,10 @@ import 'package:flutter/material.dart';
 
 import 'package:flutter_common/flutter_common.dart';
 import 'package:flutter_common/repositories/user_group_repository.dart';
+import 'package:flutter_common/repositories/user_storage_limit_repository.dart';
 import 'package:flutter_common/state/aws/s3/s3_object_page_bloc.dart';
 import 'package:flutter_common/state/user_group/user_group_bloc.dart';
+import 'package:flutter_common/state/user_storage_limit/user_storage_limit_bloc.dart';
 
 import 'package:hive_flutter/hive_flutter.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
@@ -83,6 +85,10 @@ void main() async {
         RepositoryProvider<UserGroupRepository>(
           create: (context) => UserGroupDefaultRepository(dioClient: dioClient),
         ),
+        RepositoryProvider<UserStorageLimitRepository>(
+          create: (context) =>
+              UserStorageLimitDefaultRepository(dioClient: dioClient),
+        ),
       ],
       child: MultiBlocProvider(
         providers: [
@@ -134,6 +140,12 @@ void main() async {
           BlocProvider(
             create: (context) => S3ObjectPageBloc(
               s3ObjectRepository: context.read<AwsS3Repository>(),
+            ),
+          ),
+          BlocProvider(
+            create: (context) => UserStorageLimitBloc(
+              userStorageLimitRepository: context
+                  .read<UserStorageLimitRepository>(),
             ),
           ),
         ],

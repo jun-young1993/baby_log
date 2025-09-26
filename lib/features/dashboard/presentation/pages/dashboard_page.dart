@@ -1,12 +1,17 @@
+import 'package:baby_log/core/widgets/storage_usage_widget.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_common/models/aws/s3/s3_object.dart';
 import 'package:flutter_common/state/user_group/user_group_bloc.dart';
 import 'package:flutter_common/state/user_group/user_group_event.dart';
 import 'package:flutter_common/state/user_group/user_group_selector.dart';
+import 'package:flutter_common/state/user_storage_limit/user_storage_limit_bloc.dart';
+import 'package:flutter_common/state/user_storage_limit/user_storage_limit_event.dart';
+import 'package:flutter_common/state/user_storage_limit/user_storage_limit_selector.dart';
 import 'package:flutter_common/utils/date_formatter.dart';
 import 'package:flutter_common/widgets/loader/loading_overay.dart';
 import 'package:go_router/go_router.dart';
 import 'package:flutter_common/flutter_common.dart';
+import 'package:loading_animation_widget/loading_animation_widget.dart';
 
 class DashboardPage extends StatefulWidget {
   final User user;
@@ -22,6 +27,8 @@ class _DashboardPageState extends State<DashboardPage>
   S3ObjectBloc get s3ObjectBloc => context.read<S3ObjectBloc>();
   UserGroupBloc get userGroupBloc => context.read<UserGroupBloc>();
   NoticeGroupBloc get noticeGroupBloc => context.read<NoticeGroupBloc>();
+  UserStorageLimitBloc get userStorageLimitBloc =>
+      context.read<UserStorageLimitBloc>();
 
   bool isShowUserGroupGuide = false;
 
@@ -39,7 +46,7 @@ class _DashboardPageState extends State<DashboardPage>
     userGroupBloc.add(UserGroupEvent.findAll());
     s3ObjectBloc.add(S3ObjectEvent.count());
     noticeGroupBloc.add(NoticeGroupEvent.initialize(widget.user.id));
-
+    userStorageLimitBloc.add(UserStorageLimitEvent.s3Initialize());
     // 애니메이션 컨트롤러 초기화
     _animationController = AnimationController(
       duration: const Duration(milliseconds: 1200),
@@ -207,12 +214,22 @@ class _DashboardPageState extends State<DashboardPage>
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
-        Text(
-          '이번 주 통계',
-          style: Theme.of(
-            context,
-          ).textTheme.titleLarge?.copyWith(fontWeight: FontWeight.bold),
-        ),
+        UserStorageLimitS3Selector((userStorageLimitS3) {
+          if (userStorageLimitS3 == null) {
+            return Center(
+              child: LoadingAnimationWidget.staggeredDotsWave(
+                color: Theme.of(context).colorScheme.onSurface,
+                size: 50,
+              ),
+            );
+          }
+          return AnimatedStorageUsageWidget(
+            usedStorage: userStorageLimitS3.currentUsage.toDouble(),
+            totalStorage: userStorageLimitS3.limitValue.toDouble(),
+            label: '저장소 사용량',
+            animationDuration: Duration(milliseconds: 2000),
+          );
+        }),
         const SizedBox(height: 16),
         Row(
           children: [
