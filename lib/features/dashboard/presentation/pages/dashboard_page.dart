@@ -8,7 +8,6 @@ import 'package:flutter_common/state/user_storage_limit/user_storage_limit_bloc.
 import 'package:flutter_common/state/user_storage_limit/user_storage_limit_event.dart';
 import 'package:flutter_common/state/user_storage_limit/user_storage_limit_selector.dart';
 import 'package:flutter_common/utils/date_formatter.dart';
-import 'package:flutter_common/widgets/loader/loading_overay.dart';
 import 'package:go_router/go_router.dart';
 import 'package:flutter_common/flutter_common.dart';
 import 'package:loading_animation_widget/loading_animation_widget.dart';
@@ -195,6 +194,7 @@ class _DashboardPageState extends State<DashboardPage>
         ),
       ),
       floatingActionButton: UserInfoSelector((user) {
+        print('user: $user');
         return user?.isAdmin ?? false
             ? FloatingActionButton.extended(
                 onPressed: () {
@@ -365,7 +365,7 @@ class _DashboardPageState extends State<DashboardPage>
         filled: true,
         fillColor: Theme.of(
           context,
-        ).colorScheme.surfaceVariant.withOpacity(0.5),
+        ).colorScheme.surfaceContainerHighest.withOpacity(0.5),
         contentPadding: const EdgeInsets.symmetric(vertical: 0, horizontal: 16),
       ),
     );
@@ -526,7 +526,7 @@ class _DashboardPageState extends State<DashboardPage>
             children: [
               // Placeholder image
               Container(
-                color: Theme.of(context).colorScheme.surfaceVariant,
+                color: Theme.of(context).colorScheme.surfaceContainerHighest,
                 child: Center(
                   child: s3Object?.url == null
                       ? Icon(
