@@ -179,9 +179,9 @@ class _DashboardPageState extends State<DashboardPage>
               _buildStatisticsCards(),
               const SizedBox(height: 24),
 
-              // Search Bar
-              _buildSearchBar(),
-              const SizedBox(height: 24),
+              // // Search Bar
+              // _buildSearchBar(),
+              // const SizedBox(height: 24),
 
               // Quick Actions
               _buildQuickActions(),
@@ -194,7 +194,6 @@ class _DashboardPageState extends State<DashboardPage>
         ),
       ),
       floatingActionButton: UserInfoSelector((user) {
-        print('user: $user');
         return user?.isAdmin ?? false
             ? FloatingActionButton.extended(
                 onPressed: () {
@@ -539,8 +538,11 @@ class _DashboardPageState extends State<DashboardPage>
                           fit: BoxFit.cover,
                           loadingBuilder: (context, child, loadingProgress) {
                             if (loadingProgress == null) return child;
-                            return const Center(
-                              child: CircularProgressIndicator(),
+                            return Center(
+                              child: LoadingAnimationWidget.staggeredDotsWave(
+                                color: Theme.of(context).colorScheme.onSurface,
+                                size: 24,
+                              ),
                             );
                           },
                           errorBuilder: (context, error, stackTrace) {
@@ -581,17 +583,17 @@ class _DashboardPageState extends State<DashboardPage>
                       const SizedBox(height: 8),
 
                       // Title
-                      Text(
-                        s3Object != null ? s3Object.originalName ?? '' : '',
-                        style: Theme.of(context).textTheme.bodyMedium?.copyWith(
-                          color: Colors.white,
-                          fontWeight: FontWeight.w500,
-                        ),
-                        maxLines: 2,
-                        overflow: TextOverflow.ellipsis,
-                      ),
+                      // Text(
+                      //   s3Object != null ? s3Object.originalName ?? '' : '',
+                      //   style: Theme.of(context).textTheme.bodyMedium?.copyWith(
+                      //     color: Colors.white,
+                      //     fontWeight: FontWeight.w500,
+                      //   ),
+                      //   maxLines: 2,
+                      //   overflow: TextOverflow.ellipsis,
+                      // ),
 
-                      const SizedBox(height: 4),
+                      // const SizedBox(height: 4),
 
                       // Date
                       Text(

@@ -1,6 +1,10 @@
+import 'package:baby_log/features/dashboard/presentation/pages/dashboard_page.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter_common/state/user_group/user_group_selector.dart';
 import 'package:flutter_common/widgets/error_view.dart';
 import 'package:go_router/go_router.dart';
+import 'package:flutter_common/state/user_group/user_group_bloc.dart';
+import 'package:flutter_common/state/user_group/user_group_event.dart';
 import 'package:flutter_common/flutter_common.dart';
 
 class OnboardingPage extends StatefulWidget {
@@ -13,12 +17,14 @@ class OnboardingPage extends StatefulWidget {
 class _OnboardingPageState extends State<OnboardingPage> {
   final PageController _pageController = PageController();
   UserBloc get userBloc => context.read<UserBloc>();
+  UserGroupBloc get userGroupBloc => context.read<UserGroupBloc>();
   int _currentPage = 0;
 
   @override
   void initState() {
     super.initState();
     userBloc.add(UserEvent.initialize());
+    userGroupBloc.add(UserGroupEvent.findAll());
   }
 
   @override
@@ -41,7 +47,14 @@ class _OnboardingPageState extends State<OnboardingPage> {
               },
             );
           }
-          return _buildBody();
+          return UserGroupFindSelector((userGroup) {
+            return UserInfoSelector((user) {
+              if (userGroup != null && user != null) {
+                return DashboardPage(user: user);
+              }
+              return _buildBody();
+            });
+          });
         }),
       ),
     );

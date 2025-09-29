@@ -147,11 +147,9 @@ class _AlbumListPageState extends State<AlbumListPage> {
                           context,
                         ).colorScheme.surfaceVariant.withOpacity(0.3),
                         child: Center(
-                          child: CircularProgressIndicator(
-                            strokeWidth: 2,
-                            valueColor: AlwaysStoppedAnimation<Color>(
-                              Theme.of(context).colorScheme.primary,
-                            ),
+                          child: LoadingAnimationWidget.staggeredDotsWave(
+                            color: Theme.of(context).colorScheme.onSurface,
+                            size: 24,
                           ),
                         ),
                       ),
