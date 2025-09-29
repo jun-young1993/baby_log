@@ -58,7 +58,7 @@ class _DailyRecordPageState extends State<DailyRecordPage> {
     return Scaffold(
       appBar: AppBar(
         title: Text(
-          '${widget.date.month}월 ${widget.date.day}일 기록',
+          '${Tr.date.yearFormat.tr(namedArgs: {'year': widget.date.year.toString()})} ${Tr.date.monthFormat.tr(namedArgs: {'month': widget.date.month.toString()})} ${Tr.date.dayFormat.tr(namedArgs: {'day': widget.date.day.toString()})} ${Tr.common.record.tr()}',
           style: TextStyle(
             fontSize: 18,
             fontWeight: FontWeight.bold,
@@ -127,7 +127,15 @@ class _DailyRecordPageState extends State<DailyRecordPage> {
   }
 
   Widget _buildDateCard() {
-    final weekdays = ['월', '화', '수', '목', '금', '토', '일'];
+    final weekdays = [
+      Tr.date.day1.tr(),
+      Tr.date.day2.tr(),
+      Tr.date.day3.tr(),
+      Tr.date.day4.tr(),
+      Tr.date.day5.tr(),
+      Tr.date.day6.tr(),
+      Tr.date.day7.tr(),
+    ];
     final weekday = weekdays[widget.date.weekday - 1];
 
     return Container(
@@ -164,7 +172,13 @@ class _DailyRecordPageState extends State<DailyRecordPage> {
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
                 Text(
-                  '${widget.date.year}년 ${widget.date.month}월 ${widget.date.day}일',
+                  Tr.date.yearAndMonthAndDayFormat.tr(
+                    namedArgs: {
+                      'year': widget.date.year.toString(),
+                      'month': widget.date.month.toString(),
+                      'day': widget.date.day.toString(),
+                    },
+                  ),
                   style: TextStyle(
                     fontSize: 12,
                     fontWeight: FontWeight.bold,
@@ -173,7 +187,7 @@ class _DailyRecordPageState extends State<DailyRecordPage> {
                 ),
                 const SizedBox(height: 4),
                 Text(
-                  '$weekday요일',
+                  Tr.date.weekDayFormat.tr(namedArgs: {'weekday': weekday}),
                   style: TextStyle(
                     fontSize: 11,
                     color: Theme.of(
@@ -225,7 +239,7 @@ class _DailyRecordPageState extends State<DailyRecordPage> {
                 ),
                 const SizedBox(width: 12),
                 Text(
-                  '제목',
+                  Tr.common.title.tr(),
                   style: TextStyle(
                     fontSize: 16,
                     fontWeight: FontWeight.w600,
@@ -235,36 +249,36 @@ class _DailyRecordPageState extends State<DailyRecordPage> {
               ],
             ),
           ),
-          Padding(
-            padding: const EdgeInsets.fromLTRB(20, 0, 20, 16),
-            child: TextField(
-              controller: _titleController,
-              decoration: InputDecoration(
-                hintText: '예: 첫 걸음마, 첫 말하기, 건강한 하루...',
-                hintStyle: TextStyle(
-                  color: Theme.of(
-                    context,
-                  ).colorScheme.onSurface.withOpacity(0.5),
-                  fontSize: 15,
-                ),
-                border: OutlineInputBorder(
-                  borderRadius: BorderRadius.circular(12),
-                  borderSide: BorderSide.none,
-                ),
-                filled: true,
-                fillColor: Theme.of(context).colorScheme.background,
-                contentPadding: const EdgeInsets.symmetric(
-                  horizontal: 16,
-                  vertical: 14,
-                ),
-              ),
-              style: TextStyle(
-                fontSize: 16,
-                color: Theme.of(context).colorScheme.onSurface,
-                fontWeight: FontWeight.w500,
-              ),
-            ),
-          ),
+          // Padding(
+          //   padding: const EdgeInsets.fromLTRB(20, 0, 20, 16),
+          //   child: TextField(
+          //     controller: _titleController,
+          //     decoration: InputDecoration(
+          //       hintText: '예: 첫 걸음마, 첫 말하기, 건강한 하루...',
+          //       hintStyle: TextStyle(
+          //         color: Theme.of(
+          //           context,
+          //         ).colorScheme.onSurface.withOpacity(0.5),
+          //         fontSize: 15,
+          //       ),
+          //       border: OutlineInputBorder(
+          //         borderRadius: BorderRadius.circular(12),
+          //         borderSide: BorderSide.none,
+          //       ),
+          //       filled: true,
+          //       fillColor: Theme.of(context).colorScheme.background,
+          //       contentPadding: const EdgeInsets.symmetric(
+          //         horizontal: 16,
+          //         vertical: 14,
+          //       ),
+          //     ),
+          //     style: TextStyle(
+          //       fontSize: 16,
+          //       color: Theme.of(context).colorScheme.onSurface,
+          //       fontWeight: FontWeight.w500,
+          //     ),
+          //   ),
+          // ),
         ],
       ),
     );
@@ -306,7 +320,7 @@ class _DailyRecordPageState extends State<DailyRecordPage> {
                 ),
                 const SizedBox(width: 12),
                 Text(
-                  '내용',
+                  Tr.common.content.tr(),
                   style: TextStyle(
                     fontSize: 16,
                     fontWeight: FontWeight.w600,
@@ -330,8 +344,7 @@ class _DailyRecordPageState extends State<DailyRecordPage> {
                 expands: true,
                 textAlignVertical: TextAlignVertical.top,
                 decoration: InputDecoration(
-                  hintText:
-                      '아이의 특별한 순간이나 성장 기록을 자유롭게 적어보세요...\n\n예시:\n• 오늘 처음으로 "엄마"라고 말했어요!\n• 혼자서 장난감을 정리하는 모습이 너무 귀여웠어요\n• 밤에 잘 잤고, 아침에 활발하게 일어났어요',
+                  hintText: Tr.baby.babyLogDescription.tr(),
                   hintStyle: TextStyle(
                     color: Theme.of(
                       context,
@@ -391,7 +404,7 @@ class _DailyRecordPageState extends State<DailyRecordPage> {
                 ),
                 const SizedBox(width: 12),
                 Text(
-                  '태그',
+                  Tr.common.tag.tr(),
                   style: TextStyle(
                     fontSize: 16,
                     fontWeight: FontWeight.w600,
@@ -411,7 +424,7 @@ class _DailyRecordPageState extends State<DailyRecordPage> {
                   child: TextField(
                     controller: _tagController,
                     decoration: InputDecoration(
-                      hintText: '태그 입력 (예: 첫걸음, 말하기, 건강)',
+                      hintText: Tr.baby.babyLogTagHintText.tr(),
                       hintStyle: TextStyle(
                         color: Theme.of(
                           context,
@@ -539,15 +552,15 @@ class _DailyRecordPageState extends State<DailyRecordPage> {
                     color: Theme.of(context).colorScheme.primary,
                   ),
                 ),
-                const SizedBox(width: 12),
-                Text(
-                  '미리보기',
-                  style: TextStyle(
-                    fontSize: 16,
-                    fontWeight: FontWeight.w600,
-                    color: Theme.of(context).colorScheme.onSurface,
-                  ),
-                ),
+                // const SizedBox(width: 12),
+                // Text(
+                //   '미리보기',
+                //   style: TextStyle(
+                //     fontSize: 16,
+                //     fontWeight: FontWeight.w600,
+                //     color: Theme.of(context).colorScheme.onSurface,
+                //   ),
+                // ),
               ],
             ),
           ),
@@ -630,25 +643,25 @@ class _DailyRecordPageState extends State<DailyRecordPage> {
                     Center(
                       child: Column(
                         children: [
-                          Icon(
-                            Icons.edit_note_outlined,
-                            size: 48,
-                            color: Theme.of(
-                              context,
-                            ).colorScheme.onSurface.withOpacity(0.3),
-                          ),
-                          const SizedBox(height: 12),
-                          Text(
-                            '제목과 내용을 입력하면\n미리보기를 확인할 수 있습니다',
-                            textAlign: TextAlign.center,
-                            style: TextStyle(
-                              fontSize: 14,
-                              color: Theme.of(
-                                context,
-                              ).colorScheme.onSurface.withOpacity(0.5),
-                              height: 1.4,
-                            ),
-                          ),
+                          // Icon(
+                          //   Icons.edit_note_outlined,
+                          //   size: 48,
+                          //   color: Theme.of(
+                          //     context,
+                          //   ).colorScheme.onSurface.withOpacity(0.3),
+                          // ),
+                          // const SizedBox(height: 12),
+                          // Text(
+                          //   '제목과 내용을 입력하면\n미리보기를 확인할 수 있습니다',
+                          //   textAlign: TextAlign.center,
+                          //   style: TextStyle(
+                          //     fontSize: 14,
+                          //     color: Theme.of(
+                          //       context,
+                          //     ).colorScheme.onSurface.withOpacity(0.5),
+                          //     height: 1.4,
+                          //   ),
+                          // ),
                         ],
                       ),
                     ),
@@ -682,7 +695,7 @@ class _DailyRecordPageState extends State<DailyRecordPage> {
         _contentController.text.trim().isEmpty) {
       ScaffoldMessenger.of(context).showSnackBar(
         SnackBar(
-          content: const Text('제목 또는 내용을 입력해주세요.'),
+          content: Text(Tr.validation.titleOrContentRequired.tr()),
           backgroundColor: Colors.orange,
         ),
       );
@@ -703,7 +716,9 @@ class _DailyRecordPageState extends State<DailyRecordPage> {
     ScaffoldMessenger.of(context).showSnackBar(
       SnackBar(
         content: Text(
-          widget.existingRecord != null ? '일기가 수정되었습니다.' : '일기가 저장되었습니다.',
+          widget.existingRecord != null
+              ? Tr.validation.editSuccess.tr()
+              : Tr.validation.saveSuccess.tr(),
         ),
         backgroundColor: Theme.of(context).colorScheme.primary,
       ),

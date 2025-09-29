@@ -73,7 +73,7 @@ class _OnboardingPageState extends State<OnboardingPage> {
                 onPressed: () {
                   context.go('/dashboard');
                 },
-                child: const Text('건너뛰기'),
+                child: Text(Tr.common.skip.tr()),
               ),
             ],
           ),
@@ -88,21 +88,21 @@ class _OnboardingPageState extends State<OnboardingPage> {
                 _currentPage = index;
               });
             },
-            children: const [
+            children: [
               _OnboardingStep(
                 icon: Icons.photo_camera,
-                title: '아기의 소중한 순간을 기록하세요',
-                description: '매일매일의 특별한 순간들을 사진으로 남겨보세요.',
+                title: Tr.baby.onBoardingTitle.tr(),
+                description: Tr.baby.onBoardingDescription.tr(),
               ),
               _OnboardingStep(
                 icon: Icons.auto_awesome,
-                title: 'AI가 자동으로 의미있는 순간을 찾아드려요',
-                description: '인공지능이 감정과 첫 순간들을 자동으로 분석합니다.',
+                title: Tr.baby.aiDescription.tr(),
+                description: Tr.baby.aiDescription.tr(),
               ),
               _OnboardingStep(
                 icon: Icons.family_restroom,
-                title: '가족과 함께 소중한 추억을 공유하세요',
-                description: '안전하게 가족 구성원들과 사진을 공유할 수 있습니다.',
+                title: Tr.baby.shareDescription.tr(),
+                description: Tr.baby.shareDescription.tr(),
               ),
             ],
           ),
@@ -145,7 +145,7 @@ class _OnboardingPageState extends State<OnboardingPage> {
                             curve: Curves.easeInOut,
                           );
                         },
-                        child: const Text('이전'),
+                        child: Text(Tr.common.previous.tr()),
                       ),
                     ),
 
@@ -163,7 +163,11 @@ class _OnboardingPageState extends State<OnboardingPage> {
                           context.go('/dashboard');
                         }
                       },
-                      child: Text(_currentPage < 2 ? '다음' : '시작하기'),
+                      child: Text(
+                        _currentPage < 2
+                            ? Tr.common.next.tr()
+                            : Tr.common.start.tr(),
+                      ),
                     ),
                   ),
                 ],

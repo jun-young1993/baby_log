@@ -40,8 +40,9 @@ class StorageUsageWidget extends StatelessWidget {
           Row(
             mainAxisAlignment: MainAxisAlignment.spaceBetween,
             children: [
+              Icon(Icons.storage_outlined, color: theme.colorScheme.onSurface),
               Text(
-                label ?? '스토리지 사용량',
+                label ?? 'storage usage',
                 style: theme.textTheme.bodyMedium?.copyWith(
                   fontWeight: FontWeight.w500,
                   color: theme.colorScheme.onSurface,

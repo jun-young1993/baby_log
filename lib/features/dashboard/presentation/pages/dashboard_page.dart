@@ -110,7 +110,9 @@ class _DashboardPageState extends State<DashboardPage>
                             context,
                           ).colorScheme.onSurface.withOpacity(0.5),
                   ),
-                  tooltip: userGroup != null ? '가족 공유' : '가족 그룹을 먼저 설정해주세요',
+                  tooltip: userGroup != null
+                      ? Tr.family.familyShare.tr()
+                      : Tr.family.familyShareDescription.tr(),
                 ),
                 if (userGroup == null)
                   Positioned(
@@ -198,7 +200,7 @@ class _DashboardPageState extends State<DashboardPage>
                   context.push('/photo-capture');
                 },
                 icon: const Icon(Icons.camera_alt),
-                label: const Text('사진 촬영'),
+                label: Text(Tr.photo.takePhoto.tr()),
                 backgroundColor: Theme.of(context).colorScheme.primary,
                 foregroundColor: Theme.of(context).colorScheme.onPrimary,
               )
@@ -220,14 +222,20 @@ class _DashboardPageState extends State<DashboardPage>
               ),
             );
           }
-          return AnimatedStorageUsageWidget(
-            usedStorage: userStorageLimitS3.currentUsage.toDouble(),
-            totalStorage: userStorageLimitS3.limitValue.toDouble(),
-            label: '저장소 사용량',
-            animationDuration: Duration(milliseconds: 2000),
+          return Card(
+            elevation: 2,
+            child: Padding(
+              padding: const EdgeInsets.all(16.0),
+              child: AnimatedStorageUsageWidget(
+                usedStorage: userStorageLimitS3.currentUsage.toDouble(),
+                totalStorage: userStorageLimitS3.limitValue.toDouble(),
+                label: Tr.common.storageUsage.tr(),
+                animationDuration: Duration(milliseconds: 2000),
+              ),
+            ),
           );
         }),
-        const SizedBox(height: 16),
+        const SizedBox(height: 8),
         Row(
           children: [
             Expanded(
@@ -238,9 +246,9 @@ class _DashboardPageState extends State<DashboardPage>
                     minHeight: 10,
                     type: LoadingBarType.minimal,
                     child: _buildStatCard(
-                      title: '촬영한 사진',
+                      title: Tr.photo.takenPhotos.tr(),
                       value: count.toString(),
-                      unit: '장',
+                      unit: Tr.photo.unit.tr(),
                       icon: Icons.photo_camera,
                       color: Theme.of(context).colorScheme.primary,
                     ),
@@ -248,42 +256,42 @@ class _DashboardPageState extends State<DashboardPage>
                 });
               }),
             ),
-            const SizedBox(width: 12),
-            Expanded(
-              child: _buildStatCard(
-                title: '행복한 순간',
-                value: '18',
-                unit: '개',
-                icon: Icons.sentiment_very_satisfied,
-                color: Colors.orange,
-              ),
-            ),
+            // const SizedBox(width: 12),
+            // Expanded(
+            //   child: _buildStatCard(
+            //     title: '행복한 순간',
+            //     value: '18',
+            //     unit: '개',
+            //     icon: Icons.sentiment_very_satisfied,
+            //     color: Colors.orange,
+            //   ),
+            // ),
           ],
         ),
-        const SizedBox(height: 12),
-        Row(
-          children: [
-            Expanded(
-              child: _buildStatCard(
-                title: '첫 순간',
-                value: '3',
-                unit: '개',
-                icon: Icons.star,
-                color: Colors.amber,
-              ),
-            ),
-            const SizedBox(width: 12),
-            Expanded(
-              child: _buildStatCard(
-                title: '가족 공유',
-                value: '12',
-                unit: '장',
-                icon: Icons.share,
-                color: Colors.green,
-              ),
-            ),
-          ],
-        ),
+        // const SizedBox(height: 12),
+        // Row(
+        //   children: [
+        //     Expanded(
+        //       child: _buildStatCard(
+        //         title: '첫 순간',
+        //         value: '3',
+        //         unit: '개',
+        //         icon: Icons.star,
+        //         color: Colors.amber,
+        //       ),
+        //     ),
+        //     const SizedBox(width: 12),
+        //     Expanded(
+        //       child: _buildStatCard(
+        //         title: '가족 공유',
+        //         value: '12',
+        //         unit: '장',
+        //         icon: Icons.share,
+        //         color: Colors.green,
+        //       ),
+        //     ),
+        //   ],
+        // ),
       ],
     );
   }
@@ -373,7 +381,7 @@ class _DashboardPageState extends State<DashboardPage>
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
         Text(
-          '빠른 액션',
+          Tr.common.quickAction.tr(),
           style: Theme.of(
             context,
           ).textTheme.titleLarge?.copyWith(fontWeight: FontWeight.bold),
@@ -383,7 +391,7 @@ class _DashboardPageState extends State<DashboardPage>
           children: [
             Expanded(
               child: _buildActionButton(
-                title: '갤러리',
+                title: Tr.common.gallery.tr(),
                 icon: Icons.calendar_month,
                 color: Theme.of(context).colorScheme.primary,
                 onTap: () {
@@ -394,7 +402,7 @@ class _DashboardPageState extends State<DashboardPage>
             const SizedBox(width: 12),
             Expanded(
               child: _buildActionButton(
-                title: '앨범',
+                title: Tr.common.album.tr(),
                 icon: Icons.photo_album,
                 color: Colors.orange,
                 onTap: () {
@@ -405,7 +413,7 @@ class _DashboardPageState extends State<DashboardPage>
             const SizedBox(width: 12),
             Expanded(
               child: _buildActionButton(
-                title: '가족 공유',
+                title: Tr.family.familyShare.tr(),
                 icon: Icons.family_restroom,
                 color: Colors.green,
                 onTap: () {

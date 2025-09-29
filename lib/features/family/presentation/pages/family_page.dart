@@ -32,8 +32,8 @@ class _FamilyPageState extends State<FamilyPage> {
 
   void _shareInviteCode(String inviteCode) {
     Share.share(
-      'Baby Log 가족 그룹에 초대합니다!\n\n초대 코드: $inviteCode\n\nBaby Log 앱에서 위 코드를 입력하여 가족 그룹에 참여하세요.',
-      subject: 'Baby Log 가족 그룹 초대',
+      Tr.family.familyJoinCodeDescription4.tr(namedArgs: {'code': inviteCode}),
+      subject: Tr.family.familyJoinCodeDescription5.tr(),
     );
   }
 
@@ -41,7 +41,7 @@ class _FamilyPageState extends State<FamilyPage> {
     showDialog(
       context: context,
       builder: (context) => AlertDialog(
-        title: const Text('초대 코드'),
+        title: Text(Tr.family.inviteCode.tr()),
         content: Column(
           mainAxisSize: MainAxisSize.min,
           children: [
@@ -62,20 +62,20 @@ class _FamilyPageState extends State<FamilyPage> {
               ),
             ),
             const SizedBox(height: 16),
-            const Text('이 코드를 가족들에게 공유해주세요'),
+            Text(Tr.family.inviteCodeDescription.tr()),
           ],
         ),
         actions: [
           TextButton(
             onPressed: () => Navigator.pop(context),
-            child: const Text('닫기'),
+            child: Text(Tr.common.close.tr()),
           ),
           ElevatedButton(
             onPressed: () {
               Navigator.pop(context);
               _shareInviteCode(inviteCode);
             },
-            child: const Text('공유하기'),
+            child: Text(Tr.common.share.tr()),
           ),
         ],
       ),
@@ -93,7 +93,7 @@ class _FamilyPageState extends State<FamilyPage> {
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
-        title: const Text('가족 공유'),
+        title: Text(Tr.family.familyShare.tr()),
         centerTitle: true,
         leading: IconButton(
           icon: const Icon(Icons.arrow_back),
@@ -169,7 +169,7 @@ class _FamilyPageState extends State<FamilyPage> {
               Expanded(
                 child: Text(
                   userGroup == null
-                      ? '가족과 함께하는\n소중한 순간들'
+                      ? Tr.family.familyWithPreciousMoments.tr()
                       : '${userGroup.name ?? 'no name'}',
                   textAlign: TextAlign.center,
                   style: TextStyle(
@@ -185,8 +185,8 @@ class _FamilyPageState extends State<FamilyPage> {
                   icon: const Icon(Icons.edit),
                   onPressed: () {
                     InputDialog.show(
-                      title: '가족 그룹 이름',
-                      hintText: '가족 그룹 이름을 입력해주세요.',
+                      title: Tr.family.familyGroupName.tr(),
+                      hintText: Tr.family.familyGroupNameHintText.tr(),
                       initialValue: userGroup?.name ?? '',
                       onConfirm: (value) {
                         userGroupBloc.add(UserGroupEvent.updateName(value));
@@ -206,7 +206,7 @@ class _FamilyPageState extends State<FamilyPage> {
               Expanded(
                 child: Text(
                   userGroup == null
-                      ? '가족 그룹을 만들어 아기의 성장을 함께 기록해보세요'
+                      ? Tr.family.familyShareDescription2.tr()
                       : '${userGroup.description ?? 'no description'}',
                   textAlign: TextAlign.center,
                   style: TextStyle(
@@ -221,8 +221,8 @@ class _FamilyPageState extends State<FamilyPage> {
                   icon: const Icon(Icons.edit),
                   onPressed: () {
                     InputDialog.show(
-                      title: '가족 그룹 설명',
-                      hintText: '가족 그룹 설명을 입력해주세요.',
+                      title: Tr.family.familyShareDescription3.tr(),
+                      hintText: Tr.family.familyShareDescription3HintText.tr(),
                       initialValue: userGroup?.description ?? '',
                       onConfirm: (value) {
                         userGroupBloc.add(
@@ -240,7 +240,7 @@ class _FamilyPageState extends State<FamilyPage> {
           const SizedBox(height: 8),
           if (userGroup != null)
             Text(
-              '초대 코드',
+              Tr.family.inviteCode.tr(),
               style: TextStyle(
                 fontSize: MediaQuery.of(context).size.width < 400 ? 16 : 18,
                 fontWeight: FontWeight.bold,
@@ -261,8 +261,8 @@ class _FamilyPageState extends State<FamilyPage> {
     if (userGroup == null) {
       return Column(
         children: [
-          const Text(
-            '어떤 방법으로 시작하시겠어요?',
+          Text(
+            Tr.family.familyStartDescription.tr(),
             style: TextStyle(fontSize: 18, fontWeight: FontWeight.w600),
           ),
           const SizedBox(height: 24),
@@ -270,8 +270,8 @@ class _FamilyPageState extends State<FamilyPage> {
           _buildOptionCard(
             context: context,
             icon: Icons.group_add,
-            title: '초대 코드 만들기',
-            subtitle: '사진을 올리는 사람이에요\n가족 그룹을 만들고 초대해주세요',
+            title: Tr.family.familyCodeCreate.tr(),
+            subtitle: Tr.family.familyCodeCreateDescription.tr(),
             onTap: () {
               userGroupBloc.add(UserGroupEvent.create(null, null));
             },
@@ -282,8 +282,8 @@ class _FamilyPageState extends State<FamilyPage> {
           _buildOptionCard(
             context: context,
             icon: Icons.group,
-            title: '초대 코드가 있어요',
-            subtitle: '가족 그룹에 입장할래요\n초대 코드를 입력해주세요',
+            title: Tr.family.familyCodeCreateDescription2.tr(),
+            subtitle: Tr.family.familyCodeCreateDescription3.tr(),
             onTap: () => _showJoinCodeDialog(context),
             isPrimary: false,
           ),
@@ -295,7 +295,7 @@ class _FamilyPageState extends State<FamilyPage> {
           ElevatedButton.icon(
             onPressed: () => _shareInviteCode(userGroup.number.toString()),
             icon: const Icon(Icons.share),
-            label: const Text('초대 코드 공유하기'),
+            label: Text(Tr.family.familyCodeShare.tr()),
             style: ElevatedButton.styleFrom(
               padding: const EdgeInsets.symmetric(horizontal: 32, vertical: 16),
               backgroundColor: Theme.of(context).primaryColor,
@@ -338,7 +338,9 @@ class _FamilyPageState extends State<FamilyPage> {
               ),
               const SizedBox(width: 8),
               Text(
-                '가족 멤버 (${members.length}명)',
+                Tr.family.familyMemberCountFormat.tr(
+                  namedArgs: {'count': members.length.toString()},
+                ),
                 style: TextStyle(
                   fontSize: 16,
                   fontWeight: FontWeight.bold,
@@ -403,7 +405,9 @@ class _FamilyPageState extends State<FamilyPage> {
                 ),
                 const SizedBox(height: 4),
                 Text(
-                  member.isAdmin ? '그룹장' : '멤버',
+                  member.isAdmin
+                      ? Tr.common.groupLeader.tr()
+                      : Tr.common.member.tr(),
                   style: TextStyle(fontSize: 14, color: Colors.grey[600]),
                 ),
               ],
@@ -431,15 +435,15 @@ class _FamilyPageState extends State<FamilyPage> {
                     shape: BoxShape.circle,
                   ),
                 ),
-                const SizedBox(width: 4),
-                Text(
-                  '온라인',
-                  style: TextStyle(
-                    fontSize: 12,
-                    color: Colors.green[700],
-                    fontWeight: FontWeight.w500,
-                  ),
-                ),
+                // const SizedBox(width: 4),
+                // Text(
+                //   '온라인',
+                //   style: TextStyle(
+                //     fontSize: 12,
+                //     color: Colors.green[700],
+                //     fontWeight: FontWeight.w500,
+                //   ),
+                // ),
               ],
             ),
           ),
@@ -566,7 +570,7 @@ class _JoinCodePageState extends State<JoinCodePage> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      appBar: AppBar(title: const Text('가족 그룹 참여'), centerTitle: true),
+      appBar: AppBar(title: Text(Tr.family.familyJoin.tr()), centerTitle: true),
       body: SingleChildScrollView(
         padding: const EdgeInsets.all(24.0),
         child: Column(
@@ -608,7 +612,7 @@ class _JoinCodePageState extends State<JoinCodePage> {
                     height: MediaQuery.of(context).size.width < 400 ? 16 : 20,
                   ),
                   Text(
-                    '초대 코드 입력',
+                    Tr.family.familyJoinCode.tr(),
                     style: TextStyle(
                       fontSize: MediaQuery.of(context).size.width < 400
                           ? 20
@@ -618,7 +622,7 @@ class _JoinCodePageState extends State<JoinCodePage> {
                   ),
                   const SizedBox(height: 8),
                   Text(
-                    '가족이 공유한 6자리 초대 코드를\n입력해주세요',
+                    Tr.family.familyJoinCodeDescription.tr(),
                     textAlign: TextAlign.center,
                     style: TextStyle(
                       color: Colors.grey,
@@ -655,7 +659,9 @@ class _JoinCodePageState extends State<JoinCodePage> {
                         ScaffoldMessenger.of(context).showSnackBar(
                           SnackBar(
                             content: Text(
-                              '초대 코드: ${_code.join('')}로 가족 그룹에 참여합니다',
+                              Tr.family.familyJoinCodeDescription2.tr(
+                                namedArgs: {'code': _code.join('')},
+                              ),
                             ),
                             backgroundColor: Colors.green,
                           ),
@@ -673,8 +679,8 @@ class _JoinCodePageState extends State<JoinCodePage> {
                     borderRadius: BorderRadius.circular(12),
                   ),
                 ),
-                child: const Text(
-                  '가족 그룹 참여하기',
+                child: Text(
+                  Tr.family.familyJoin.tr(),
                   style: TextStyle(fontSize: 16, fontWeight: FontWeight.bold),
                 ),
               ),
@@ -688,13 +694,13 @@ class _JoinCodePageState extends State<JoinCodePage> {
                 borderRadius: BorderRadius.circular(12),
                 border: Border.all(color: Colors.orange.withOpacity(0.3)),
               ),
-              child: const Row(
+              child: Row(
                 children: [
                   Icon(Icons.info_outline, color: Colors.orange, size: 20),
                   SizedBox(width: 8),
                   Expanded(
                     child: Text(
-                      '초대 코드를 받지 못했나요? 가족에게 Baby Log 앱에서 초대 코드를 요청해보세요.',
+                      Tr.family.familyJoinCodeDescription3.tr(),
                       style: TextStyle(color: Colors.orange, fontSize: 14),
                     ),
                   ),
