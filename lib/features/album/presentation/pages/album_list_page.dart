@@ -26,7 +26,7 @@ class _AlbumListPageState extends State<AlbumListPage> {
     super.initState();
 
     s3ObjectPageBloc.add(ClearS3Object());
-    s3ObjectPageBloc.add(FetchNextS3Object(widget.user));
+    s3ObjectPageBloc.add(FetchNextS3Object());
   }
 
   @override
@@ -59,13 +59,10 @@ class _AlbumListPageState extends State<AlbumListPage> {
     return BlocBuilder<S3ObjectPageBloc, PagingState<int, S3Object>>(
       bloc: s3ObjectPageBloc,
       builder: (context, state) {
-        print(state);
-        // return Text('hi');
-        // _buildAlbumCard(item)
         return PagedGridView<int, S3Object>(
           state: state,
           fetchNextPage: () {
-            s3ObjectPageBloc.add(FetchNextS3Object(widget.user));
+            s3ObjectPageBloc.add(FetchNextS3Object());
           },
           gridDelegate: const SliverGridDelegateWithFixedCrossAxisCount(
             crossAxisCount: 3, // 인스타그램처럼 3열

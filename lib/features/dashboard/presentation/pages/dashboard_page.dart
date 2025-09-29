@@ -39,9 +39,7 @@ class _DashboardPageState extends State<DashboardPage>
   @override
   void initState() {
     super.initState();
-    s3ObjectBloc.add(
-      S3ObjectEvent.getS3Objects(widget.user, 0, maxRecentPhotoCount),
-    );
+    s3ObjectBloc.add(S3ObjectEvent.getS3Objects(0, maxRecentPhotoCount));
     userGroupBloc.add(UserGroupEvent.findAll());
     s3ObjectBloc.add(S3ObjectEvent.count());
     noticeGroupBloc.add(NoticeGroupEvent.initialize(widget.user.id));
