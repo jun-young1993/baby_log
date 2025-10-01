@@ -124,7 +124,7 @@ final routerProvider = Provider<GoRouter>((ref) {
         name: 'photo-detail',
         builder: (context, state) {
           // final photoId = state.pathParameters['photoId']!;
-          return PhotoDetailPage();
+          return UserInfoSelector((user) => PhotoDetailPage(user: user!));
         },
       ),
 

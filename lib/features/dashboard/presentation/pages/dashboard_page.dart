@@ -509,7 +509,9 @@ class _DashboardPageState extends State<DashboardPage>
     return InkWell(
       onTap: () {
         if (s3Object != null) {
-          s3ObjectBloc.add(S3ObjectEvent.findOneOrFail(s3Object.id));
+          s3ObjectBloc.add(
+            S3ObjectEvent.findOneOrFail(s3Object.id, widget.user),
+          );
           context.push('/photo-detail');
         }
       },

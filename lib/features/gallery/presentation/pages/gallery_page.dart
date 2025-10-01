@@ -605,7 +605,9 @@ class _GalleryPageState extends State<GalleryPage> {
           return GestureDetector(
             onTap: () {
               Navigator.pop(context);
-              s3ObjectBloc.add(S3ObjectEvent.findOneOrFail(object.id));
+              s3ObjectBloc.add(
+                S3ObjectEvent.findOneOrFail(object.id, widget.user),
+              );
               context.push('/photo-detail');
             },
             child: ClipRRect(
