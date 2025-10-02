@@ -116,6 +116,12 @@ class _PhotoDetailPageState extends State<PhotoDetailPage> {
 
   Widget _buildLoadingState(BuildContext context) {
     return Center(
+      child: LoadingAnimationWidget.staggeredDotsWave(
+        color: Theme.of(context).colorScheme.onSurface,
+        size: 24,
+      ),
+    );
+    return Center(
       child: Column(
         mainAxisAlignment: MainAxisAlignment.center,
         children: [
@@ -248,6 +254,70 @@ class _PhotoDetailPageState extends State<PhotoDetailPage> {
                     ],
                   ],
                 ),
+                const SizedBox(height: 12),
+                S3ObjectIsS3ObjectSurroundLoadingSelector((surroundLoading) {
+                  if (surroundLoading) {
+                    return _buildLoadingState(context);
+                  }
+                  return S3ObjectS3ObjectSurroundSelector((surround) {
+                    if (surround == null) {
+                      return const SizedBox.shrink();
+                    }
+                    return Row(
+                      mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                      children: [
+                        Row(
+                          children:
+                              surround.previous
+                                  ?.map(
+                                    (object) => _buildThumbnailImage(
+                                      imageUrl: object.url!,
+                                      onTap: () => s3ObjectBloc.add(
+                                        S3ObjectEvent.findOneOrFail(
+                                          object.id,
+                                          widget.user,
+                                        ),
+                                      ),
+                                    ),
+                                  )
+                                  .toList() ??
+                              [
+                                _buildPlaceholderImage(
+                                  placeholder: "No moreNo",
+                                  size: SizeConstants.getCountdownDisplaySize(
+                                    context,
+                                  ),
+                                ),
+                              ],
+                        ),
+                        Row(
+                          children:
+                              surround.next
+                                  ?.map(
+                                    (object) => _buildThumbnailImage(
+                                      imageUrl: object.url!,
+                                      onTap: () => s3ObjectBloc.add(
+                                        S3ObjectEvent.findOneOrFail(
+                                          object.id,
+                                          widget.user,
+                                        ),
+                                      ),
+                                    ),
+                                  )
+                                  .toList() ??
+                              [
+                                _buildPlaceholderImage(
+                                  placeholder: "No moreNo",
+                                  size: SizeConstants.getCountdownDisplaySize(
+                                    context,
+                                  ),
+                                ),
+                              ],
+                        ),
+                      ],
+                    );
+                  });
+                }),
               ],
             ),
           ),
@@ -661,6 +731,110 @@ class _PhotoDetailPageState extends State<PhotoDetailPage> {
             ),
           ),
         ],
+      ),
+    );
+  }
+
+  Widget _buildPlaceholderImage({
+    required String placeholder,
+    required double size,
+  }) {
+    return Text(
+      'hi',
+      style: TextStyle(color: Colors.white, fontSize: size * 0.2),
+    );
+    return Container(
+      color: Colors.grey[200],
+      child: Center(
+        child: Text(
+          placeholder,
+          style: TextStyle(
+            color: Colors.white.withOpacity(0.5),
+            fontSize: size * 0.2,
+          ),
+        ),
+      ),
+    );
+  }
+
+  Widget _buildThumbnailImage({
+    String? imageUrl,
+    required VoidCallback onTap,
+    double size = 50,
+    bool isSelected = false,
+    String? placeholder,
+  }) {
+    return GestureDetector(
+      onTap: onTap,
+      child: Container(
+        width: size,
+        height: size,
+        margin: const EdgeInsets.only(right: 8),
+        decoration: BoxDecoration(
+          borderRadius: BorderRadius.circular(8),
+          border: Border.all(
+            color: isSelected ? Colors.white : Colors.white.withOpacity(0.3),
+            width: isSelected ? 2 : 1,
+          ),
+          boxShadow: isSelected
+              ? [
+                  BoxShadow(
+                    color: Colors.white.withOpacity(0.3),
+                    blurRadius: 8,
+                    spreadRadius: 1,
+                  ),
+                ]
+              : null,
+        ),
+        child: ClipRRect(
+          borderRadius: BorderRadius.circular(7),
+          child: imageUrl != null
+              ? Image.network(
+                  imageUrl,
+                  fit: BoxFit.cover,
+                  loadingBuilder: (context, child, loadingProgress) {
+                    if (loadingProgress == null) return child;
+                    return Container(
+                      color: Colors.grey[800],
+                      child: Center(
+                        child: SizedBox(
+                          width: size * 0.4,
+                          height: size * 0.4,
+                          child: CircularProgressIndicator(
+                            strokeWidth: 2,
+                            valueColor: AlwaysStoppedAnimation<Color>(
+                              Colors.white.withOpacity(0.5),
+                            ),
+                          ),
+                        ),
+                      ),
+                    );
+                  },
+                  errorBuilder: (context, error, stackTrace) {
+                    return Container(
+                      color: Colors.grey[800],
+                      child: Icon(
+                        Icons.image,
+                        color: Colors.white.withOpacity(0.5),
+                        size: size * 0.4,
+                      ),
+                    );
+                  },
+                )
+              : Container(
+                  color: Colors.grey[800],
+                  child: placeholder != null
+                      ? _buildPlaceholderImage(
+                          placeholder: placeholder,
+                          size: size,
+                        )
+                      : Icon(
+                          Icons.image,
+                          color: Colors.white.withOpacity(0.5),
+                          size: size * 0.4,
+                        ),
+                ),
+        ),
       ),
     );
   }
