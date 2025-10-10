@@ -1170,11 +1170,142 @@
             "testStrategy": "Conduct performance tests to ensure the widget updates efficiently and remains responsive."
           }
         ]
+      },
+      {
+        "id": 18,
+        "title": "Add Video Upload and Selection Feature",
+        "description": "Implement comprehensive video support including video capture, selection, playback, and upload functionality.",
+        "details": "Extend the current photo-only system to support videos. Implement video capture using the camera package, video selection from gallery using image_picker with video support, video playback using video_player package with controls (play/pause/seek). Create video thumbnail generation for efficient preview display. Update PhotoModel to MediaModel or create a VideoModel to handle both media types. Add video indicators on thumbnails (play button icon). Implement video compression using packages like video_compress or flutter_ffmpeg for efficient storage. Update PhotoService to MediaService with methods for video handling. Ensure proper video format support (mp4, mov) and aspect ratio handling. Add video duration display and file size optimization.",
+        "testStrategy": "Test video capture on multiple devices. Verify video playback with various formats and sizes. Test gallery selection with mixed media (photos and videos). Validate video compression ratios and quality. Test video upload to S3. Ensure UI properly displays video indicators and playback controls.",
+        "status": "done",
+        "dependencies": [
+          5,
+          6
+        ],
+        "priority": "high",
+        "subtasks": [
+          {
+            "id": 1,
+            "title": "Extend Data Model for Video Support",
+            "description": "Update PhotoModel to MediaModel or create separate VideoModel to handle video metadata.",
+            "dependencies": [],
+            "details": "Add fields for media type (photo/video), video duration, video codec, aspect ratio. Update Hive type adapters. Consider creating MediaModel that can handle both photos and videos with a mediaType enum.",
+            "status": "done",
+            "testStrategy": "Verify model serialization/deserialization with both photo and video data."
+          },
+          {
+            "id": 2,
+            "title": "Implement Video Capture from Camera",
+            "description": "Add functionality to record videos using device camera.",
+            "dependencies": [
+              "18.1"
+            ],
+            "details": "Use image_picker's pickVideo method with ImageSource.camera. Add video recording duration limits (e.g., 60 seconds max). Implement recording UI with timer and stop button. Handle camera permissions for video recording.",
+            "status": "done",
+            "testStrategy": "Test video recording on iOS and Android devices. Verify video quality and file size."
+          },
+          {
+            "id": 3,
+            "title": "Implement Video Selection from Gallery",
+            "description": "Add functionality to select videos from device gallery.",
+            "dependencies": [
+              "18.1"
+            ],
+            "details": "Use image_picker's pickVideo method with ImageSource.gallery. Support multiple video formats (mp4, mov, avi). Add video file validation for size limits and duration.",
+            "status": "done",
+            "testStrategy": "Test video selection with various formats. Verify proper error handling for unsupported formats."
+          },
+          {
+            "id": 4,
+            "title": "Create Video Player with Controls",
+            "description": "Implement video playback functionality with play/pause/seek controls.",
+            "dependencies": [
+              "18.2",
+              "18.3"
+            ],
+            "details": "Use video_player package to create custom video player widget. Add controls: play/pause button, seek bar, volume control, fullscreen toggle. Display video duration and current playback time. Handle video loading states and errors. Add video buffering indicator.",
+            "status": "done",
+            "testStrategy": "Test video playback with different video sizes and formats. Verify controls functionality on various screen sizes."
+          },
+          {
+            "id": 5,
+            "title": "Generate Video Thumbnails",
+            "description": "Implement automatic video thumbnail generation for efficient preview.",
+            "dependencies": [
+              "18.1"
+            ],
+            "details": "Use video_thumbnail package to generate thumbnails from videos. Extract thumbnail at specific time point (e.g., 1 second). Store thumbnails separately like photo thumbnails. Add video play icon overlay on thumbnails.",
+            "status": "done",
+            "testStrategy": "Verify thumbnail generation quality and performance. Test thumbnail display in grid views."
+          },
+          {
+            "id": 6,
+            "title": "Implement Video Compression",
+            "description": "Add video compression for efficient storage and faster uploads.",
+            "dependencies": [
+              "18.2",
+              "18.3"
+            ],
+            "details": "Use video_compress or flutter_ffmpeg package for video compression. Implement compression with quality presets (low/medium/high). Add compression progress indicator. Keep original video quality option. Compress videos before upload to reduce storage and bandwidth.",
+            "status": "done",
+            "testStrategy": "Test compression ratios and quality. Measure compression time for various video sizes. Verify compressed video playback quality."
+          },
+          {
+            "id": 7,
+            "title": "Update UI for Video Support",
+            "description": "Modify existing UI components to handle both photos and videos.",
+            "dependencies": [
+              "18.4",
+              "18.5"
+            ],
+            "details": "Update PhotoCapturePage to show video/photo toggle. Add video duration badge on thumbnails. Update gallery grid to show video indicators (play icon). Modify PhotoDetailPage to handle video playback. Update dashboard to show video count in statistics.",
+            "status": "done",
+            "testStrategy": "Test UI with mixed media content. Verify proper display of video indicators and controls."
+          },
+          {
+            "id": 8,
+            "title": "Update MediaService (PhotoService)",
+            "description": "Extend PhotoService to handle video operations.",
+            "dependencies": [
+              "18.1",
+              "18.2",
+              "18.3",
+              "18.5",
+              "18.6"
+            ],
+            "details": "Rename PhotoService to MediaService or add video methods. Add captureVideo(), pickVideoFromGallery(), compressVideo(), generateVideoThumbnail() methods. Update file storage structure to separate photos and videos. Handle video file cleanup and deletion.",
+            "status": "done",
+            "testStrategy": "Test all media service methods with various scenarios. Verify proper file management and cleanup."
+          },
+          {
+            "id": 9,
+            "title": "Implement Video Upload to S3",
+            "description": "Add video upload functionality to cloud storage.",
+            "dependencies": [
+              "18.6",
+              "18.8"
+            ],
+            "details": "Update S3ObjectBloc to handle video uploads. Add upload progress indicator for videos (can take longer than photos). Implement chunked upload for large video files. Add retry mechanism for failed uploads. Store video metadata in database.",
+            "status": "done",
+            "testStrategy": "Test video upload with various file sizes. Verify upload progress accuracy. Test upload failure and retry scenarios."
+          },
+          {
+            "id": 10,
+            "title": "Add Video Format and Size Validation",
+            "description": "Implement validation for video formats and file sizes.",
+            "dependencies": [
+              "18.1"
+            ],
+            "details": "Add validation for supported video formats (mp4, mov, avi). Set maximum video file size limit (e.g., 100MB). Validate video duration limits (e.g., max 5 minutes). Show user-friendly error messages for invalid videos.",
+            "status": "done",
+            "testStrategy": "Test with various video formats and sizes. Verify error messages display correctly."
+          }
+        ]
       }
     ],
     "metadata": {
       "created": "2025-08-06T07:33:50.160Z",
-      "updated": "2025-09-26T07:22:06.759Z",
+      "updated": "2025-10-10T00:00:00.000Z",
       "description": "Tasks for master context"
     }
   }

@@ -60,12 +60,15 @@ dependencies:
   shared_preferences: ^2.2.3
   hive: ^2.2.3
   hive_flutter: ^1.1.0
+  path_provider: ^2.1.2
 
   # Image & Video
   image_picker: ^1.0.7
   video_player: ^2.8.3
   camera: ^0.10.5+9
   permission_handler: ^12.0.1
+  video_thumbnail: ^0.5.3
+  video_compress: ^3.1.2
 
   # Utils
   intl: ^0.20.2

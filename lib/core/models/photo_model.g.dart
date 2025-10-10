@@ -31,13 +31,17 @@ class PhotoModelAdapter extends TypeAdapter<PhotoModel> {
       longitude: fields[11] as double?,
       fileSize: fields[12] as int,
       thumbnailPath: fields[13] as String?,
+      mediaType: fields[14] as String,
+      durationInSeconds: fields[15] as int?,
+      videoCodec: fields[16] as String?,
+      aspectRatio: fields[17] as double?,
     );
   }
 
   @override
   void write(BinaryWriter writer, PhotoModel obj) {
     writer
-      ..writeByte(14)
+      ..writeByte(18)
       ..writeByte(0)
       ..write(obj.id)
       ..writeByte(1)
@@ -65,7 +69,15 @@ class PhotoModelAdapter extends TypeAdapter<PhotoModel> {
       ..writeByte(12)
       ..write(obj.fileSize)
       ..writeByte(13)
-      ..write(obj.thumbnailPath);
+      ..write(obj.thumbnailPath)
+      ..writeByte(14)
+      ..write(obj.mediaType)
+      ..writeByte(15)
+      ..write(obj.durationInSeconds)
+      ..writeByte(16)
+      ..write(obj.videoCodec)
+      ..writeByte(17)
+      ..write(obj.aspectRatio);
   }
 
   @override

@@ -2,6 +2,12 @@ import 'package:hive/hive.dart';
 
 part 'photo_model.g.dart';
 
+/// Media type enum for PhotoModel
+/// Represents whether the media is a photo or video
+enum MediaType { photo, video }
+
+/// PhotoModel - Supports both photos and videos
+/// Can be renamed to MediaModel in the future for clarity
 @HiveType(typeId: 0)
 class PhotoModel extends HiveObject {
   @HiveField(0)
@@ -46,6 +52,22 @@ class PhotoModel extends HiveObject {
   @HiveField(13)
   final String? thumbnailPath;
 
+  /// Media type: 'photo' or 'video' (default: 'photo' for backward compatibility)
+  @HiveField(14)
+  final String mediaType;
+
+  /// Video duration in seconds (only for videos)
+  @HiveField(15)
+  final int? durationInSeconds;
+
+  /// Video codec information (e.g., 'h264', 'hevc')
+  @HiveField(16)
+  final String? videoCodec;
+
+  /// Video aspect ratio (e.g., 16:9 = 1.777, 9:16 = 0.5625)
+  @HiveField(17)
+  final double? aspectRatio;
+
   PhotoModel({
     required this.id,
     required this.filePath,
@@ -61,7 +83,25 @@ class PhotoModel extends HiveObject {
     this.longitude,
     required this.fileSize,
     this.thumbnailPath,
+    this.mediaType = 'photo',
+    this.durationInSeconds,
+    this.videoCodec,
+    this.aspectRatio,
   });
+
+  /// Check if this media is a video
+  bool get isVideo => mediaType == 'video';
+
+  /// Check if this media is a photo
+  bool get isPhoto => mediaType == 'photo';
+
+  /// Get formatted duration string (e.g., "1:23", "10:05")
+  String? get formattedDuration {
+    if (durationInSeconds == null) return null;
+    final minutes = durationInSeconds! ~/ 60;
+    final seconds = durationInSeconds! % 60;
+    return '$minutes:${seconds.toString().padLeft(2, '0')}';
+  }
 
   PhotoModel copyWith({
     String? id,
@@ -78,6 +118,10 @@ class PhotoModel extends HiveObject {
     double? longitude,
     int? fileSize,
     String? thumbnailPath,
+    String? mediaType,
+    int? durationInSeconds,
+    String? videoCodec,
+    double? aspectRatio,
   }) {
     return PhotoModel(
       id: id ?? this.id,
@@ -94,6 +138,10 @@ class PhotoModel extends HiveObject {
       longitude: longitude ?? this.longitude,
       fileSize: fileSize ?? this.fileSize,
       thumbnailPath: thumbnailPath ?? this.thumbnailPath,
+      mediaType: mediaType ?? this.mediaType,
+      durationInSeconds: durationInSeconds ?? this.durationInSeconds,
+      videoCodec: videoCodec ?? this.videoCodec,
+      aspectRatio: aspectRatio ?? this.aspectRatio,
     );
   }
 
@@ -113,6 +161,10 @@ class PhotoModel extends HiveObject {
       'longitude': longitude,
       'fileSize': fileSize,
       'thumbnailPath': thumbnailPath,
+      'mediaType': mediaType,
+      'durationInSeconds': durationInSeconds,
+      'videoCodec': videoCodec,
+      'aspectRatio': aspectRatio,
     };
   }
 
@@ -134,6 +186,10 @@ class PhotoModel extends HiveObject {
       longitude: json['longitude'] as double?,
       fileSize: json['fileSize'] as int,
       thumbnailPath: json['thumbnailPath'] as String?,
+      mediaType: json['mediaType'] as String? ?? 'photo',
+      durationInSeconds: json['durationInSeconds'] as int?,
+      videoCodec: json['videoCodec'] as String?,
+      aspectRatio: json['aspectRatio'] as double?,
     );
   }
 }
