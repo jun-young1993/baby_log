@@ -23,7 +23,7 @@ class _PhotoCapturePageState extends State<PhotoCapturePage> {
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
-        title: const Text('사진 촬영'),
+        title: Text(Tr.photo.takePhoto.tr()),
         centerTitle: true,
         leading: IconButton(
           icon: const Icon(Icons.arrow_back),
@@ -36,13 +36,13 @@ class _PhotoCapturePageState extends State<PhotoCapturePage> {
 
   Widget _buildBody() {
     if (_isLoading) {
-      return const Center(
+      return Center(
         child: Column(
           mainAxisAlignment: MainAxisAlignment.center,
           children: [
             CircularProgressIndicator(),
             SizedBox(height: 16),
-            Text('사진을 처리 중입니다...'),
+            Text(Tr.photo.processing.tr()),
           ],
         ),
       );
@@ -79,7 +79,7 @@ class _PhotoCapturePageState extends State<PhotoCapturePage> {
 
           // 제목
           Text(
-            '아기의 소중한 순간을 기록하세요',
+            Tr.baby.onBoardingTitle.tr(),
             style: Theme.of(
               context,
             ).textTheme.headlineSmall?.copyWith(fontWeight: FontWeight.bold),
@@ -89,7 +89,7 @@ class _PhotoCapturePageState extends State<PhotoCapturePage> {
 
           // 설명
           Text(
-            '카메라로 직접 촬영하거나 갤러리에서 선택하세요',
+            Tr.baby.cameraHintText.tr(),
             style: Theme.of(context).textTheme.bodyLarge?.copyWith(
               color: Theme.of(context).colorScheme.onSurfaceVariant,
             ),
@@ -104,7 +104,7 @@ class _PhotoCapturePageState extends State<PhotoCapturePage> {
             child: ElevatedButton.icon(
               onPressed: _capturePhoto,
               icon: const Icon(Icons.camera_alt),
-              label: const Text('카메라로 촬영'),
+              label: Text(Tr.baby.cameraTitle.tr()),
               style: ElevatedButton.styleFrom(
                 backgroundColor: Theme.of(context).colorScheme.primary,
                 foregroundColor: Theme.of(context).colorScheme.onPrimary,
@@ -126,7 +126,7 @@ class _PhotoCapturePageState extends State<PhotoCapturePage> {
                 _pickFromGallery();
               },
               icon: const Icon(Icons.photo_library),
-              label: const Text('갤러리에서 선택'),
+              label: Text(Tr.baby.galleryTitle.tr()),
               style: OutlinedButton.styleFrom(
                 foregroundColor: Theme.of(context).colorScheme.primary,
               ),
@@ -175,19 +175,22 @@ class _PhotoCapturePageState extends State<PhotoCapturePage> {
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
                   Text(
-                    '사진 정보',
+                    Tr.file.fileInfo.tr(),
                     style: Theme.of(context).textTheme.titleMedium?.copyWith(
                       fontWeight: FontWeight.bold,
                     ),
                   ),
                   const SizedBox(height: 8),
-                  _buildInfoRow('파일명', _capturedPhoto!.fileName),
                   _buildInfoRow(
-                    '크기',
+                    Tr.file.fileName.tr(),
+                    _capturedPhoto!.fileName,
+                  ),
+                  _buildInfoRow(
+                    Tr.file.fileSize.tr(),
                     _formatFileSize(_capturedPhoto!.fileSize),
                   ),
                   _buildInfoRow(
-                    '촬영일',
+                    Tr.file.fileCreatedAt.tr(),
                     _formatDateTime(
                       _capturedPhoto!.takenAt ?? _capturedPhoto!.createdAt,
                     ),
@@ -205,7 +208,7 @@ class _PhotoCapturePageState extends State<PhotoCapturePage> {
                 child: OutlinedButton.icon(
                   onPressed: _retakePhoto,
                   icon: const Icon(Icons.refresh),
-                  label: const Text('다시 촬영'),
+                  label: Text(Tr.baby.reTake.tr()),
                 ),
               ),
               const SizedBox(width: 16),
@@ -213,7 +216,7 @@ class _PhotoCapturePageState extends State<PhotoCapturePage> {
                 child: ElevatedButton.icon(
                   onPressed: () => _savePhoto(userBloc.state.user!),
                   icon: const Icon(Icons.save),
-                  label: const Text('저장'),
+                  label: Text(Tr.common.save.tr()),
                   style: ElevatedButton.styleFrom(
                     backgroundColor: Theme.of(context).colorScheme.primary,
                     foregroundColor: Theme.of(context).colorScheme.onPrimary,
