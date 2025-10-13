@@ -18,11 +18,17 @@ class FamilyPage extends StatefulWidget {
 
 class _FamilyPageState extends State<FamilyPage> {
   UserGroupBloc get userGroupBloc => context.read<UserGroupBloc>();
+  UserBloc get userBloc => context.read<UserBloc>();
 
   @override
   void initState() {
     super.initState();
     userGroupBloc.add(UserGroupEvent.findAll());
+    userGroupBloc.stream.listen((state) {
+      if (state.userGroup != null) {
+        userBloc.add(UserEvent.initialize());
+      }
+    });
   }
 
   @override
