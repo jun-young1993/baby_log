@@ -5,7 +5,6 @@ import 'package:flutter_common/flutter_common.dart';
 import 'package:go_router/go_router.dart';
 import '../../../../core/services/photo_service.dart';
 import '../../../../core/models/photo_model.dart';
-import '../../../../core/widgets/simple_video_player.dart';
 
 class PhotoCapturePage extends StatefulWidget {
   const PhotoCapturePage({super.key});
@@ -19,7 +18,7 @@ class _PhotoCapturePageState extends State<PhotoCapturePage> {
   S3ObjectBloc get s3ObjectBloc => context.read<S3ObjectBloc>();
   UserBloc get userBloc => context.read<UserBloc>();
   bool _isLoading = false;
-  PhotoModel? _capturedPhoto;
+  List<PhotoModel> _capturedPhotos = []; // 여러 장의 사진/비디오
   bool _isVideoMode = false; // 동영상 모드 여부
 
   @override
@@ -51,8 +50,8 @@ class _PhotoCapturePageState extends State<PhotoCapturePage> {
       );
     }
 
-    if (_capturedPhoto != null) {
-      return _buildPhotoPreview();
+    if (_capturedPhotos.isNotEmpty) {
+      return _buildPhotosPreview();
     }
 
     return _buildCaptureOptions();
@@ -290,120 +289,176 @@ class _PhotoCapturePageState extends State<PhotoCapturePage> {
     );
   }
 
-  Widget _buildPhotoPreview() {
-    final isVideo = _capturedPhoto?.isVideo ?? false;
-
+  Widget _buildPhotosPreview() {
     return Column(
       children: [
-        // 미디어 미리보기 (상단 고정)
+        // 헤더: 선택된 개수 표시
         Padding(
           padding: const EdgeInsets.all(16.0),
-          child: Container(
-            width: double.infinity,
-            height: MediaQuery.of(context).size.height * 0.4,
-            decoration: BoxDecoration(
-              borderRadius: BorderRadius.circular(16),
-              boxShadow: [
-                BoxShadow(
-                  color: Colors.black.withOpacity(0.1),
-                  blurRadius: 8,
-                  offset: const Offset(0, 2),
-                ),
-              ],
-            ),
-            child: ClipRRect(
-              borderRadius: BorderRadius.circular(16),
-              child: isVideo
-                  ? SimpleVideoPlayer(
-                      videoPath: _capturedPhoto!.filePath,
-                      aspectRatio: _capturedPhoto!.aspectRatio,
-                    )
-                  : Image.file(
-                      File(_capturedPhoto!.filePath),
-                      fit: BoxFit.cover,
-                    ),
-            ),
+          child: Row(
+            children: [
+              Text(
+                '${_capturedPhotos.length}개 선택됨',
+                style: Theme.of(
+                  context,
+                ).textTheme.titleMedium?.copyWith(fontWeight: FontWeight.bold),
+              ),
+              const Spacer(),
+              TextButton.icon(
+                onPressed: () {
+                  setState(() {
+                    _capturedPhotos.clear();
+                  });
+                },
+                icon: const Icon(Icons.delete_outline),
+                label: const Text('전체 삭제'),
+              ),
+            ],
           ),
         ),
 
-        // 스크롤 가능한 정보 영역
+        // 그리드로 미디어 목록 표시
         Expanded(
-          child: SingleChildScrollView(
-            padding: const EdgeInsets.symmetric(horizontal: 16.0),
-            child: Column(
-              children: [
-                // 미디어 정보
-                Card(
-                  child: Padding(
-                    padding: const EdgeInsets.all(16.0),
-                    child: Column(
-                      crossAxisAlignment: CrossAxisAlignment.start,
-                      children: [
-                        Text(
-                          Tr.file.fileInfo.tr(),
-                          style: Theme.of(context).textTheme.titleMedium
-                              ?.copyWith(fontWeight: FontWeight.bold),
-                        ),
-                        const SizedBox(height: 8),
-                        _buildInfoRow(
-                          Tr.file.fileName.tr(),
-                          _capturedPhoto!.fileName,
-                        ),
-                        _buildInfoRow(
-                          Tr.file.fileSize.tr(),
-                          _formatFileSize(_capturedPhoto!.fileSize),
-                        ),
-                        if (isVideo &&
-                            _capturedPhoto!.durationInSeconds != null)
-                          _buildInfoRow(
-                            '재생 시간',
-                            _capturedPhoto!.formattedDuration ?? '',
-                          ),
-                        _buildInfoRow(
-                          Tr.file.fileCreatedAt.tr(),
-                          _formatDateTime(
-                            _capturedPhoto!.takenAt ??
-                                _capturedPhoto!.createdAt,
-                          ),
-                        ),
-                      ],
-                    ),
+          child: GridView.builder(
+            padding: const EdgeInsets.all(16.0),
+            gridDelegate: const SliverGridDelegateWithFixedCrossAxisCount(
+              crossAxisCount: 2,
+              crossAxisSpacing: 12,
+              mainAxisSpacing: 12,
+              childAspectRatio: 1,
+            ),
+            itemCount: _capturedPhotos.length,
+            itemBuilder: (context, index) {
+              final photo = _capturedPhotos[index];
+              return _buildMediaThumbnail(photo, index);
+            },
+          ),
+        ),
+
+        // 하단 액션 버튼들
+        Padding(
+          padding: const EdgeInsets.all(16.0),
+          child: Row(
+            children: [
+              Expanded(
+                child: OutlinedButton.icon(
+                  onPressed: () {
+                    _isVideoMode ? _pickVideoFromGallery() : _pickFromGallery();
+                  },
+                  icon: const Icon(Icons.add_photo_alternate),
+                  label: const Text('더 추가'),
+                ),
+              ),
+              const SizedBox(width: 16),
+              Expanded(
+                flex: 2,
+                child: ElevatedButton.icon(
+                  onPressed: () => _saveAllPhotos(userBloc.state.user!),
+                  icon: const Icon(Icons.cloud_upload),
+                  label: Text('${_capturedPhotos.length}개 업로드'),
+                  style: ElevatedButton.styleFrom(
+                    backgroundColor: Theme.of(context).colorScheme.primary,
+                    foregroundColor: Theme.of(context).colorScheme.onPrimary,
                   ),
                 ),
-                const SizedBox(height: 24),
+              ),
+            ],
+          ),
+        ),
+      ],
+    );
+  }
 
-                // 액션 버튼들
-                Padding(
-                  padding: const EdgeInsets.only(bottom: 16.0),
-                  child: Row(
+  Widget _buildMediaThumbnail(PhotoModel photo, int index) {
+    final isVideo = photo.isVideo;
+
+    return Stack(
+      children: [
+        Container(
+          decoration: BoxDecoration(
+            borderRadius: BorderRadius.circular(12),
+            boxShadow: [
+              BoxShadow(
+                color: Colors.black.withOpacity(0.1),
+                blurRadius: 8,
+                offset: const Offset(0, 2),
+              ),
+            ],
+          ),
+          child: ClipRRect(
+            borderRadius: BorderRadius.circular(12),
+            child: isVideo
+                ? Stack(
+                    fit: StackFit.expand,
                     children: [
-                      Expanded(
-                        child: OutlinedButton.icon(
-                          onPressed: _retakePhoto,
-                          icon: const Icon(Icons.refresh),
-                          label: Text(Tr.baby.reTake.tr()),
-                        ),
+                      Image.file(
+                        File(photo.filePath),
+                        fit: BoxFit.cover,
+                        errorBuilder: (context, error, stackTrace) {
+                          return Container(
+                            color: Colors.black87,
+                            child: const Center(
+                              child: Icon(
+                                Icons.videocam,
+                                color: Colors.white,
+                                size: 48,
+                              ),
+                            ),
+                          );
+                        },
                       ),
-                      const SizedBox(width: 16),
-                      Expanded(
-                        child: ElevatedButton.icon(
-                          onPressed: () => _savePhoto(userBloc.state.user!),
-                          icon: const Icon(Icons.save),
-                          label: Text(Tr.common.save.tr()),
-                          style: ElevatedButton.styleFrom(
-                            backgroundColor: Theme.of(
-                              context,
-                            ).colorScheme.primary,
-                            foregroundColor: Theme.of(
-                              context,
-                            ).colorScheme.onPrimary,
+                      Center(
+                        child: Container(
+                          padding: const EdgeInsets.all(12),
+                          decoration: BoxDecoration(
+                            color: Colors.black.withOpacity(0.6),
+                            shape: BoxShape.circle,
+                          ),
+                          child: const Icon(
+                            Icons.play_arrow,
+                            color: Colors.white,
+                            size: 32,
                           ),
                         ),
                       ),
                     ],
-                  ),
-                ),
-              ],
+                  )
+                : Image.file(File(photo.filePath), fit: BoxFit.cover),
+          ),
+        ),
+        // 삭제 버튼
+        Positioned(
+          top: 4,
+          right: 4,
+          child: GestureDetector(
+            onTap: () {
+              setState(() {
+                _capturedPhotos.removeAt(index);
+              });
+            },
+            child: Container(
+              padding: const EdgeInsets.all(6),
+              decoration: BoxDecoration(
+                color: Colors.black.withOpacity(0.6),
+                shape: BoxShape.circle,
+              ),
+              child: const Icon(Icons.close, color: Colors.white, size: 16),
+            ),
+          ),
+        ),
+        // 파일 크기 표시
+        Positioned(
+          bottom: 4,
+          left: 4,
+          child: Container(
+            padding: const EdgeInsets.symmetric(horizontal: 6, vertical: 4),
+            decoration: BoxDecoration(
+              color: Colors.black.withOpacity(0.6),
+              borderRadius: BorderRadius.circular(4),
+            ),
+            child: Text(
+              _formatFileSize(photo.fileSize),
+              style: const TextStyle(color: Colors.white, fontSize: 10),
             ),
           ),
         ),
@@ -411,37 +466,10 @@ class _PhotoCapturePageState extends State<PhotoCapturePage> {
     );
   }
 
-  Widget _buildInfoRow(String label, String value) {
-    return Padding(
-      padding: const EdgeInsets.symmetric(vertical: 4.0),
-      child: Row(
-        crossAxisAlignment: CrossAxisAlignment.start,
-        children: [
-          SizedBox(
-            width: 80,
-            child: Text(
-              '$label:',
-              style: Theme.of(context).textTheme.bodyMedium?.copyWith(
-                color: Theme.of(context).colorScheme.onSurfaceVariant,
-              ),
-            ),
-          ),
-          Expanded(
-            child: Text(value, style: Theme.of(context).textTheme.bodyMedium),
-          ),
-        ],
-      ),
-    );
-  }
-
   String _formatFileSize(int bytes) {
     if (bytes < 1024) return '$bytes B';
     if (bytes < 1024 * 1024) return '${(bytes / 1024).toStringAsFixed(1)} KB';
     return '${(bytes / (1024 * 1024)).toStringAsFixed(1)} MB';
-  }
-
-  String _formatDateTime(DateTime dateTime) {
-    return '${dateTime.year}년 ${dateTime.month}월 ${dateTime.day}일 ${dateTime.hour.toString().padLeft(2, '0')}:${dateTime.minute.toString().padLeft(2, '0')}';
   }
 
   Future<void> _capturePhoto() async {
@@ -453,7 +481,7 @@ class _PhotoCapturePageState extends State<PhotoCapturePage> {
       final photo = await _photoService.capturePhoto();
       if (photo != null) {
         setState(() {
-          _capturedPhoto = photo;
+          _capturedPhotos.add(photo);
         });
       } else {
         _showSnackBar(Tr.photo.photoTakenCancel.tr());
@@ -475,18 +503,30 @@ class _PhotoCapturePageState extends State<PhotoCapturePage> {
     });
 
     try {
-      final photo = await _photoService.pickPhotoFromGallery();
-      if (photo != null) {
+      // 여러 장 선택 가능
+      final photos = await _photoService.pickMultiplePhotosFromGallery();
+      if (photos != null && photos.isNotEmpty) {
         setState(() {
-          _capturedPhoto = photo;
+          _capturedPhotos.addAll(photos);
         });
+        _showSnackBar('${photos.length}장의 사진이 선택되었습니다');
       } else {
         _showSnackBar(Tr.photo.photoSelectCancel.tr());
       }
     } catch (e) {
-      _showSnackBar(
-        Tr.photo.photoSelectError.tr(namedArgs: {'error': e.toString()}),
-      );
+      // 여러 장 선택이 실패하면 한 장 선택으로 폴백
+      try {
+        final photo = await _photoService.pickPhotoFromGallery();
+        if (photo != null) {
+          setState(() {
+            _capturedPhotos.add(photo);
+          });
+        }
+      } catch (e2) {
+        _showSnackBar(
+          Tr.photo.photoSelectError.tr(namedArgs: {'error': e2.toString()}),
+        );
+      }
     } finally {
       setState(() {
         _isLoading = false;
@@ -503,7 +543,7 @@ class _PhotoCapturePageState extends State<PhotoCapturePage> {
       final video = await _photoService.captureVideo();
       if (video != null) {
         setState(() {
-          _capturedPhoto = video;
+          _capturedPhotos.add(video);
         });
       } else {
         _showSnackBar(Tr.video.videoTakenCancel.tr());
@@ -528,7 +568,7 @@ class _PhotoCapturePageState extends State<PhotoCapturePage> {
       final video = await _photoService.pickVideoFromGallery();
       if (video != null) {
         setState(() {
-          _capturedPhoto = video;
+          _capturedPhotos.add(video);
         });
       } else {
         _showSnackBar(Tr.video.videoSelectCancel.tr());
@@ -544,21 +584,16 @@ class _PhotoCapturePageState extends State<PhotoCapturePage> {
     }
   }
 
-  void _retakePhoto() {
-    setState(() {
-      _capturedPhoto = null;
-    });
-  }
+  void _saveAllPhotos(User user) {
+    if (_capturedPhotos.isEmpty) return;
 
-  void _savePhoto(User user) {
-    if (_capturedPhoto != null) {
-      // TODO: 데이터베이스에 저장하는 로직 추가
-      s3ObjectBloc.add(
-        S3ObjectEvent.uploadFile(File(_capturedPhoto!.filePath), user),
-      );
-      _showSnackBar(Tr.photo.photoSaved.tr());
-      context.pop(_capturedPhoto);
+    // 모든 미디어를 업로드
+    for (final photo in _capturedPhotos) {
+      s3ObjectBloc.add(S3ObjectEvent.uploadFile(File(photo.filePath), user));
     }
+
+    _showSnackBar('${_capturedPhotos.length}개 파일 업로드 시작');
+    context.pop(_capturedPhotos);
   }
 
   void _showSnackBar(String message) {

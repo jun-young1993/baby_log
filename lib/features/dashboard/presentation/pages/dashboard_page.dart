@@ -1,4 +1,5 @@
 import 'package:baby_log/core/widgets/storage_usage_widget.dart';
+import 'package:baby_log/features/dashboard/presentation/widgets/aws_s3_object_photo_card.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_common/models/aws/s3/s3_object.dart';
 import 'package:flutter_common/state/user_group/user_group_bloc.dart';
@@ -354,30 +355,6 @@ class _DashboardPageState extends State<DashboardPage>
     );
   }
 
-  Widget _buildSearchBar() {
-    return TextField(
-      controller: _searchController,
-      onChanged: (query) {
-        setState(() {
-          _searchQuery = query;
-        });
-      },
-      decoration: InputDecoration(
-        hintText: '사진 검색 (예: 행복, 첫 미소)',
-        prefixIcon: const Icon(Icons.search),
-        border: OutlineInputBorder(
-          borderRadius: BorderRadius.circular(12),
-          borderSide: BorderSide.none,
-        ),
-        filled: true,
-        fillColor: Theme.of(
-          context,
-        ).colorScheme.surfaceContainerHighest.withOpacity(0.5),
-        contentPadding: const EdgeInsets.symmetric(vertical: 0, horizontal: 16),
-      ),
-    );
-  }
-
   Widget _buildQuickActions() {
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
@@ -504,11 +481,8 @@ class _DashboardPageState extends State<DashboardPage>
   }
 
   Widget _buildPhotoCard(S3Object? s3Object) {
-    return _buildPhotoCardWithParams(s3Object: s3Object);
-  }
-
-  Widget _buildPhotoCardWithParams({S3Object? s3Object}) {
-    return InkWell(
+    return AwsS3ObjectPhotoCard(
+      s3Object: s3Object,
       onTap: () {
         if (s3Object != null) {
           s3ObjectBloc.add(
@@ -517,131 +491,6 @@ class _DashboardPageState extends State<DashboardPage>
           context.push('/photo-detail');
         }
       },
-      borderRadius: BorderRadius.circular(12),
-      child: Container(
-        decoration: BoxDecoration(
-          borderRadius: BorderRadius.circular(12),
-          boxShadow: [
-            BoxShadow(
-              color: Colors.black.withOpacity(0.1),
-              blurRadius: 8,
-              offset: const Offset(0, 2),
-            ),
-          ],
-        ),
-        child: ClipRRect(
-          borderRadius: BorderRadius.circular(12),
-          child: Stack(
-            children: [
-              // Placeholder image
-              Container(
-                color: Theme.of(context).colorScheme.surfaceContainerHighest,
-                child: Center(
-                  child: s3Object?.url == null
-                      ? Icon(
-                          Icons.photo,
-                          size: 48,
-                          color: Theme.of(context).colorScheme.onSurfaceVariant,
-                        )
-                      : Image.network(
-                          s3Object!.url!,
-                          fit: BoxFit.cover,
-                          loadingBuilder: (context, child, loadingProgress) {
-                            if (loadingProgress == null) return child;
-                            return Center(
-                              child: LoadingAnimationWidget.staggeredDotsWave(
-                                color: Theme.of(context).colorScheme.onSurface,
-                                size: 24,
-                              ),
-                            );
-                          },
-                          errorBuilder: (context, error, stackTrace) {
-                            return Icon(
-                              Icons.broken_image,
-                              size: 48,
-                              color: Theme.of(
-                                context,
-                              ).colorScheme.onSurfaceVariant,
-                            );
-                          },
-                        ),
-                ),
-              ),
-
-              // Gradient overlay
-              Positioned(
-                bottom: 0,
-                left: 0,
-                right: 0,
-                child: Container(
-                  decoration: BoxDecoration(
-                    gradient: LinearGradient(
-                      begin: Alignment.topCenter,
-                      end: Alignment.bottomCenter,
-                      colors: [
-                        Colors.transparent,
-                        Colors.black.withOpacity(0.7),
-                      ],
-                    ),
-                  ),
-                  padding: const EdgeInsets.all(12),
-                  child: Column(
-                    crossAxisAlignment: CrossAxisAlignment.start,
-                    mainAxisSize: MainAxisSize.min,
-                    children: [
-                      // First moment badge
-                      const SizedBox(height: 8),
-
-                      // Title
-                      // Text(
-                      //   s3Object != null ? s3Object.originalName ?? '' : '',
-                      //   style: Theme.of(context).textTheme.bodyMedium?.copyWith(
-                      //     color: Colors.white,
-                      //     fontWeight: FontWeight.w500,
-                      //   ),
-                      //   maxLines: 2,
-                      //   overflow: TextOverflow.ellipsis,
-                      // ),
-
-                      // const SizedBox(height: 4),
-
-                      // Date
-                      Text(
-                        s3Object != null
-                            ? DateFormatter.getRelativeTime(
-                                s3Object.createdAt ?? DateTime.now(),
-                              )
-                            : Tr.photo.noPhoto.tr(),
-                        style: Theme.of(context).textTheme.bodySmall?.copyWith(
-                          color: Colors.white.withOpacity(0.8),
-                        ),
-                      ),
-                    ],
-                  ),
-                ),
-              ),
-
-              // Emotion indicator
-              Positioned(
-                top: 8,
-                right: 8,
-                child: Container(
-                  padding: const EdgeInsets.all(6),
-                  decoration: BoxDecoration(
-                    color: Colors.black.withOpacity(0.5),
-                    borderRadius: BorderRadius.circular(20),
-                  ),
-                  child: Icon(
-                    Icons.sentiment_neutral,
-                    color: Colors.white,
-                    size: 16,
-                  ),
-                ),
-              ),
-            ],
-          ),
-        ),
-      ),
     );
   }
 }

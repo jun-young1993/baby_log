@@ -11,7 +11,12 @@ import 'package:flutter_common/widgets/toast/toast.dart';
 import 'package:go_router/go_router.dart';
 import 'package:loading_animation_widget/loading_animation_widget.dart';
 import 'package:share_plus/share_plus.dart';
+import '../widgets/media_viewer.dart';
+import '../widgets/media_bottom_bar.dart';
+import '../widgets/media_info_overlay.dart';
 
+/// PhotoDetailPage - Displays detailed view of photos and videos
+/// Supports zoom, playback, likes, comments, and navigation
 class PhotoDetailPage extends StatefulWidget {
   final User user;
   const PhotoDetailPage({super.key, required this.user});
@@ -114,6 +119,7 @@ class _PhotoDetailPageState extends State<PhotoDetailPage> {
     );
   }
 
+  /// Builds loading state indicator
   Widget _buildLoadingState(BuildContext context) {
     return Center(
       child: LoadingAnimationWidget.staggeredDotsWave(
@@ -121,23 +127,9 @@ class _PhotoDetailPageState extends State<PhotoDetailPage> {
         size: 24,
       ),
     );
-    return Center(
-      child: Column(
-        mainAxisAlignment: MainAxisAlignment.center,
-        children: [
-          Center(
-            child: LoadingAnimationWidget.staggeredDotsWave(
-              color: Theme.of(context).colorScheme.onSurface,
-              size: 24,
-            ),
-          ),
-          SizedBox(height: 16),
-          Text(Tr.common.loading.tr(), style: TextStyle(color: Colors.white)),
-        ],
-      ),
-    );
   }
 
+  /// Shows report dialog for the main media object
   void _showReportDialog(BuildContext context) {
     ReportDialog.show(
       context: context,
@@ -153,6 +145,7 @@ class _PhotoDetailPageState extends State<PhotoDetailPage> {
     );
   }
 
+  /// Shows report dialog for a reply/comment
   void _showReplyReportDialog(BuildContext context, S3ObjectReply reply) {
     ReportDialog.show(
       context: context,
@@ -164,279 +157,48 @@ class _PhotoDetailPageState extends State<PhotoDetailPage> {
     );
   }
 
+  /// Builds the main media detail view (image or video)
   Widget _buildPhotoDetail(BuildContext context, dynamic s3Object) {
     return Stack(
       children: [
-        // Full screen image
+        // Full screen media viewer (handles both image and video)
         Positioned.fill(
-          child: InteractiveViewer(
-            minScale: 0.5,
-            maxScale: 3.0,
-            child: s3Object.url != null
-                ? Image.network(
-                    s3Object.url!,
-                    fit: BoxFit.contain,
-                    loadingBuilder: (context, child, loadingProgress) {
-                      if (loadingProgress == null) return child;
-                      return Center(
-                        child: Container(
-                          padding: const EdgeInsets.all(20),
-                          decoration: BoxDecoration(
-                            color: Colors.black.withOpacity(0.7),
-                            borderRadius: BorderRadius.circular(12),
-                          ),
-                          child: Center(
-                            child: LoadingAnimationWidget.staggeredDotsWave(
-                              color: Theme.of(context).colorScheme.onSurface,
-                              size: 24,
-                            ),
-                          ),
-                        ),
-                      );
-                    },
-                    errorBuilder: (context, error, stackTrace) {
-                      return _buildErrorState(context);
-                    },
-                  )
-                : _buildErrorState(context),
+          child: MediaViewer(
+            url: s3Object.url,
+            mimetype: s3Object.mimetype,
+            thumbnailUrl: s3Object.thumbnailUrl,
           ),
         ),
 
-        // Photo info overlay (bottom)
-        Positioned(
-          bottom: 0,
-          left: 0,
-          right: 0,
-          child: Container(
-            decoration: BoxDecoration(
-              gradient: LinearGradient(
-                begin: Alignment.topCenter,
-                end: Alignment.bottomCenter,
-                colors: [Colors.transparent, Colors.black.withOpacity(0.8)],
+        // Media info overlay (bottom)
+        S3ObjectIsS3ObjectSurroundLoadingSelector((surroundLoading) {
+          return S3ObjectS3ObjectSurroundSelector((surround) {
+            return MediaInfoOverlay(
+              createdAt: s3Object.createdAt,
+              size: s3Object.size,
+              fileSize: s3Object.fileSize,
+              isSurroundLoading: surroundLoading,
+              surround: surround,
+              onNavigate: (objectId) => s3ObjectBloc.add(
+                S3ObjectEvent.findOneOrFail(objectId, widget.user),
               ),
-            ),
-            padding: const EdgeInsets.fromLTRB(20, 40, 20, 20),
-            child: Column(
-              crossAxisAlignment: CrossAxisAlignment.start,
-              mainAxisSize: MainAxisSize.min,
-              children: [
-                Row(
-                  crossAxisAlignment: CrossAxisAlignment.end,
-                  children: [
-                    Icon(
-                      Icons.access_time,
-                      color: Colors.white.withOpacity(0.7),
-                      size: 16,
-                    ),
-                    const SizedBox(width: 4),
-                    Text(
-                      _formatDate(s3Object.createdAt),
-                      style: TextStyle(
-                        color: Colors.white.withOpacity(0.7),
-                        fontSize: 14,
-                      ),
-                    ),
-                    SizedBox(width: SizeConstants.getColumnSpacing(context)),
-                    if (s3Object.size != null) ...[
-                      Icon(
-                        Icons.storage,
-                        color: Colors.white.withOpacity(0.7),
-                        size: 16,
-                      ),
-                      const SizedBox(width: 4),
-                      Text(
-                        s3Object.fileSize,
-                        style: TextStyle(
-                          color: Colors.white.withOpacity(0.7),
-                          fontSize: 14,
-                        ),
-                      ),
-                    ],
-                  ],
-                ),
-                const SizedBox(height: 12),
-                S3ObjectIsS3ObjectSurroundLoadingSelector((surroundLoading) {
-                  if (surroundLoading) {
-                    return _buildLoadingState(context);
-                  }
-                  return S3ObjectS3ObjectSurroundSelector((surround) {
-                    if (surround == null) {
-                      return const SizedBox.shrink();
-                    }
-                    return Row(
-                      mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                      children: [
-                        Row(
-                          children:
-                              surround.previous
-                                  ?.map(
-                                    (object) => _buildThumbnailImage(
-                                      imageUrl: object.url!,
-                                      onTap: () => s3ObjectBloc.add(
-                                        S3ObjectEvent.findOneOrFail(
-                                          object.id,
-                                          widget.user,
-                                        ),
-                                      ),
-                                    ),
-                                  )
-                                  .toList() ??
-                              [
-                                _buildPlaceholderImage(
-                                  placeholder: "No moreNo",
-                                  size: SizeConstants.getCountdownDisplaySize(
-                                    context,
-                                  ),
-                                ),
-                              ],
-                        ),
-                        Row(
-                          children:
-                              surround.next
-                                  ?.map(
-                                    (object) => _buildThumbnailImage(
-                                      imageUrl: object.url!,
-                                      onTap: () => s3ObjectBloc.add(
-                                        S3ObjectEvent.findOneOrFail(
-                                          object.id,
-                                          widget.user,
-                                        ),
-                                      ),
-                                    ),
-                                  )
-                                  .toList() ??
-                              [
-                                _buildPlaceholderImage(
-                                  placeholder: "No moreNo",
-                                  size: SizeConstants.getCountdownDisplaySize(
-                                    context,
-                                  ),
-                                ),
-                              ],
-                        ),
-                      ],
-                    );
-                  });
-                }),
-              ],
-            ),
-          ),
-        ),
+            );
+          });
+        }),
       ],
     );
   }
 
-  Widget _buildErrorState(BuildContext context) {
-    return Center(
-      child: Column(
-        mainAxisAlignment: MainAxisAlignment.center,
-        children: [
-          Icon(
-            Icons.broken_image_outlined,
-            size: 120,
-            color: Colors.white.withOpacity(0.5),
-          ),
-          const SizedBox(height: 24),
-          Text(
-            '사진을 불러올 수 없습니다',
-            style: Theme.of(context).textTheme.headlineSmall?.copyWith(
-              color: Colors.white,
-              fontWeight: FontWeight.bold,
-            ),
-          ),
-          const SizedBox(height: 8),
-          Text(
-            '네트워크 연결을 확인해주세요',
-            style: Theme.of(context).textTheme.bodyMedium?.copyWith(
-              color: Colors.white.withOpacity(0.7),
-            ),
-          ),
-        ],
-      ),
-    );
-  }
-
+  /// Builds bottom action bar with like and comment buttons
   Widget _buildBottomBar(BuildContext context, dynamic s3Object) {
-    return Container(
-      padding: const EdgeInsets.all(20),
-      decoration: BoxDecoration(
-        color: Colors.black.withOpacity(0.9),
-        border: Border(
-          top: BorderSide(color: Colors.white.withOpacity(0.1), width: 1),
-        ),
-      ),
-      child: SafeArea(
-        child: Row(
-          mainAxisAlignment: MainAxisAlignment.spaceEvenly,
-          children: [
-            S3ObjectLikeSelector(
-              (like) => _buildBottomBarButton(
-                color: like == null ? Colors.white : Colors.red,
-                icon: like == null ? Icons.favorite_border : Icons.favorite,
-                label: Tr.app.like.tr(),
-                onTap: () => _toggleLike(context, s3Object, like),
-              ),
-            ),
-            _buildBottomBarButton(
-              icon: Icons.comment_outlined,
-              label: Tr.common.reply.tr(),
-              onTap: () => _showComments(context, s3Object),
-            ),
-            // _buildBottomBarButton(
-            //   icon: Icons.download,
-            //   label: '다운로드',
-            //   onTap: () => _downloadPhoto(context, s3Object),
-            // ),
-            // _buildBottomBarButton(
-            //   icon: Icons.edit,
-            //   label: '편집',
-            //   onTap: () => _editPhoto(context, s3Object),
-            // ),
-          ],
-        ),
+    return S3ObjectLikeSelector(
+      (like) => MediaBottomBar(
+        s3Object: s3Object,
+        like: like,
+        onLikeTap: () => _toggleLike(context, s3Object, like),
+        onCommentTap: () => _showComments(context, s3Object),
       ),
     );
-  }
-
-  Widget _buildBottomBarButton({
-    required IconData icon,
-    required String label,
-    required VoidCallback onTap,
-    Color color = Colors.white,
-  }) {
-    return InkWell(
-      onTap: onTap,
-      borderRadius: BorderRadius.circular(12),
-      child: Container(
-        padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
-        child: Column(
-          mainAxisSize: MainAxisSize.min,
-          children: [
-            Icon(icon, color: color, size: 24),
-            const SizedBox(height: 4),
-            Text(
-              label,
-              style: TextStyle(
-                color: Colors.white,
-                fontSize: 12,
-                fontWeight: FontWeight.w500,
-              ),
-            ),
-          ],
-        ),
-      ),
-    );
-  }
-
-  String _formatDate(DateTime? date) {
-    if (date == null) return Tr.app.noDate.tr();
-    return DateFormatter.getRelativeTime(date);
-  }
-
-  String _formatFileSize(int bytes) {
-    if (bytes < 1024) return '${bytes}B';
-    if (bytes < 1024 * 1024) return '${(bytes / 1024).toStringAsFixed(1)}KB';
-    return '${(bytes / (1024 * 1024)).toStringAsFixed(1)}MB';
   }
 
   void _showMoreOptions(BuildContext context) {
@@ -735,110 +497,7 @@ class _PhotoDetailPageState extends State<PhotoDetailPage> {
     );
   }
 
-  Widget _buildPlaceholderImage({
-    required String placeholder,
-    required double size,
-  }) {
-    return Text(
-      'hi',
-      style: TextStyle(color: Colors.white, fontSize: size * 0.2),
-    );
-    return Container(
-      color: Colors.grey[200],
-      child: Center(
-        child: Text(
-          placeholder,
-          style: TextStyle(
-            color: Colors.white.withOpacity(0.5),
-            fontSize: size * 0.2,
-          ),
-        ),
-      ),
-    );
-  }
-
-  Widget _buildThumbnailImage({
-    String? imageUrl,
-    required VoidCallback onTap,
-    double size = 50,
-    bool isSelected = false,
-    String? placeholder,
-  }) {
-    return GestureDetector(
-      onTap: onTap,
-      child: Container(
-        width: size,
-        height: size,
-        margin: const EdgeInsets.only(right: 8),
-        decoration: BoxDecoration(
-          borderRadius: BorderRadius.circular(8),
-          border: Border.all(
-            color: isSelected ? Colors.white : Colors.white.withOpacity(0.3),
-            width: isSelected ? 2 : 1,
-          ),
-          boxShadow: isSelected
-              ? [
-                  BoxShadow(
-                    color: Colors.white.withOpacity(0.3),
-                    blurRadius: 8,
-                    spreadRadius: 1,
-                  ),
-                ]
-              : null,
-        ),
-        child: ClipRRect(
-          borderRadius: BorderRadius.circular(7),
-          child: imageUrl != null
-              ? Image.network(
-                  imageUrl,
-                  fit: BoxFit.cover,
-                  loadingBuilder: (context, child, loadingProgress) {
-                    if (loadingProgress == null) return child;
-                    return Container(
-                      color: Colors.grey[800],
-                      child: Center(
-                        child: SizedBox(
-                          width: size * 0.4,
-                          height: size * 0.4,
-                          child: CircularProgressIndicator(
-                            strokeWidth: 2,
-                            valueColor: AlwaysStoppedAnimation<Color>(
-                              Colors.white.withOpacity(0.5),
-                            ),
-                          ),
-                        ),
-                      ),
-                    );
-                  },
-                  errorBuilder: (context, error, stackTrace) {
-                    return Container(
-                      color: Colors.grey[800],
-                      child: Icon(
-                        Icons.image,
-                        color: Colors.white.withOpacity(0.5),
-                        size: size * 0.4,
-                      ),
-                    );
-                  },
-                )
-              : Container(
-                  color: Colors.grey[800],
-                  child: placeholder != null
-                      ? _buildPlaceholderImage(
-                          placeholder: placeholder,
-                          size: size,
-                        )
-                      : Icon(
-                          Icons.image,
-                          color: Colors.white.withOpacity(0.5),
-                          size: size * 0.4,
-                        ),
-                ),
-        ),
-      ),
-    );
-  }
-
+  /// Toggles like status for the media object
   void _toggleLike(
     BuildContext context,
     S3Object s3Object,
@@ -888,9 +547,11 @@ class _PhotoDetailPageState extends State<PhotoDetailPage> {
               ),
               textAlign: TextAlign.center,
             ),
-            AwesomeDescriptionText(
-              fontSize: 11,
-              text: Tr.notice.contentDescription.tr(),
+            Expanded(
+              child: AwesomeDescriptionText(
+                fontSize: 11,
+                text: Tr.notice.contentDescription.tr(),
+              ),
             ),
           ],
         ),

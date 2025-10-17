@@ -32,6 +32,7 @@ class _SimpleVideoPlayerState extends State<SimpleVideoPlayer> {
 
   Future<void> _initializeVideo() async {
     try {
+      debugPrint('widget.videoPath: ${widget.videoPath}');
       _controller = VideoPlayerController.file(File(widget.videoPath));
       await _controller.initialize();
       setState(() {

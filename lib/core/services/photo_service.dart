@@ -82,19 +82,54 @@ class PhotoService {
     }
   }
 
+  /// 갤러리에서 여러 장의 사진 선택
+  Future<List<PhotoModel>?> pickMultiplePhotosFromGallery() async {
+    try {
+      // 갤러리 권한 확인
+      final photosPermission = await Permission.photos.request();
+      if (photosPermission != PermissionStatus.granted) {
+        throw Exception('갤러리 권한이 필요합니다.');
+      }
+
+      // 갤러리에서 여러 장 선택
+      final List<XFile> images = await _imagePicker.pickMultiImage(
+        imageQuality: 100,
+        maxWidth: 1920,
+        maxHeight: 1920,
+      );
+
+      if (images.isEmpty) return null;
+
+      debugPrint('${images.length}장의 사진 선택됨');
+
+      // 모든 이미지 처리
+      final List<PhotoModel> photos = [];
+      for (final image in images) {
+        try {
+          final photo = await _processImage(image);
+          photos.add(photo);
+        } catch (e) {
+          debugPrint('이미지 처리 실패: ${image.path}, 오류: $e');
+          // 계속 진행
+        }
+      }
+
+      return photos.isEmpty ? null : photos;
+    } catch (e) {
+      debugPrint('갤러리에서 여러 사진 선택 오류: $e');
+      rethrow;
+    }
+  }
+
   /// 이미지 처리 및 저장
   Future<PhotoModel> _processImage(XFile image) async {
     try {
       // 앱 전용 디렉토리 생성
       final appDir = await _getAppDirectory();
       final photosDir = Directory('${appDir.path}/photos');
-      final thumbnailsDir = Directory('${appDir.path}/thumbnails');
 
       if (!await photosDir.exists()) {
         await photosDir.create(recursive: true);
-      }
-      if (!await thumbnailsDir.exists()) {
-        await thumbnailsDir.create(recursive: true);
       }
 
       // 고유한 파일명 생성
@@ -271,9 +306,6 @@ class PhotoService {
   /// 갤러리에서 동영상 선택
   Future<PhotoModel?> pickVideoFromGallery() async {
     // 플랫폼 지원 확인
-    if (!isVideoSupported) {
-      throw Exception('이 플랫폼에서는 동영상 선택이 지원되지 않습니다.');
-    }
 
     try {
       // 갤러리 권한 확인
@@ -303,13 +335,10 @@ class PhotoService {
       // 앱 전용 디렉토리 생성
       final appDir = await _getAppDirectory();
       final videosDir = Directory('${appDir.path}/videos');
-      final thumbnailsDir = Directory('${appDir.path}/thumbnails');
+      debugPrint('videosDir: ${videosDir.path}');
 
       if (!await videosDir.exists()) {
         await videosDir.create(recursive: true);
-      }
-      if (!await thumbnailsDir.exists()) {
-        await thumbnailsDir.create(recursive: true);
       }
 
       // 고유한 파일명 생성
@@ -326,14 +355,8 @@ class PhotoService {
       final fileStat = await savedFile.stat();
 
       // 동영상 길이 및 기타 정보 가져오기
-      final videoDuration = await _getVideoDuration(filePath);
-      final aspectRatio = await _getVideoAspectRatio(filePath);
-
-      // 썸네일 생성
-      final thumbnailPath = await _generateVideoThumbnail(
-        filePath,
-        thumbnailsDir.path,
-      );
+      // final videoDuration = await _getVideoDuration(filePath);
+      // final aspectRatio = await _getVideoAspectRatio(filePath);
 
       // PhotoModel 생성 (동영상용)
       return PhotoModel(
@@ -343,10 +366,8 @@ class PhotoService {
         createdAt: DateTime.now(),
         takenAt: fileStat.modified,
         fileSize: fileSize,
-        thumbnailPath: thumbnailPath,
+        thumbnailPath: null,
         mediaType: 'video',
-        durationInSeconds: videoDuration,
-        aspectRatio: aspectRatio,
       );
     } catch (e) {
       debugPrint('동영상 처리 오류: $e');

@@ -1,5 +1,7 @@
+import 'package:baby_log/features/dashboard/presentation/widgets/aws_s3_object_album_infinity_grid.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_common/flutter_common.dart';
+import 'package:flutter_common/state/aws/s3/s3_object_page_bloc.dart';
 import 'package:go_router/go_router.dart';
 import 'package:loading_animation_widget/loading_animation_widget.dart';
 
@@ -16,6 +18,7 @@ class _GalleryPageState extends State<GalleryPage> {
   DateTime _currentMonth = DateTime.now();
   S3ObjectBloc get s3ObjectBloc => context.read<S3ObjectBloc>();
   NoticeBloc get noticeBloc => context.read<NoticeBloc>();
+  S3ObjectPageBloc get s3ObjectPageBloc => context.read<S3ObjectPageBloc>();
   @override
   void initState() {
     super.initState();
@@ -37,7 +40,7 @@ class _GalleryPageState extends State<GalleryPage> {
     return Scaffold(
       appBar: AppBar(
         title: Text(
-          '갤러리',
+          Tr.common.gallery.tr(),
           style: TextStyle(
             fontSize: 20,
             fontWeight: FontWeight.bold,
@@ -134,7 +137,15 @@ class _GalleryPageState extends State<GalleryPage> {
     final daysInMonth = lastDayOfMonth.day;
 
     // 요일 헤더
-    final weekdays = ['월', '화', '수', '목', '금', '토', '일'];
+    final weekdays = [
+      Tr.date.day1.tr(),
+      Tr.date.day2.tr(),
+      Tr.date.day3.tr(),
+      Tr.date.day4.tr(),
+      Tr.date.day5.tr(),
+      Tr.date.day6.tr(),
+      Tr.date.day7.tr(),
+    ];
 
     return Container(
       padding: const EdgeInsets.all(16),
@@ -316,13 +327,12 @@ class _GalleryPageState extends State<GalleryPage> {
         date.day.toString(),
       ),
     );
-
-    // 새로운 날짜의 데이터 가져오기
-    s3ObjectBloc.add(
-      S3ObjectEvent.getObjectsByDate(
-        date.year.toString(),
-        date.month.toString(),
-        date.day.toString(),
+    s3ObjectPageBloc.add(ClearS3Object());
+    s3ObjectPageBloc.add(
+      FetchS3ObjectsByDate(
+        year: date.year.toString(),
+        month: date.month.toString(),
+        day: date.day.toString(),
       ),
     );
 
@@ -344,9 +354,9 @@ class _GalleryPageState extends State<GalleryPage> {
       isScrollControlled: true,
       backgroundColor: Colors.transparent,
       builder: (context) => DraggableScrollableSheet(
-        initialChildSize: 0.8,
+        initialChildSize: 0.95,
         minChildSize: 0.3,
-        maxChildSize: 0.95,
+        maxChildSize: 1,
         builder: (context, scrollController) => Container(
           decoration: BoxDecoration(
             color: Theme.of(context).colorScheme.surface,
@@ -389,7 +399,13 @@ class _GalleryPageState extends State<GalleryPage> {
                     // 날짜 표시
                     Expanded(
                       child: Text(
-                        '${date.year}년 ${date.month}월 ${date.day}일',
+                        Tr.date.yearAndMonthAndDayFormat.tr(
+                          namedArgs: {
+                            'year': date.year.toString(),
+                            'month': date.month.toString(),
+                            'day': date.day.toString(),
+                          },
+                        ),
                         textAlign: TextAlign.center,
                         style: TextStyle(
                           fontSize: 20,
@@ -456,9 +472,9 @@ class _GalleryPageState extends State<GalleryPage> {
                           unselectedLabelColor: Theme.of(
                             context,
                           ).colorScheme.onSurface.withOpacity(0.7),
-                          tabs: const [
-                            Tab(text: '사진'),
-                            Tab(text: '일기'),
+                          tabs: [
+                            Tab(text: Tr.common.album.tr()),
+                            Tab(text: Tr.common.log.tr()),
                           ],
                         ),
                       ),
@@ -468,7 +484,10 @@ class _GalleryPageState extends State<GalleryPage> {
                         child: TabBarView(
                           children: [
                             // 사진 탭
-                            _buildPhotosForDate(date),
+                            Padding(
+                              padding: const EdgeInsets.all(8),
+                              child: _buildPhotosForDate(date),
+                            ),
                             // 일기 탭
                             _buildDiaryForDate(date),
                           ],
@@ -500,7 +519,7 @@ class _GalleryPageState extends State<GalleryPage> {
               },
               icon: Icon(Icons.edit_note, color: Colors.white, size: 20),
               label: Text(
-                '일기 작성',
+                Tr.baby.writeDiary.tr(),
                 style: TextStyle(
                   color: Colors.white,
                   fontWeight: FontWeight.w600,
@@ -554,103 +573,19 @@ class _GalleryPageState extends State<GalleryPage> {
   }
 
   Widget _buildPhotosForDate(DateTime date) {
-    // 해당 날짜의 실제 사진들을 가져와서 표시
-    return S3ObjectObjectsByDateSelector((objects) {
-      if (objects.isEmpty) {
-        return Center(
-          child: Column(
-            mainAxisAlignment: MainAxisAlignment.center,
-            children: [
-              Icon(
-                Icons.photo_library_outlined,
-                size: 64,
-                color: Theme.of(context).colorScheme.onSurface.withOpacity(0.3),
-              ),
-              const SizedBox(height: 16),
-              Text(
-                '이 날짜에는 사진이 없습니다',
-                style: TextStyle(
-                  fontSize: 16,
-                  color: Theme.of(
-                    context,
-                  ).colorScheme.onSurface.withOpacity(0.5),
-                ),
-              ),
-              const SizedBox(height: 8),
-              Text(
-                '사진 추가 버튼을 눌러 소중한 순간을 기록해보세요',
-                style: TextStyle(
-                  fontSize: 14,
-                  color: Theme.of(
-                    context,
-                  ).colorScheme.onSurface.withOpacity(0.4),
-                ),
-              ),
-            ],
+    return AwsS3ObjectAlbumInfinityGrid(
+      user: widget.user,
+      initState: () {},
+      fetchNextPage: () {
+        s3ObjectPageBloc.add(
+          FetchS3ObjectsByDate(
+            year: date.year.toString(),
+            month: date.month.toString(),
+            day: date.day.toString(),
           ),
         );
-      }
-
-      return GridView.builder(
-        controller: ScrollController(),
-        padding: const EdgeInsets.all(16),
-        gridDelegate: const SliverGridDelegateWithFixedCrossAxisCount(
-          crossAxisCount: 3,
-          mainAxisSpacing: 8,
-          crossAxisSpacing: 8,
-        ),
-        itemCount: objects.length,
-        itemBuilder: (context, index) {
-          final object = objects[index];
-          return GestureDetector(
-            onTap: () {
-              Navigator.pop(context);
-              s3ObjectBloc.add(
-                S3ObjectEvent.findOneOrFail(object.id, widget.user),
-              );
-              context.push('/photo-detail');
-            },
-            child: ClipRRect(
-              borderRadius: BorderRadius.circular(8),
-              child: Image.network(
-                object.url!,
-                fit: BoxFit.cover,
-                loadingBuilder: (context, child, loadingProgress) {
-                  if (loadingProgress == null) return child;
-                  return Container(
-                    decoration: BoxDecoration(
-                      color: Theme.of(
-                        context,
-                      ).colorScheme.primary.withOpacity(0.1),
-                      borderRadius: BorderRadius.circular(8),
-                    ),
-                    child: Center(
-                      child: CircularProgressIndicator(
-                        value: loadingProgress.expectedTotalBytes != null
-                            ? loadingProgress.cumulativeBytesLoaded /
-                                  loadingProgress.expectedTotalBytes!
-                            : null,
-                      ),
-                    ),
-                  );
-                },
-                errorBuilder: (context, error, stackTrace) => Container(
-                  decoration: BoxDecoration(
-                    color: Theme.of(context).colorScheme.error.withOpacity(0.1),
-                    borderRadius: BorderRadius.circular(8),
-                  ),
-                  child: Icon(
-                    Icons.error,
-                    color: Theme.of(context).colorScheme.error,
-                    size: 32,
-                  ),
-                ),
-              ),
-            ),
-          );
-        },
-      );
-    });
+      },
+    );
   }
 
   Widget _buildDiaryForDate(DateTime date) {
@@ -686,7 +621,7 @@ class _GalleryPageState extends State<GalleryPage> {
                 ),
                 const SizedBox(height: 12),
                 Text(
-                  '아이의 소중한 순간을 기록해보세요',
+                  Tr.baby.onBoardingTitle.tr(),
                   style: TextStyle(
                     fontSize: 16,
                     fontWeight: FontWeight.w600,
@@ -695,7 +630,7 @@ class _GalleryPageState extends State<GalleryPage> {
                 ),
                 const SizedBox(height: 8),
                 Text(
-                  '첫 걸음마, 첫 말하기, 특별한 하루...\n모든 순간이 소중한 기록이 됩니다.',
+                  Tr.baby.babyLogDescription2.tr(),
                   textAlign: TextAlign.center,
                   style: TextStyle(
                     fontSize: 14,

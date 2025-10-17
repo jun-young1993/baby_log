@@ -104,9 +104,9 @@ class _DailyRecordPageState extends State<DailyRecordPage> {
               _buildDateCard(),
               const SizedBox(height: 20),
 
-              // 제목 입력
-              _buildTitleField(),
-              const SizedBox(height: 20),
+              // // 제목 입력
+              // _buildTitleField(),
+              // const SizedBox(height: 20),
 
               // 내용 입력
               _buildContentField(),
@@ -198,87 +198,6 @@ class _DailyRecordPageState extends State<DailyRecordPage> {
               ],
             ),
           ),
-        ],
-      ),
-    );
-  }
-
-  Widget _buildTitleField() {
-    return Container(
-      decoration: BoxDecoration(
-        color: Theme.of(context).colorScheme.surface,
-        borderRadius: BorderRadius.circular(16),
-        boxShadow: [
-          BoxShadow(
-            color: Theme.of(context).colorScheme.shadow.withOpacity(0.05),
-            blurRadius: 10,
-            offset: const Offset(0, 2),
-          ),
-        ],
-      ),
-      child: Column(
-        crossAxisAlignment: CrossAxisAlignment.start,
-        children: [
-          Padding(
-            padding: const EdgeInsets.fromLTRB(20, 16, 20, 8),
-            child: Row(
-              children: [
-                Container(
-                  padding: const EdgeInsets.all(8),
-                  decoration: BoxDecoration(
-                    color: Theme.of(
-                      context,
-                    ).colorScheme.primary.withOpacity(0.1),
-                    borderRadius: BorderRadius.circular(8),
-                  ),
-                  child: Icon(
-                    Icons.title,
-                    size: 20,
-                    color: Theme.of(context).colorScheme.primary,
-                  ),
-                ),
-                const SizedBox(width: 12),
-                Text(
-                  Tr.common.title.tr(),
-                  style: TextStyle(
-                    fontSize: 16,
-                    fontWeight: FontWeight.w600,
-                    color: Theme.of(context).colorScheme.onSurface,
-                  ),
-                ),
-              ],
-            ),
-          ),
-          // Padding(
-          //   padding: const EdgeInsets.fromLTRB(20, 0, 20, 16),
-          //   child: TextField(
-          //     controller: _titleController,
-          //     decoration: InputDecoration(
-          //       hintText: '예: 첫 걸음마, 첫 말하기, 건강한 하루...',
-          //       hintStyle: TextStyle(
-          //         color: Theme.of(
-          //           context,
-          //         ).colorScheme.onSurface.withOpacity(0.5),
-          //         fontSize: 15,
-          //       ),
-          //       border: OutlineInputBorder(
-          //         borderRadius: BorderRadius.circular(12),
-          //         borderSide: BorderSide.none,
-          //       ),
-          //       filled: true,
-          //       fillColor: Theme.of(context).colorScheme.background,
-          //       contentPadding: const EdgeInsets.symmetric(
-          //         horizontal: 16,
-          //         vertical: 14,
-          //       ),
-          //     ),
-          //     style: TextStyle(
-          //       fontSize: 16,
-          //       color: Theme.of(context).colorScheme.onSurface,
-          //       fontWeight: FontWeight.w500,
-          //     ),
-          //   ),
-          // ),
         ],
       ),
     );
