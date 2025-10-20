@@ -85,6 +85,13 @@ dependencies:
   loading_animation_widget: ^1.3.0
   infinite_scroll_pagination: ^5.1.0
 
+  # firebase
+  firebase_core: ^3.15.2
+  firebase_messaging: ^15.2.5
+
+  # ads
+  google_mobile_ads: ^6.0.0
+
 dev_dependencies:
   flutter_test:
     sdk: flutter

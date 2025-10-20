@@ -162,7 +162,7 @@ class _GalleryPageState extends State<GalleryPage> {
                       child: Text(
                         day,
                         style: TextStyle(
-                          fontSize: 14,
+                          fontSize: 11,
                           fontWeight: FontWeight.w600,
                           color: Theme.of(
                             context,

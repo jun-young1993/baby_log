@@ -1,13 +1,9 @@
+import 'dart:io';
 import 'package:baby_log/features/dashboard/presentation/widgets/aws_s3_object_album_infinity_grid.dart';
-import 'package:baby_log/features/dashboard/presentation/widgets/aws_s3_object_photo_card.dart';
+import 'package:baby_log/features/dashboard/presentation/widgets/native_ad_widget.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_common/flutter_common.dart';
-import 'package:flutter_common/models/aws/s3/s3_object.dart';
 import 'package:flutter_common/state/aws/s3/s3_object_page_bloc.dart';
-import 'package:go_router/go_router.dart';
-import 'package:infinite_scroll_pagination/infinite_scroll_pagination.dart';
-import 'package:cached_network_image/cached_network_image.dart';
-import 'package:loading_animation_widget/loading_animation_widget.dart';
 
 class AlbumListPage extends StatefulWidget {
   final User user;
@@ -20,7 +16,6 @@ class AlbumListPage extends StatefulWidget {
 class _AlbumListPageState extends State<AlbumListPage> {
   S3ObjectPageBloc get s3ObjectPageBloc => context.read<S3ObjectPageBloc>();
   S3ObjectBloc get s3ObjectBloc => context.read<S3ObjectBloc>();
-
   @override
   void initState() {
     super.initState();
@@ -31,7 +26,7 @@ class _AlbumListPageState extends State<AlbumListPage> {
     return Scaffold(
       backgroundColor: Theme.of(context).colorScheme.surface,
       appBar: AppBar(
-        title: const Text('앨범'),
+        title: Text(Tr.common.album.tr()),
         centerTitle: true,
         backgroundColor: Colors.transparent,
         elevation: 0,
@@ -62,18 +57,7 @@ class _AlbumListPageState extends State<AlbumListPage> {
       fetchNextPage: () {
         s3ObjectPageBloc.add(FetchNextS3Object());
       },
-    );
-  }
-
-  Widget _buildAlbumCard(S3Object object) {
-    return AwsS3ObjectPhotoCard(
-      s3Object: object,
-      enableDateTextVisibility: false,
-      enableEmotionVisibility: false,
-      onTap: () {
-        s3ObjectBloc.add(S3ObjectEvent.findOneOrFail(object.id, widget.user));
-        context.push('/photo-detail');
-      },
+      // 매 9개마다 광고 표시 (3x3 그리드 후)
     );
   }
 }

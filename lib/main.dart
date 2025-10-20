@@ -1,3 +1,9 @@
+import 'dart:io';
+
+import 'package:baby_log/firebase_options.dart';
+import 'package:firebase_core/firebase_core.dart';
+import 'package:firebase_messaging/firebase_messaging.dart';
+import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 
 import 'package:flutter_common/flutter_common.dart';
@@ -6,6 +12,7 @@ import 'package:flutter_common/repositories/user_storage_limit_repository.dart';
 import 'package:flutter_common/state/aws/s3/s3_object_page_bloc.dart';
 import 'package:flutter_common/state/user_group/user_group_bloc.dart';
 import 'package:flutter_common/state/user_storage_limit/user_storage_limit_bloc.dart';
+import 'package:flutter_common/widgets/ad/ad_open_app.dart';
 
 import 'package:hive_flutter/hive_flutter.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
@@ -16,6 +23,30 @@ import 'package:baby_log/core/models/photo_model.dart';
 
 void main() async {
   WidgetsFlutterBinding.ensureInitialized();
+
+  // Firebase 먼저 초기화 (AdMob보다 안정적)
+  await Firebase.initializeApp(options: DefaultFirebaseOptions.currentPlatform);
+
+  // FCM 토큰 가져오기
+  final String? fcmToken = await FirebaseMessaging.instance.getToken();
+  debugPrint('fcmToken: $fcmToken');
+
+  // AdMaster 초기화 - 에러가 발생해도 앱이 계속 실행되도록
+  try {
+    final adMaster = AdMaster();
+    await adMaster.initialize(AdConfig(isTestMode: kDebugMode));
+    AdOpenApp(
+      adMaster: AdMaster(),
+      adUnitId: Platform.isIOS
+          ? 'ca-app-pub-4656262305566191/2066955512'
+          : 'ca-app-pub-4656262305566191/9127241785',
+    ).listenToAppStateChanges();
+
+    debugPrint('✅ AdMaster 초기화 성공');
+  } catch (e) {
+    debugPrint('⚠️ AdMaster 초기화 실패: $e');
+    // 광고 없이 앱은 계속 실행
+  }
 
   // Initialize Hive
   await Hive.initFlutter();
@@ -46,8 +77,6 @@ void main() async {
   );
 
   final AppKeys appKey = AppKeys.babyLog;
-
-  final fcmToken = null;
 
   runApp(
     MultiRepositoryProvider(
