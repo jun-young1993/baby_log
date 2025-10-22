@@ -6,7 +6,6 @@ import 'package:flutter_common/state/user_group/user_group_bloc.dart';
 import 'package:flutter_common/state/user_group/user_group_event.dart';
 import 'package:flutter_common/state/user_group/user_group_selector.dart';
 import 'package:flutter_common/widgets/error_view.dart';
-import 'package:flutter_common/widgets/fields/card_field.dart';
 import 'package:share_plus/share_plus.dart';
 
 class FamilyPage extends StatefulWidget {
@@ -176,7 +175,7 @@ class _FamilyPageState extends State<FamilyPage> {
                 child: Text(
                   userGroup == null
                       ? Tr.family.familyWithPreciousMoments.tr()
-                      : '${userGroup.name ?? 'no name'}',
+                      : userGroup.name ?? 'no name',
                   textAlign: TextAlign.center,
                   style: TextStyle(
                     fontSize: MediaQuery.of(context).size.width < 400 ? 16 : 20,
@@ -193,7 +192,7 @@ class _FamilyPageState extends State<FamilyPage> {
                     InputDialog.show(
                       title: Tr.family.familyGroupName.tr(),
                       hintText: Tr.family.familyGroupNameHintText.tr(),
-                      initialValue: userGroup?.name ?? '',
+                      initialValue: userGroup.name ?? '',
                       onConfirm: (value) {
                         userGroupBloc.add(UserGroupEvent.updateName(value));
                       },
@@ -213,7 +212,7 @@ class _FamilyPageState extends State<FamilyPage> {
                 child: Text(
                   userGroup == null
                       ? Tr.family.familyShareDescription2.tr()
-                      : '${userGroup.description ?? 'no description'}',
+                      : userGroup.description ?? 'no description',
                   textAlign: TextAlign.center,
                   style: TextStyle(
                     color: Colors.grey,
@@ -229,7 +228,7 @@ class _FamilyPageState extends State<FamilyPage> {
                     InputDialog.show(
                       title: Tr.family.familyShareDescription3.tr(),
                       hintText: Tr.family.familyShareDescription3HintText.tr(),
-                      initialValue: userGroup?.description ?? '',
+                      initialValue: userGroup.description ?? '',
                       onConfirm: (value) {
                         userGroupBloc.add(
                           UserGroupEvent.updateDescription(value),
@@ -356,9 +355,7 @@ class _FamilyPageState extends State<FamilyPage> {
             ],
           ),
           const SizedBox(height: 16),
-          ...members
-              .map((member) => _buildMemberItem(context, member))
-              .toList(),
+          ...members.map((member) => _buildMemberItem(context, member)),
         ],
       ),
     );
@@ -737,6 +734,7 @@ class JoinCodeField extends StatelessWidget {
     this.isReadOnly = false,
   });
 
+  @override
   Widget build(BuildContext context) {
     return Row(
       mainAxisAlignment: MainAxisAlignment.spaceEvenly,

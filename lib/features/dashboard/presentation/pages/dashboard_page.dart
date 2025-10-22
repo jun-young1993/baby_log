@@ -1,5 +1,3 @@
-import 'dart:io';
-
 import 'package:baby_log/core/widgets/storage_usage_widget.dart';
 import 'package:baby_log/features/dashboard/presentation/widgets/aws_s3_object_photo_card.dart';
 import 'package:flutter/material.dart';
@@ -33,7 +31,6 @@ class _DashboardPageState extends State<DashboardPage>
 
   bool isShowUserGroupGuide = false;
 
-  String _searchQuery = '';
   final maxRecentPhotoCount = 6;
   late AnimationController _animationController;
   late Animation<double> _scaleAnimation;

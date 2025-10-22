@@ -27,9 +27,32 @@ void main() async {
   // Firebase 먼저 초기화 (AdMob보다 안정적)
   await Firebase.initializeApp(options: DefaultFirebaseOptions.currentPlatform);
 
-  // FCM 토큰 가져오기
-  final String? fcmToken = await FirebaseMessaging.instance.getToken();
-  debugPrint('fcmToken: $fcmToken');
+  // iOS에서 APNS 토큰 설정 및 FCM 토큰 가져오기
+  String? fcmToken;
+  try {
+    if (Platform.isIOS) {
+      // iOS에서 APNS 권한 요청
+      await FirebaseMessaging.instance.requestPermission(
+        alert: true,
+        announcement: false,
+        badge: true,
+        carPlay: false,
+        criticalAlert: false,
+        provisional: false,
+        sound: true,
+      );
+
+      // APNS 토큰이 설정될 때까지 잠시 대기
+      await Future.delayed(const Duration(seconds: 1));
+    }
+
+    // FCM 토큰 가져오기
+    fcmToken = await FirebaseMessaging.instance.getToken();
+    debugPrint('fcmToken: $fcmToken');
+  } catch (e) {
+    debugPrint('⚠️ FCM 토큰 가져오기 실패: $e');
+    // 토큰 없이도 앱은 계속 실행
+  }
 
   // AdMaster 초기화 - 에러가 발생해도 앱이 계속 실행되도록
   try {
