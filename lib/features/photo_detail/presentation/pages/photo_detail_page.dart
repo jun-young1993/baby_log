@@ -1,3 +1,6 @@
+import 'dart:io';
+
+import 'package:baby_log/core/widgets/native_ad_modal_widget.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_common/flutter_common.dart';
@@ -28,6 +31,12 @@ class PhotoDetailPage extends StatefulWidget {
 class _PhotoDetailPageState extends State<PhotoDetailPage> {
   S3ObjectBloc get s3ObjectBloc => context.read<S3ObjectBloc>();
   final TextEditingController _commentController = TextEditingController();
+
+  @override
+  void initState() {
+    super.initState();
+    NativeAdModalHelper.showAd(context: context);
+  }
 
   @override
   void dispose() {

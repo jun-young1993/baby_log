@@ -147,7 +147,7 @@ class AwsS3ObjectPhotoCard extends StatelessWidget {
                                 ),
                               ),
                             )
-                            .toList(),
+                            ,
                         // Show +N if more than 3
                         if (s3Object!.emotions.length > 3)
                           Text(

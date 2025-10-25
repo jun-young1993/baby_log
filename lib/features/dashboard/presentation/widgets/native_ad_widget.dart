@@ -1,7 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_common/widgets/ad/ad_master.dart';
 import 'package:google_mobile_ads/google_mobile_ads.dart';
-import 'package:loading_animation_widget/loading_animation_widget.dart';
 
 /// Native ad widget that loads asynchronously
 /// Shows loading state until ad is ready
@@ -96,12 +95,16 @@ class _NativeAdWidgetState extends State<NativeAdWidget> {
     // 광고 표시 (안전성 체크 추가)
     if (_nativeAd != null && !_isDisposed) {
       return Container(
-        height: widget.height ?? 250,
+        height: widget.height ?? 140, // 텍스트가 잘리지 않도록 높이 증가
         decoration: BoxDecoration(
-          borderRadius: BorderRadius.circular(12),
-          border: Border.all(color: Colors.grey[300]!),
+          borderRadius: BorderRadius.circular(8),
+          border: Border.all(color: Colors.grey[300]!, width: 1),
+          color: Colors.white,
         ),
-        child: AdWidget(ad: _nativeAd!),
+        child: ClipRRect(
+          borderRadius: BorderRadius.circular(8),
+          child: AdWidget(ad: _nativeAd!),
+        ),
       );
     } else {
       return _buildLoading(context);
@@ -110,31 +113,13 @@ class _NativeAdWidgetState extends State<NativeAdWidget> {
 
   Widget _buildLoading(BuildContext context) {
     return Container(
-      height: widget.height ?? 250,
+      height: widget.height ?? 140, // 텍스트가 잘리지 않도록 높이 증가
       decoration: BoxDecoration(
-        color: Colors.grey[200],
-        borderRadius: BorderRadius.circular(12),
+        color: Colors.grey[100],
+        borderRadius: BorderRadius.circular(8),
+        border: Border.all(color: Colors.grey[300]!, width: 1),
       ),
-      child: Center(
-        child: Column(
-          mainAxisAlignment: MainAxisAlignment.center,
-          children: [
-            SizedBox(
-              width: 20,
-              height: 20,
-              child: CircularProgressIndicator(
-                strokeWidth: 2,
-                color: Colors.grey[400],
-              ),
-            ),
-            const SizedBox(height: 8),
-            LoadingAnimationWidget.staggeredDotsWave(
-              color: Theme.of(context).colorScheme.onSurface,
-              size: 50,
-            ),
-          ],
-        ),
-      ),
+      child: const Center(child: CircularProgressIndicator(strokeWidth: 2)),
     );
   }
 }
