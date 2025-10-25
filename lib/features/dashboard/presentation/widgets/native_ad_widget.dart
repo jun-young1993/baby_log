@@ -18,7 +18,7 @@ class _NativeAdWidgetState extends State<NativeAdWidget> {
   NativeAd? _nativeAd;
   bool _isAdLoaded = false;
   bool _isAdFailed = false;
-  bool _isDisposed = false;
+
   final AdMaster _adMaster = AdMaster();
 
   @override
@@ -28,42 +28,34 @@ class _NativeAdWidgetState extends State<NativeAdWidget> {
   }
 
   Future<void> _loadAd() async {
-    if (_isDisposed) return;
-
     try {
-      debugPrint('광고 로딩 시작: ${widget.adUnitId}');
-
-      final ad = await _adMaster.createNativeAd(
-        adUnitId: widget.adUnitId,
-        factoryId: 'listTile',
+      final finalAdUnitId = AdMaster().getAdUnitIdForType(
+        AdType.native,
+        adMobUnitId: widget.adUnitId,
       );
-
-      if (_isDisposed) {
-        ad?.dispose();
-        return;
-      }
-
-      if (ad != null) {
-        debugPrint('광고 로딩 성공: ${widget.adUnitId}');
-        if (mounted) {
-          setState(() {
-            _nativeAd = ad;
-            _isAdLoaded = true;
-            _isAdFailed = false;
-          });
-        }
-      } else {
-        debugPrint('광고 로딩 실패: ad is null');
-        if (mounted) {
-          setState(() {
-            _isAdFailed = true;
-            _isAdLoaded = false;
-          });
-        }
-      }
+      _nativeAd = NativeAd(
+        adUnitId: finalAdUnitId,
+        factoryId: 'listTile',
+        listener: NativeAdListener(
+          onAdLoaded: (ad) {
+            setState(() {
+              _isAdLoaded = true;
+            });
+          },
+          onAdFailedToLoad: (ad, error) {
+            debugPrint('광고 로드 실패: $error');
+            setState(() {
+              _isAdFailed = true;
+              _isAdLoaded = false;
+            });
+          },
+        ),
+        request: const AdRequest(),
+      );
+      await _nativeAd?.load();
     } catch (e) {
       debugPrint('광고 로드 실패: $e');
-      if (mounted && !_isDisposed) {
+      if (mounted) {
         setState(() {
           _isAdFailed = true;
           _isAdLoaded = false;
@@ -75,7 +67,6 @@ class _NativeAdWidgetState extends State<NativeAdWidget> {
   @override
   void dispose() {
     debugPrint('NativeAdWidget dispose');
-    _isDisposed = true;
     _nativeAd?.dispose();
     super.dispose();
   }
@@ -93,9 +84,13 @@ class _NativeAdWidgetState extends State<NativeAdWidget> {
     }
 
     // 광고 표시 (안전성 체크 추가)
-    if (_nativeAd != null && !_isDisposed) {
+    if (_nativeAd != null && _isAdLoaded) {
+      debugPrint('광고 표시: ${widget.height}');
       return Container(
-        height: widget.height ?? 140, // 텍스트가 잘리지 않도록 높이 증가
+        constraints: BoxConstraints(
+          minHeight: widget.height ?? 140,
+          maxHeight: widget.height ?? 140,
+        ),
         decoration: BoxDecoration(
           borderRadius: BorderRadius.circular(8),
           border: Border.all(color: Colors.grey[300]!, width: 1),
