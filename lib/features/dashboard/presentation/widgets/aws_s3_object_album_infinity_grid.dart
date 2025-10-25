@@ -1,6 +1,4 @@
 import 'dart:io';
-// import kept below
-import 'package:baby_log/core/widgets/native_ad_modal_widget.dart';
 import 'package:baby_log/features/dashboard/presentation/widgets/aws_s3_object_photo_card.dart';
 import 'package:flutter/material.dart';
 import 'package:baby_log/features/dashboard/presentation/widgets/native_ad_widget.dart';
@@ -64,17 +62,22 @@ class _AwsS3ObjectAlbumInfinityGridState
           fetchNextPage: widget.fetchNextPage,
           gridDelegate: SliverGridDelegateWithFixedCrossAxisCount(
             crossAxisCount: 1, // 전폭 1열
-            mainAxisSpacing: 2,
-            crossAxisSpacing: 2,
+            mainAxisSpacing: 8,
+            crossAxisSpacing: 8,
             mainAxisExtent: 220, // 행 높이 고정 (광고/이미지 동일)
           ),
           builderDelegate: PagedChildBuilderDelegate<S3Object>(
             itemBuilder: (context, item, index) {
-              if (_isAdPosition(index)) {
+              // 전체 아이템 수 계산
+              final totalItems = (state.pages ?? const <List<S3Object>>[])
+                  .expand((page) => page)
+                  .length;
+
+              if (_isAdPosition(index, totalItems)) {
                 if (_nativeAdWidgetCache.containsKey(index)) {
                   return _nativeAdWidgetCache[index]!;
                 }
-                final widget = _buildFullWidthAdTile(context);
+                final widget = _buildFullWidthAdTile(context, index);
                 _nativeAdWidgetCache[index] = widget;
                 return widget;
               }
@@ -132,17 +135,16 @@ class _AwsS3ObjectAlbumInfinityGridState
     );
   }
 
-  // 광고 주기 및 오프셋 (아이템 인덱스 기준)
-  static const int _adFrequency = 12; // 12개마다 광고 1개
-  static const int _adOffset = 8; // 첫 광고는 8개 이후부터
+  // 광고를 마지막에 표시하기 위한 설정
+  bool _isAdPosition(int index, int totalItems) {
+    if (index == 0) return false;
+    final adFrequency = 12;
 
-  bool _isAdPosition(int index) {
-    final pos = index + 1;
-    if (pos <= _adOffset) return false;
-    return (pos - _adOffset) % _adFrequency == 0;
+    // 마지막 아이템일 때만 광고 표시
+    return index % adFrequency == 0;
   }
 
-  Widget _buildFullWidthAdTile(BuildContext context) {
+  Widget _buildFullWidthAdTile(BuildContext context, int index) {
     final String adUnitId = AdMaster().getAdUnitIdForType(
       AdType.native,
       adMobUnitId: Platform.isIOS
@@ -153,7 +155,11 @@ class _AwsS3ObjectAlbumInfinityGridState
       padding: const EdgeInsets.symmetric(horizontal: 2),
       child: ClipRRect(
         borderRadius: BorderRadius.circular(6),
-        child: NativeAdWidget(adUnitId: adUnitId, height: 140),
+        child: NativeAdWidget(
+          key: ValueKey('ad-$index'),
+          adUnitId: adUnitId,
+          height: 140,
+        ),
       ),
     );
   }

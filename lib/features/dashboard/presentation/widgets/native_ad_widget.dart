@@ -14,7 +14,8 @@ class NativeAdWidget extends StatefulWidget {
   State<NativeAdWidget> createState() => _NativeAdWidgetState();
 }
 
-class _NativeAdWidgetState extends State<NativeAdWidget> {
+class _NativeAdWidgetState extends State<NativeAdWidget>
+    with AutomaticKeepAliveClientMixin<NativeAdWidget> {
   NativeAd? _nativeAd;
   bool _isAdLoaded = false;
   bool _isAdFailed = false;
@@ -73,6 +74,7 @@ class _NativeAdWidgetState extends State<NativeAdWidget> {
 
   @override
   Widget build(BuildContext context) {
+    super.build(context);
     // 광고 로딩 실패 시 빈 공간 표시 (에러 숨김)
     if (_isAdFailed) {
       return const SizedBox.shrink();
@@ -117,4 +119,7 @@ class _NativeAdWidgetState extends State<NativeAdWidget> {
       child: const Center(child: CircularProgressIndicator(strokeWidth: 2)),
     );
   }
+
+  @override
+  bool get wantKeepAlive => true;
 }
