@@ -1,6 +1,7 @@
 import Flutter
 import UIKit
 import google_mobile_ads
+import Firebase
 
 @main
 @objc class AppDelegate: FlutterAppDelegate {

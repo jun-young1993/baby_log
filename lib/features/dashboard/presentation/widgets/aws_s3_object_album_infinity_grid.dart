@@ -155,10 +155,12 @@ class _AwsS3ObjectAlbumInfinityGridState
       padding: const EdgeInsets.symmetric(horizontal: 2),
       child: ClipRRect(
         borderRadius: BorderRadius.circular(6),
-        child: NativeAdWidget(
-          key: ValueKey('ad-$index'),
-          adUnitId: adUnitId,
-          height: 140,
+        child: Center(
+          child: NativeAdWidget(
+            key: ValueKey('ad-$index'),
+            adUnitId: adUnitId,
+            height: 140,
+          ),
         ),
       ),
     );
