@@ -32,7 +32,7 @@ void main() async {
   try {
     if (Platform.isIOS) {
       // iOS에서 APNS 권한 요청
-      await FirebaseMessaging.instance.requestPermission(
+      final settings = await FirebaseMessaging.instance.requestPermission(
         alert: true,
         announcement: false,
         badge: true,
@@ -41,6 +41,12 @@ void main() async {
         provisional: false,
         sound: true,
       );
+
+      if (settings.authorizationStatus == AuthorizationStatus.authorized) {
+        debugPrint('사용자가 알림을 허용했습니다.');
+      } else {
+        debugPrint('사용자가 알림을 거부했습니다.');
+      }
 
       // APNS 토큰이 설정될 때까지 잠시 대기
       await Future.delayed(const Duration(seconds: 1));
