@@ -4,6 +4,7 @@ import 'package:flutter/material.dart';
 import 'package:image_picker/image_picker.dart';
 import 'package:path_provider/path_provider.dart';
 import 'package:permission_handler/permission_handler.dart';
+import 'package:permission_handler/permission_handler.dart' as AppSettings;
 import 'package:uuid/uuid.dart';
 import 'package:video_thumbnail/video_thumbnail.dart';
 import 'package:video_compress/video_compress.dart';
@@ -40,7 +41,7 @@ class PhotoService {
       // 카메라로 사진 촬영
       final XFile? image = await _imagePicker.pickImage(
         source: ImageSource.camera,
-        imageQuality: 85,
+        imageQuality: 100,
         maxWidth: 1920,
         maxHeight: 1920,
       );
@@ -54,12 +55,34 @@ class PhotoService {
     }
   }
 
+  static Future<bool> _requestPermission(Permission permission) async {
+    final status = await permission.status;
+
+    if (status.isGranted) {
+      // 이미 권한이 허용된 경우
+      debugPrint("${permission.toString()} 권한이 허용되었습니다.");
+      return true;
+    } else if (status.isPermanentlyDenied) {
+      // 영구적으로 거부된 경우
+      await AppSettings.openAppSettings();
+      debugPrint("${permission.toString()} 권한이 영구적으로 거부되었습니다.");
+      return false;
+    } else {
+      // 권한 요청
+      final requestStatus = await permission.request();
+      debugPrint("${permission.toString()} 권한 요청 결과: $requestStatus");
+      return requestStatus.isGranted;
+    }
+  }
+
   /// 갤러리에서 사진 선택
   Future<PhotoModel?> pickPhotoFromGallery() async {
     try {
       // 갤러리 권한 확인
       final photosPermission = await Permission.photos.request();
       if (photosPermission != PermissionStatus.granted) {
+        await _requestPermission(Permission.photos);
+        await _requestPermission(Permission.camera);
         throw Exception('갤러리 권한이 필요합니다.');
       }
 

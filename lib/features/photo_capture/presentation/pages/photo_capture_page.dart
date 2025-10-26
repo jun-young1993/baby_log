@@ -3,6 +3,7 @@ import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_common/flutter_common.dart';
 import 'package:go_router/go_router.dart';
+import 'package:google_mobile_ads/google_mobile_ads.dart';
 import '../../../../core/services/photo_service.dart';
 import '../../../../core/models/photo_model.dart';
 
@@ -18,8 +19,66 @@ class _PhotoCapturePageState extends State<PhotoCapturePage> {
   S3ObjectBloc get s3ObjectBloc => context.read<S3ObjectBloc>();
   UserBloc get userBloc => context.read<UserBloc>();
   bool _isLoading = false;
-  List<PhotoModel> _capturedPhotos = []; // 여러 장의 사진/비디오
+  final List<PhotoModel> _capturedPhotos = []; // 여러 장의 사진/비디오
   bool _isVideoMode = false; // 동영상 모드 여부
+  BannerAd? _bannerAd;
+  bool _isBannerAdLoaded = false;
+
+  @override
+  void initState() {
+    super.initState();
+    _loadBannerAd();
+  }
+
+  @override
+  void dispose() {
+    _bannerAd?.dispose();
+    super.dispose();
+  }
+
+  void _loadBannerAd() {
+    final String adUnitId = AdMaster().getAdUnitIdForType(
+      AdType.banner,
+      adMobUnitId: Platform.isIOS
+          ? 'ca-app-pub-4656262305566191/4143764337'
+          : 'ca-app-pub-4656262305566191/3488910792',
+    );
+    _bannerAd = BannerAd(
+      size: AdSize.banner,
+      adUnitId: adUnitId,
+      listener: BannerAdListener(
+        onAdLoaded: (ad) {
+          debugPrint('BannerAd loaded');
+          if (!mounted) return;
+          setState(() {
+            _isBannerAdLoaded = true;
+          });
+        },
+        onAdFailedToLoad: (ad, error) {
+          debugPrint('BannerAd failed to load: $error');
+          ad.dispose();
+          if (!mounted) return;
+          setState(() {
+            _isBannerAdLoaded = false;
+          });
+        },
+        onAdOpened: (ad) {
+          debugPrint('BannerAd opened');
+        },
+        onAdClosed: (ad) {
+          debugPrint('BannerAd closed');
+        },
+        onAdClicked: (ad) {
+          debugPrint('BannerAd clicked');
+        },
+        onAdImpression: (ad) {
+          debugPrint('BannerAd impression');
+        },
+      ),
+      request: const AdRequest(),
+    );
+    _bannerAd?.load();
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -32,11 +91,11 @@ class _PhotoCapturePageState extends State<PhotoCapturePage> {
           onPressed: () => context.pop(),
         ),
       ),
-      body: _buildBody(),
+      body: buildBody(),
     );
   }
 
-  Widget _buildBody() {
+  Widget buildBody() {
     if (_isLoading) {
       return Center(
         child: Column(
@@ -51,13 +110,13 @@ class _PhotoCapturePageState extends State<PhotoCapturePage> {
     }
 
     if (_capturedPhotos.isNotEmpty) {
-      return _buildPhotosPreview();
+      return buildPhotosPreview();
     }
 
-    return _buildCaptureOptions();
+    return buildCaptureOptions();
   }
 
-  Widget _buildCaptureOptions() {
+  Widget buildCaptureOptions() {
     return Column(
       children: [
         // 사진/동영상 토글 (상단 고정)
@@ -71,13 +130,13 @@ class _PhotoCapturePageState extends State<PhotoCapturePage> {
             child: Row(
               mainAxisSize: MainAxisSize.min,
               children: [
-                _buildModeToggleButton(
+                buildModeToggleButton(
                   icon: Icons.camera_alt,
                   label: Tr.photo.title.tr(),
                   isSelected: !_isVideoMode,
                   onTap: () => setState(() => _isVideoMode = false),
                 ),
-                _buildModeToggleButton(
+                buildModeToggleButton(
                   icon: Icons.videocam,
                   label: Tr.video.title.tr(),
                   isSelected: _isVideoMode,
@@ -174,7 +233,7 @@ class _PhotoCapturePageState extends State<PhotoCapturePage> {
                     width: double.infinity,
                     height: 56,
                     child: ElevatedButton(
-                      onPressed: _isVideoMode ? _captureVideo : _capturePhoto,
+                      onPressed: _isVideoMode ? captureVideo : capturePhoto,
                       style: ElevatedButton.styleFrom(
                         backgroundColor: Theme.of(context).colorScheme.primary,
                         foregroundColor: Theme.of(
@@ -212,9 +271,7 @@ class _PhotoCapturePageState extends State<PhotoCapturePage> {
                       if (user == null) {
                         return;
                       }
-                      _isVideoMode
-                          ? _pickVideoFromGallery()
-                          : _pickFromGallery();
+                      _isVideoMode ? pickVideoFromGallery() : pickFromGallery();
                     },
                     style: OutlinedButton.styleFrom(
                       foregroundColor: Theme.of(context).colorScheme.primary,
@@ -244,11 +301,22 @@ class _PhotoCapturePageState extends State<PhotoCapturePage> {
             ),
           ),
         ),
+        if (_isBannerAdLoaded) ...[
+          Center(
+            child: SizedBox(
+              height: _bannerAd!.size.height.toDouble(),
+              width: _bannerAd!.size.width.toDouble(),
+              child: AdWidget(ad: _bannerAd!),
+            ),
+          ),
+          SizedBox(height: SizeConstants.getColumnSpacing(context)),
+          SizedBox(height: SizeConstants.getColumnSpacing(context)),
+        ],
       ],
     );
   }
 
-  Widget _buildModeToggleButton({
+  Widget buildModeToggleButton({
     required IconData icon,
     required String label,
     required bool isSelected,
@@ -289,7 +357,7 @@ class _PhotoCapturePageState extends State<PhotoCapturePage> {
     );
   }
 
-  Widget _buildPhotosPreview() {
+  Widget buildPhotosPreview() {
     return Column(
       children: [
         // 헤더: 선택된 개수 표시
@@ -330,7 +398,7 @@ class _PhotoCapturePageState extends State<PhotoCapturePage> {
             itemCount: _capturedPhotos.length,
             itemBuilder: (context, index) {
               final photo = _capturedPhotos[index];
-              return _buildMediaThumbnail(photo, index);
+              return buildMediaThumbnail(photo, index);
             },
           ),
         ),
@@ -343,7 +411,7 @@ class _PhotoCapturePageState extends State<PhotoCapturePage> {
               Expanded(
                 child: OutlinedButton.icon(
                   onPressed: () {
-                    _isVideoMode ? _pickVideoFromGallery() : _pickFromGallery();
+                    _isVideoMode ? pickVideoFromGallery() : pickFromGallery();
                   },
                   icon: const Icon(Icons.add_photo_alternate),
                   label: const Text('더 추가'),
@@ -353,7 +421,7 @@ class _PhotoCapturePageState extends State<PhotoCapturePage> {
               Expanded(
                 flex: 2,
                 child: ElevatedButton.icon(
-                  onPressed: () => _saveAllPhotos(userBloc.state.user!),
+                  onPressed: () => saveAllPhotos(userBloc.state.user!),
                   icon: const Icon(Icons.cloud_upload),
                   label: Text('${_capturedPhotos.length}개 업로드'),
                   style: ElevatedButton.styleFrom(
@@ -369,7 +437,7 @@ class _PhotoCapturePageState extends State<PhotoCapturePage> {
     );
   }
 
-  Widget _buildMediaThumbnail(PhotoModel photo, int index) {
+  Widget buildMediaThumbnail(PhotoModel photo, int index) {
     final isVideo = photo.isVideo;
 
     return Stack(
@@ -457,7 +525,7 @@ class _PhotoCapturePageState extends State<PhotoCapturePage> {
               borderRadius: BorderRadius.circular(4),
             ),
             child: Text(
-              _formatFileSize(photo.fileSize),
+              formatFileSize(photo.fileSize),
               style: const TextStyle(color: Colors.white, fontSize: 10),
             ),
           ),
@@ -466,13 +534,13 @@ class _PhotoCapturePageState extends State<PhotoCapturePage> {
     );
   }
 
-  String _formatFileSize(int bytes) {
+  String formatFileSize(int bytes) {
     if (bytes < 1024) return '$bytes B';
     if (bytes < 1024 * 1024) return '${(bytes / 1024).toStringAsFixed(1)} KB';
     return '${(bytes / (1024 * 1024)).toStringAsFixed(1)} MB';
   }
 
-  Future<void> _capturePhoto() async {
+  Future<void> capturePhoto() async {
     setState(() {
       _isLoading = true;
     });
@@ -484,10 +552,10 @@ class _PhotoCapturePageState extends State<PhotoCapturePage> {
           _capturedPhotos.add(photo);
         });
       } else {
-        _showSnackBar(Tr.photo.photoTakenCancel.tr());
+        showSnackBar(Tr.photo.photoTakenCancel.tr());
       }
     } catch (e) {
-      _showSnackBar(
+      showSnackBar(
         Tr.photo.photoTakenError.tr(namedArgs: {'error': e.toString()}),
       );
     } finally {
@@ -497,7 +565,7 @@ class _PhotoCapturePageState extends State<PhotoCapturePage> {
     }
   }
 
-  Future<void> _pickFromGallery() async {
+  Future<void> pickFromGallery() async {
     setState(() {
       _isLoading = true;
     });
@@ -509,9 +577,9 @@ class _PhotoCapturePageState extends State<PhotoCapturePage> {
         setState(() {
           _capturedPhotos.addAll(photos);
         });
-        _showSnackBar('${photos.length}장의 사진이 선택되었습니다');
+        showSnackBar('${photos.length}장의 사진이 선택되었습니다');
       } else {
-        _showSnackBar(Tr.photo.photoSelectCancel.tr());
+        showSnackBar(Tr.photo.photoSelectCancel.tr());
       }
     } catch (e) {
       // 여러 장 선택이 실패하면 한 장 선택으로 폴백
@@ -523,7 +591,7 @@ class _PhotoCapturePageState extends State<PhotoCapturePage> {
           });
         }
       } catch (e2) {
-        _showSnackBar(
+        showSnackBar(
           Tr.photo.photoSelectError.tr(namedArgs: {'error': e2.toString()}),
         );
       }
@@ -534,7 +602,7 @@ class _PhotoCapturePageState extends State<PhotoCapturePage> {
     }
   }
 
-  Future<void> _captureVideo() async {
+  Future<void> captureVideo() async {
     setState(() {
       _isLoading = true;
     });
@@ -546,10 +614,10 @@ class _PhotoCapturePageState extends State<PhotoCapturePage> {
           _capturedPhotos.add(video);
         });
       } else {
-        _showSnackBar(Tr.video.videoTakenCancel.tr());
+        showSnackBar(Tr.video.videoTakenCancel.tr());
       }
     } catch (e) {
-      _showSnackBar(
+      showSnackBar(
         Tr.video.videoTakenError.tr(namedArgs: {'error': e.toString()}),
       );
     } finally {
@@ -559,7 +627,7 @@ class _PhotoCapturePageState extends State<PhotoCapturePage> {
     }
   }
 
-  Future<void> _pickVideoFromGallery() async {
+  Future<void> pickVideoFromGallery() async {
     setState(() {
       _isLoading = true;
     });
@@ -571,10 +639,10 @@ class _PhotoCapturePageState extends State<PhotoCapturePage> {
           _capturedPhotos.add(video);
         });
       } else {
-        _showSnackBar(Tr.video.videoSelectCancel.tr());
+        showSnackBar(Tr.video.videoSelectCancel.tr());
       }
     } catch (e) {
-      _showSnackBar(
+      showSnackBar(
         Tr.video.videoSelectError.tr(namedArgs: {'error': e.toString()}),
       );
     } finally {
@@ -584,7 +652,7 @@ class _PhotoCapturePageState extends State<PhotoCapturePage> {
     }
   }
 
-  void _saveAllPhotos(User user) {
+  void saveAllPhotos(User user) {
     if (_capturedPhotos.isEmpty) return;
 
     // 모든 미디어를 업로드
@@ -592,11 +660,11 @@ class _PhotoCapturePageState extends State<PhotoCapturePage> {
       s3ObjectBloc.add(S3ObjectEvent.uploadFile(File(photo.filePath), user));
     }
 
-    _showSnackBar('${_capturedPhotos.length}개 파일 업로드 시작');
+    showSnackBar('${_capturedPhotos.length}개 파일 업로드 시작');
     context.pop(_capturedPhotos);
   }
 
-  void _showSnackBar(String message) {
+  void showSnackBar(String message) {
     ScaffoldMessenger.of(context).showSnackBar(
       SnackBar(content: Text(message), behavior: SnackBarBehavior.floating),
     );
