@@ -3,9 +3,52 @@ import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_common/flutter_common.dart';
 import 'package:go_router/go_router.dart';
-import 'package:google_mobile_ads/google_mobile_ads.dart';
+import 'package:google_mobile_ads/google_mobile_ads.dart' hide AdError;
 import '../../../../core/services/photo_service.dart';
 import '../../../../core/models/photo_model.dart';
+
+class PhotoCaptureInterstitialAdCallback extends AdCallback {
+  @override
+  void onAdClicked() {
+    // TODO: implement onAdClicked
+  }
+
+  @override
+  void onAdClosed() {
+    // TODO: implement onAdClosed
+  }
+
+  @override
+  void onAdFailedToLoad(AdError error) {
+    // TODO: implement onAdFailedToLoad
+  }
+
+  @override
+  void onAdLoaded() {
+    // TODO: implement onAdLoaded
+  }
+
+  @override
+  void onAdShown() {
+    // TODO: implement onAdShown
+  }
+
+  @override
+  void onInterstitialAdLoaded(InterstitialAd ad) {
+    // TODO: implement onInterstitialAdLoaded
+    ad.show();
+  }
+
+  @override
+  void onRewardedAdLoaded(RewardedAd ad) {
+    // TODO: implement onRewardedAdLoaded
+  }
+
+  @override
+  void onRewardedAdUserEarnedReward(RewardItem reward) {
+    // TODO: implement onRewardedAdUserEarnedReward
+  }
+}
 
 class PhotoCapturePage extends StatefulWidget {
   const PhotoCapturePage({super.key});
@@ -23,6 +66,8 @@ class _PhotoCapturePageState extends State<PhotoCapturePage> {
   bool _isVideoMode = false; // 동영상 모드 여부
   BannerAd? _bannerAd;
   bool _isBannerAdLoaded = false;
+
+  final AdMaster _adMaster = AdMaster();
 
   @override
   void initState() {
@@ -652,16 +697,50 @@ class _PhotoCapturePageState extends State<PhotoCapturePage> {
     }
   }
 
-  void saveAllPhotos(User user) {
+  void saveAllPhotos(User user) async {
     if (_capturedPhotos.isEmpty) return;
 
-    // 모든 미디어를 업로드
-    for (final photo in _capturedPhotos) {
-      s3ObjectBloc.add(S3ObjectEvent.uploadFile(File(photo.filePath), user));
-    }
+    setState(() {
+      _isLoading = true;
+    });
 
-    showSnackBar('${_capturedPhotos.length}개 파일 업로드 시작');
-    context.pop(_capturedPhotos);
+    try {
+      if (_capturedPhotos.length > 5) {
+        throw Exception('최대 5개의 파일만 업로드할 수 있습니다.');
+      }
+
+      s3ObjectBloc.add(
+        S3ObjectEvent.uploadFiles(
+          _capturedPhotos.map((photo) => File(photo.filePath)).toList(),
+          user,
+        ),
+      );
+
+      debugPrint(
+        'uploaded files: ${_capturedPhotos.map((photo) => photo.filePath).toList().join(',')}',
+      );
+
+      showSnackBar('${_capturedPhotos.length}개 파일 업로드 시작');
+
+      // 백그라운드에서 업로드가 진행되는 동안 페이지를 닫음
+      _adMaster.createInterstitialAd(
+        adUnitId: Platform.isIOS
+            ? 'ca-app-pub-4656262305566191/5748242622'
+            : 'ca-app-pub-4656262305566191/5146333745',
+        callback: PhotoCaptureInterstitialAdCallback(),
+      );
+      if (mounted) {
+        context.pop(_capturedPhotos);
+      }
+    } catch (e) {
+      showSnackBar('업로드 중 오류가 발생했습니다: $e');
+    } finally {
+      if (mounted) {
+        setState(() {
+          _isLoading = false;
+        });
+      }
+    }
   }
 
   void showSnackBar(String message) {
