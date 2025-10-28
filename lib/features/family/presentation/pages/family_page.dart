@@ -549,6 +549,8 @@ class _JoinCodePageState extends State<JoinCodePage> {
   final List<FocusNode> _focusNodes = List.generate(6, (index) => FocusNode());
   final List<String> _code = List.filled(6, '');
 
+  UserGroupBloc get userGroupBloc => context.read<UserGroupBloc>();
+
   @override
   void dispose() {
     for (var controller in _controllers) {
@@ -659,6 +661,9 @@ class _JoinCodePageState extends State<JoinCodePage> {
                 onPressed: _code.join('').length == 6
                     ? () {
                         // 가족 그룹 참여 로직
+                        userGroupBloc.add(
+                          UserGroupEvent.addUserByNumber(_code.join('')),
+                        );
                         ScaffoldMessenger.of(context).showSnackBar(
                           SnackBar(
                             content: Text(

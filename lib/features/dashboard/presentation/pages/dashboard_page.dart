@@ -26,6 +26,7 @@ class _DashboardPageState extends State<DashboardPage>
   S3ObjectBloc get s3ObjectBloc => context.read<S3ObjectBloc>();
   UserGroupBloc get userGroupBloc => context.read<UserGroupBloc>();
   NoticeGroupBloc get noticeGroupBloc => context.read<NoticeGroupBloc>();
+  UserBloc get userBloc => context.read<UserBloc>();
   UserStorageLimitBloc get userStorageLimitBloc =>
       context.read<UserStorageLimitBloc>();
 
@@ -38,14 +39,20 @@ class _DashboardPageState extends State<DashboardPage>
   @override
   void initState() {
     super.initState();
+    userBloc.add(UserEvent.clearError());
+    userBloc.add(UserEvent.initialize());
+    userBloc.stream.listen((state) {
+      if (state.user != null) {
+        userGroupBloc.add(UserGroupEvent.findAll());
+        s3ObjectBloc.add(S3ObjectEvent.getS3Objects(0, maxRecentPhotoCount));
+        s3ObjectBloc.add(S3ObjectEvent.count());
+        noticeGroupBloc.add(
+          NoticeGroupEvent.initialize(widget.user.id, withNotices: false),
+        );
+        userStorageLimitBloc.add(UserStorageLimitEvent.s3Initialize());
+      }
+    });
 
-    s3ObjectBloc.add(S3ObjectEvent.getS3Objects(0, maxRecentPhotoCount));
-    userGroupBloc.add(UserGroupEvent.findAll());
-    s3ObjectBloc.add(S3ObjectEvent.count());
-    noticeGroupBloc.add(
-      NoticeGroupEvent.initialize(widget.user.id, withNotices: false),
-    );
-    userStorageLimitBloc.add(UserStorageLimitEvent.s3Initialize());
     // 애니메이션 컨트롤러 초기화
     _animationController = AnimationController(
       duration: const Duration(milliseconds: 1200),

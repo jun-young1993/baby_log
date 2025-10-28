@@ -77,7 +77,7 @@ void main() async {
     debugBaseUrl: JunyConstants.apiBaseUrl,
     // debugBaseUrl: 'http://127.0.0.1:3000',
     xIncludeUserGroupAdmin: true,
-    useLogInterceptor: false,
+    useLogInterceptor: true,
     appKey: AppKeys.babyLog,
     sharedPreferences: sharedPreferences,
   );
