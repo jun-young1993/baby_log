@@ -28,7 +28,7 @@ class _SettingsPageState extends State<SettingsPage> {
         ),
       ),
       body: SettingScreenLayout(
-        appKey: AppKeys.loanCountdown,
+        appKey: AppKeys.babyLog,
         onUserDeleted: (user) {
           userBloc.add(UserEvent.deleteUserData(user));
         },
