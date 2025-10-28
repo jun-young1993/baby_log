@@ -1,3 +1,5 @@
+import 'dart:io';
+
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_common/flutter_common.dart';
@@ -18,11 +20,13 @@ class FamilyPage extends StatefulWidget {
 class _FamilyPageState extends State<FamilyPage> {
   UserGroupBloc get userGroupBloc => context.read<UserGroupBloc>();
   UserBloc get userBloc => context.read<UserBloc>();
+  AppConfigBloc get appConfigBloc => context.read<AppConfigBloc>();
 
   @override
   void initState() {
     super.initState();
     userGroupBloc.add(UserGroupEvent.findAll());
+    appConfigBloc.add(AppConfigEvent.initialize(AppKeys.babyLog, null));
     userGroupBloc.stream.listen((state) {
       if (state.userGroup != null) {
         userBloc.add(UserEvent.initialize());
@@ -35,10 +39,23 @@ class _FamilyPageState extends State<FamilyPage> {
     super.dispose();
   }
 
-  void _shareInviteCode(String inviteCode) {
+  void _shareInviteCodeWithPosition(
+    BuildContext context,
+    String inviteCode,
+    String storeUrl,
+  ) {
+    final RenderBox? box = context.findRenderObject() as RenderBox?;
+    final Offset position = box != null
+        ? box.localToGlobal(Offset.zero)
+        : const Offset(0, 0);
+    final Size size = box?.size ?? const Size(0, 0);
+
     Share.share(
-      Tr.family.familyJoinCodeDescription4.tr(namedArgs: {'code': inviteCode}),
+      '${Tr.family.familyJoinCodeDescription4.tr(namedArgs: {'code': inviteCode})}\n\n${Tr.family.familyJoinCodeDescription5.tr()}\n\n$storeUrl',
       subject: Tr.family.familyJoinCodeDescription5.tr(),
+      sharePositionOrigin: Platform.isIOS
+          ? Rect.fromLTWH(position.dx, position.dy, size.width, size.height)
+          : null,
     );
   }
 
@@ -75,13 +92,21 @@ class _FamilyPageState extends State<FamilyPage> {
             onPressed: () => Navigator.pop(context),
             child: Text(Tr.common.close.tr()),
           ),
-          ElevatedButton(
-            onPressed: () {
-              Navigator.pop(context);
-              _shareInviteCode(inviteCode);
-            },
-            child: Text(Tr.common.share.tr()),
-          ),
+          RemoteAppConfigSelector((appConfig) {
+            return Builder(
+              builder: (buttonContext) => ElevatedButton(
+                onPressed: () {
+                  Navigator.pop(context);
+                  _shareInviteCodeWithPosition(
+                    buttonContext,
+                    inviteCode,
+                    'App Store: ${appConfig?.appStoreUrl ?? ''} \n\n Google Play: ${appConfig?.googlePlayUrl ?? ''} ',
+                  );
+                },
+                child: Text(Tr.common.share.tr()),
+              ),
+            );
+          }),
         ],
       ),
     );
@@ -297,19 +322,30 @@ class _FamilyPageState extends State<FamilyPage> {
     } else {
       return Column(
         children: [
-          ElevatedButton.icon(
-            onPressed: () => _shareInviteCode(userGroup.number.toString()),
-            icon: const Icon(Icons.share),
-            label: Text(Tr.family.familyCodeShare.tr()),
-            style: ElevatedButton.styleFrom(
-              padding: const EdgeInsets.symmetric(horizontal: 32, vertical: 16),
-              backgroundColor: Theme.of(context).primaryColor,
-              foregroundColor: Colors.white,
-              shape: RoundedRectangleBorder(
-                borderRadius: BorderRadius.circular(12),
+          RemoteAppConfigSelector((appConfig) {
+            return Builder(
+              builder: (buttonContext) => ElevatedButton.icon(
+                onPressed: () => _shareInviteCodeWithPosition(
+                  buttonContext,
+                  userGroup.number.toString(),
+                  'App Store: ${appConfig?.appStoreUrl ?? ''} \n\n Google Play: ${appConfig?.googlePlayUrl ?? ''} ',
+                ),
+                icon: const Icon(Icons.share),
+                label: Text(Tr.family.familyCodeShare.tr()),
+                style: ElevatedButton.styleFrom(
+                  padding: const EdgeInsets.symmetric(
+                    horizontal: 32,
+                    vertical: 16,
+                  ),
+                  backgroundColor: Theme.of(context).primaryColor,
+                  foregroundColor: Colors.white,
+                  shape: RoundedRectangleBorder(
+                    borderRadius: BorderRadius.circular(12),
+                  ),
+                ),
               ),
-            ),
-          ),
+            );
+          }),
           const SizedBox(height: 20),
           // 가족 멤버 리스트
           _buildFamilyMembersList(context, userGroup),

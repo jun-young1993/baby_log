@@ -68,14 +68,31 @@ class _PhotoDetailPageState extends State<PhotoDetailPage> {
               color: Colors.black.withOpacity(0.5),
               borderRadius: BorderRadius.circular(12),
             ),
-            child: IconButton(
-              icon: const Icon(Icons.share, color: Colors.white),
-              onPressed: () {
-                Share.share(
-                  s3ObjectBloc.state.s3Object!.url!,
-                  subject: '${widget.user.username}(${Tr.app.share.tr()})',
-                );
-              },
+            child: Builder(
+              builder: (buttonContext) => IconButton(
+                icon: const Icon(Icons.share, color: Colors.white),
+                onPressed: () {
+                  final RenderBox? box =
+                      buttonContext.findRenderObject() as RenderBox?;
+                  final Offset position = box != null
+                      ? box.localToGlobal(Offset.zero)
+                      : const Offset(0, 0);
+                  final Size size = box?.size ?? const Size(0, 0);
+
+                  Share.share(
+                    s3ObjectBloc.state.s3Object!.url!,
+                    subject: '${widget.user.username}(${Tr.app.share.tr()})',
+                    sharePositionOrigin: Platform.isIOS
+                        ? Rect.fromLTWH(
+                            position.dx,
+                            position.dy,
+                            size.width,
+                            size.height,
+                          )
+                        : null,
+                  );
+                },
+              ),
             ),
           ),
           Container(
