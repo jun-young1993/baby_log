@@ -1,3 +1,6 @@
+import java.util.Properties
+import java.io.FileInputStream
+
 plugins {
     id("com.android.application")
     // START: FlutterFire Configuration
@@ -35,6 +38,44 @@ android {
         targetSdk = flutter.targetSdkVersion
         versionCode = flutter.versionCode
         versionName = flutter.versionName
+    }
+
+    signingConfigs {
+        create("release") {
+            val keyProperties = Properties().apply {
+                val file = rootProject.file("key.properties")
+                if(file.exists()){
+                    load(FileInputStream(file))
+                }
+            }
+            val storeFilePath = keyProperties.getProperty("storeFile")
+            val loadedKeyAlias = keyProperties.getProperty("keyAlias")
+            val loadedKeyPassword = keyProperties.getProperty("keyPassword")
+            val loadedStorePassword = keyProperties.getProperty("storePassword")
+            if (storeFilePath.isNullOrEmpty()) {
+                throw GradleException("Missing 'storeFile' property in key.properties")
+            }
+
+            val storeFileResolved = rootProject.file(storeFilePath)
+            if (!storeFileResolved.exists()) {
+                throw GradleException("Keystore file specified in 'storeFile' property not found at: ${storeFileResolved.absolutePath}")
+            }
+            if (loadedKeyAlias.isNullOrEmpty()) {
+                throw GradleException("Missing 'keyAlias' property in key.properties")
+            }
+            if (loadedKeyPassword.isNullOrEmpty()) {
+                throw GradleException("Missing 'keyPassword' property in key.properties")
+            }
+            if (loadedStorePassword.isNullOrEmpty()) {
+                throw GradleException("Missing 'storePassword' property in key.properties")
+            }
+
+            storeFile = storeFileResolved
+            keyAlias = loadedKeyAlias
+            keyPassword = loadedKeyPassword
+            storePassword = loadedStorePassword
+          
+        }
     }
 
     buildTypes {

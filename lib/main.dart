@@ -40,7 +40,9 @@ void main() async {
   // AdMaster 초기화 - 에러가 발생해도 앱이 계속 실행되도록
   try {
     final adMaster = AdMaster();
-    await adMaster.initialize(AdConfig(isTestMode: kDebugMode));
+    await adMaster.initialize(
+      AdConfig(isTestMode: Platform.isIOS ? kDebugMode : true),
+    );
     AdOpenApp(
       adMaster: AdMaster(),
       adUnitId: Platform.isIOS

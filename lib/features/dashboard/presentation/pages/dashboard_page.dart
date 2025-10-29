@@ -53,6 +53,10 @@ class _DashboardPageState extends State<DashboardPage>
       }
     });
 
+    userGroupBloc.stream.listen((state) {
+      if (state.userGroup == null) {}
+    });
+
     // 애니메이션 컨트롤러 초기화
     _animationController = AnimationController(
       duration: const Duration(milliseconds: 1200),

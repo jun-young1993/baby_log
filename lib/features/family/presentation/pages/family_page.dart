@@ -59,59 +59,6 @@ class _FamilyPageState extends State<FamilyPage> {
     );
   }
 
-  void _showInviteCodeDialog(BuildContext context, String inviteCode) {
-    showDialog(
-      context: context,
-      builder: (context) => AlertDialog(
-        title: Text(Tr.family.inviteCode.tr()),
-        content: Column(
-          mainAxisSize: MainAxisSize.min,
-          children: [
-            Container(
-              padding: const EdgeInsets.all(16),
-              decoration: BoxDecoration(
-                color: Colors.grey[100],
-                borderRadius: BorderRadius.circular(12),
-                border: Border.all(color: Colors.grey[300]!),
-              ),
-              child: Text(
-                inviteCode,
-                style: const TextStyle(
-                  fontSize: 24,
-                  fontWeight: FontWeight.bold,
-                  letterSpacing: 2,
-                ),
-              ),
-            ),
-            const SizedBox(height: 16),
-            Text(Tr.family.inviteCodeDescription.tr()),
-          ],
-        ),
-        actions: [
-          TextButton(
-            onPressed: () => Navigator.pop(context),
-            child: Text(Tr.common.close.tr()),
-          ),
-          RemoteAppConfigSelector((appConfig) {
-            return Builder(
-              builder: (buttonContext) => ElevatedButton(
-                onPressed: () {
-                  Navigator.pop(context);
-                  _shareInviteCodeWithPosition(
-                    buttonContext,
-                    inviteCode,
-                    'App Store: ${appConfig?.appStoreUrl ?? ''} \n\n Google Play: ${appConfig?.googlePlayUrl ?? ''} ',
-                  );
-                },
-                child: Text(Tr.common.share.tr()),
-              ),
-            );
-          }),
-        ],
-      ),
-    );
-  }
-
   void _showJoinCodeDialog(BuildContext context) {
     Navigator.push(
       context,
