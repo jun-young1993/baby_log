@@ -30,8 +30,6 @@ class _DashboardPageState extends State<DashboardPage>
   UserStorageLimitBloc get userStorageLimitBloc =>
       context.read<UserStorageLimitBloc>();
 
-  bool isShowUserGroupGuide = false;
-
   final maxRecentPhotoCount = 6;
   late AnimationController _animationController;
   late Animation<double> _scaleAnimation;
@@ -54,7 +52,9 @@ class _DashboardPageState extends State<DashboardPage>
     });
 
     userGroupBloc.stream.listen((state) {
-      if (state.userGroup == null) {}
+      if (state.isNotFound) {
+        context.go('/family');
+      }
     });
 
     // 애니메이션 컨트롤러 초기화

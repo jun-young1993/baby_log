@@ -24,7 +24,11 @@ class _OnboardingPageState extends State<OnboardingPage> {
   void initState() {
     super.initState();
     userBloc.add(UserEvent.initialize());
-    userGroupBloc.add(UserGroupEvent.findAll());
+    userBloc.stream.listen((state) {
+      if (state.user != null) {
+        userGroupBloc.add(UserGroupEvent.findAll());
+      }
+    });
   }
 
   @override
