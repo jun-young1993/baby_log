@@ -52,6 +52,7 @@ class _DashboardPageState extends State<DashboardPage>
     });
 
     userGroupBloc.stream.listen((state) {
+      debugPrint('userGroupBloc state: $state');
       if (state.isNotFound) {
         context.go('/family');
       }
