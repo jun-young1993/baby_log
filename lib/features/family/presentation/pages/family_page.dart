@@ -277,7 +277,7 @@ class _FamilyPageState extends State<FamilyPage> {
                 onPressed: () => _shareInviteCodeWithPosition(
                   buttonContext,
                   userGroup.number.toString(),
-                  'App Store: ${appConfig?.appStoreUrl ?? ''} \n\n Google Play: ${appConfig?.googlePlayUrl ?? ''} ',
+                  appConfig?.redirectUrl ?? '',
                 ),
                 icon: const Icon(Icons.share),
                 label: Text(Tr.family.familyCodeShare.tr()),
