@@ -37,26 +37,7 @@ class _DashboardPageState extends State<DashboardPage>
   @override
   void initState() {
     super.initState();
-    userBloc.add(UserEvent.clearError());
-    userBloc.add(UserEvent.initialize());
-    userBloc.stream.listen((state) {
-      if (state.user != null) {
-        userGroupBloc.add(UserGroupEvent.findAll());
-        s3ObjectBloc.add(S3ObjectEvent.getS3Objects(0, maxRecentPhotoCount));
-        s3ObjectBloc.add(S3ObjectEvent.count());
-        noticeGroupBloc.add(
-          NoticeGroupEvent.initialize(widget.user.id, withNotices: false),
-        );
-        userStorageLimitBloc.add(UserStorageLimitEvent.s3Initialize());
-      }
-    });
-
-    userGroupBloc.stream.listen((state) {
-      debugPrint('userGroupBloc state: $state');
-      if (state.isNotFound) {
-        context.go('/family');
-      }
-    });
+    initialize();
 
     // 애니메이션 컨트롤러 초기화
     _animationController = AnimationController(
@@ -87,6 +68,28 @@ class _DashboardPageState extends State<DashboardPage>
     _searchController.dispose();
     _animationController.dispose();
     super.dispose();
+  }
+
+  void initialize() {
+    userBloc.add(UserEvent.clearError());
+    userBloc.add(UserEvent.initialize());
+    userBloc.stream.listen((state) {
+      if (state.user != null) {
+        userGroupBloc.add(UserGroupEvent.findAll());
+        s3ObjectBloc.add(S3ObjectEvent.getS3Objects(0, maxRecentPhotoCount));
+        s3ObjectBloc.add(S3ObjectEvent.count());
+        noticeGroupBloc.add(
+          NoticeGroupEvent.initialize(widget.user.id, withNotices: false),
+        );
+        userStorageLimitBloc.add(UserStorageLimitEvent.s3Initialize());
+      }
+    });
+    userGroupBloc.stream.listen((state) {
+      debugPrint('userGroupBloc state: $state');
+      if (state.isNotFound) {
+        context.go('/family');
+      }
+    });
   }
 
   @override
@@ -182,7 +185,7 @@ class _DashboardPageState extends State<DashboardPage>
       ),
       body: RefreshIndicator(
         onRefresh: () async {
-          await Future.delayed(const Duration(seconds: 1));
+          initialize();
         },
         child: SingleChildScrollView(
           padding: const EdgeInsets.all(16.0),

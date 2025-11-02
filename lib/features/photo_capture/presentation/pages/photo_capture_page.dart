@@ -8,13 +8,17 @@ import '../../../../core/services/photo_service.dart';
 import '../../../../core/models/photo_model.dart';
 
 class PhotoCaptureInterstitialAdCallback extends AdCallback {
+  final onAdLoadedCallback;
+  PhotoCaptureInterstitialAdCallback({required this.onAdLoadedCallback});
   @override
   void onAdClicked() {
+    debugPrint('PhotoCaptureInterstitialAdCallback onAdClicked');
     // TODO: implement onAdClicked
   }
 
   @override
   void onAdClosed() {
+    debugPrint('PhotoCaptureInterstitialAdCallback onAdClosed');
     // TODO: implement onAdClosed
   }
 
@@ -25,11 +29,13 @@ class PhotoCaptureInterstitialAdCallback extends AdCallback {
 
   @override
   void onAdLoaded() {
-    // TODO: implement onAdLoaded
+    debugPrint('PhotoCaptureInterstitialAdCallback onAdLoaded');
+    onAdLoadedCallback();
   }
 
   @override
   void onAdShown() {
+    debugPrint('PhotoCaptureInterstitialAdCallback onAdShown');
     // TODO: implement onAdShown
   }
 
@@ -41,11 +47,15 @@ class PhotoCaptureInterstitialAdCallback extends AdCallback {
 
   @override
   void onRewardedAdLoaded(RewardedAd ad) {
+    debugPrint('PhotoCaptureInterstitialAdCallback onRewardedAdLoaded');
     // TODO: implement onRewardedAdLoaded
   }
 
   @override
   void onRewardedAdUserEarnedReward(RewardItem reward) {
+    debugPrint(
+      'PhotoCaptureInterstitialAdCallback onRewardedAdUserEarnedReward',
+    );
     // TODO: implement onRewardedAdUserEarnedReward
   }
 }
@@ -63,7 +73,7 @@ class _PhotoCapturePageState extends State<PhotoCapturePage> {
   UserBloc get userBloc => context.read<UserBloc>();
   bool _isLoading = false;
   final List<PhotoModel> _capturedPhotos = []; // 여러 장의 사진/비디오
-  bool _isVideoMode = false; // 동영상 모드 여부
+  final bool _isVideoMode = false; // 동영상 모드 여부
   BannerAd? _bannerAd;
   bool _isBannerAdLoaded = false;
 
@@ -165,32 +175,32 @@ class _PhotoCapturePageState extends State<PhotoCapturePage> {
     return Column(
       children: [
         // 사진/동영상 토글 (상단 고정)
-        Padding(
-          padding: const EdgeInsets.all(24.0),
-          child: Container(
-            decoration: BoxDecoration(
-              border: Border.all(color: Theme.of(context).colorScheme.outline),
-              borderRadius: BorderRadius.circular(50),
-            ),
-            child: Row(
-              mainAxisSize: MainAxisSize.min,
-              children: [
-                buildModeToggleButton(
-                  icon: Icons.camera_alt,
-                  label: Tr.photo.title.tr(),
-                  isSelected: !_isVideoMode,
-                  onTap: () => setState(() => _isVideoMode = false),
-                ),
-                buildModeToggleButton(
-                  icon: Icons.videocam,
-                  label: Tr.video.title.tr(),
-                  isSelected: _isVideoMode,
-                  onTap: () => setState(() => _isVideoMode = true),
-                ),
-              ],
-            ),
-          ),
-        ),
+        // Padding(
+        //   padding: const EdgeInsets.all(24.0),
+        //   child: Container(
+        //     decoration: BoxDecoration(
+        //       border: Border.all(color: Theme.of(context).colorScheme.outline),
+        //       borderRadius: BorderRadius.circular(50),
+        //     ),
+        //     child: Row(
+        //       mainAxisSize: MainAxisSize.min,
+        //       children: [
+        //         buildModeToggleButton(
+        //           icon: Icons.camera_alt,
+        //           label: Tr.photo.title.tr(),
+        //           isSelected: !_isVideoMode,
+        //           onTap: () => setState(() => _isVideoMode = false),
+        //         ),
+        //         buildModeToggleButton(
+        //           icon: Icons.videocam,
+        //           label: Tr.video.title.tr(),
+        //           isSelected: _isVideoMode,
+        //           onTap: () => setState(() => _isVideoMode = true),
+        //         ),
+        //       ],
+        //     ),
+        //   ),
+        // ),
 
         // 스크롤 가능한 컨텐츠
         Expanded(
@@ -316,7 +326,7 @@ class _PhotoCapturePageState extends State<PhotoCapturePage> {
                       if (user == null) {
                         return;
                       }
-                      _isVideoMode ? pickVideoFromGallery() : pickFromGallery();
+                      pickFromGallery();
                     },
                     style: OutlinedButton.styleFrom(
                       foregroundColor: Theme.of(context).colorScheme.primary,
@@ -617,7 +627,7 @@ class _PhotoCapturePageState extends State<PhotoCapturePage> {
 
     try {
       // 여러 장 선택 가능
-      final photos = await _photoService.pickMultiplePhotosFromGallery();
+      final photos = await _photoService.pickMultipleMediasFromGallery();
       if (photos != null && photos.isNotEmpty) {
         setState(() {
           _capturedPhotos.addAll(photos);
@@ -627,19 +637,9 @@ class _PhotoCapturePageState extends State<PhotoCapturePage> {
         showSnackBar(Tr.photo.photoSelectCancel.tr());
       }
     } catch (e) {
-      // 여러 장 선택이 실패하면 한 장 선택으로 폴백
-      try {
-        final photo = await _photoService.pickPhotoFromGallery();
-        if (photo != null) {
-          setState(() {
-            _capturedPhotos.add(photo);
-          });
-        }
-      } catch (e2) {
-        showSnackBar(
-          Tr.photo.photoSelectError.tr(namedArgs: {'error': e2.toString()}),
-        );
-      }
+      showSnackBar(
+        Tr.photo.photoSelectError.tr(namedArgs: {'error': e.toString()}),
+      );
     } finally {
       setState(() {
         _isLoading = false;
@@ -709,13 +709,6 @@ class _PhotoCapturePageState extends State<PhotoCapturePage> {
         throw Exception('최대 5개의 파일만 업로드할 수 있습니다.');
       }
 
-      s3ObjectBloc.add(
-        S3ObjectEvent.uploadFiles(
-          _capturedPhotos.map((photo) => File(photo.filePath)).toList(),
-          user,
-        ),
-      );
-
       debugPrint(
         'uploaded files: ${_capturedPhotos.map((photo) => photo.filePath).toList().join(',')}',
       );
@@ -727,11 +720,23 @@ class _PhotoCapturePageState extends State<PhotoCapturePage> {
         adUnitId: Platform.isIOS
             ? 'ca-app-pub-4656262305566191/5748242622'
             : 'ca-app-pub-4656262305566191/5146333745',
-        callback: PhotoCaptureInterstitialAdCallback(),
+        callback: PhotoCaptureInterstitialAdCallback(
+          onAdLoadedCallback: () {
+            s3ObjectBloc.add(
+              S3ObjectEvent.uploadFiles(
+                _capturedPhotos.map((photo) => File(photo.filePath)).toList(),
+                user,
+              ),
+            );
+            if (mounted) {
+              _capturedPhotos.clear();
+              setState(() {
+                _isLoading = false;
+              });
+            }
+          },
+        ),
       );
-      if (mounted) {
-        context.pop(_capturedPhotos);
-      }
     } catch (e) {
       showSnackBar('업로드 중 오류가 발생했습니다: $e');
     } finally {

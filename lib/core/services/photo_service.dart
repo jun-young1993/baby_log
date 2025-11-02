@@ -2,6 +2,7 @@ import 'dart:io';
 import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:image_picker/image_picker.dart';
+import 'package:mime/mime.dart';
 import 'package:path_provider/path_provider.dart';
 import 'package:permission_handler/permission_handler.dart';
 import 'package:permission_handler/permission_handler.dart' as AppSettings;
@@ -19,6 +20,7 @@ class PhotoService {
   PhotoService._internal();
 
   final ImagePicker _imagePicker = ImagePicker();
+
   final Uuid _uuid = const Uuid();
 
   /// Check if video features are supported on current platform
@@ -48,7 +50,7 @@ class PhotoService {
 
       if (image == null) return null;
       print('image.path: ${image.path}');
-      return await _processImage(image);
+      return await _processMedia(image);
     } catch (e) {
       debugPrint('사진 촬영 오류: $e');
       rethrow;
@@ -98,7 +100,7 @@ class PhotoService {
 
       print('image.path: ${image.path}');
 
-      return await _processImage(image);
+      return await _processMedia(image);
     } catch (e) {
       debugPrint('갤러리에서 사진 선택 오류: $e');
       rethrow;
@@ -106,7 +108,7 @@ class PhotoService {
   }
 
   /// 갤러리에서 여러 장의 사진 선택
-  Future<List<PhotoModel>?> pickMultiplePhotosFromGallery() async {
+  Future<List<PhotoModel>?> pickMultipleMediasFromGallery() async {
     try {
       // 갤러리 권한 확인
       final photosPermission = await Permission.photos.request();
@@ -115,11 +117,7 @@ class PhotoService {
       }
 
       // 갤러리에서 여러 장 선택
-      final List<XFile> images = await _imagePicker.pickMultiImage(
-        imageQuality: 100,
-        maxWidth: 1920,
-        maxHeight: 1920,
-      );
+      final List<XFile> images = await _imagePicker.pickMultipleMedia();
 
       if (images.isEmpty) return null;
 
@@ -129,7 +127,7 @@ class PhotoService {
       final List<PhotoModel> photos = [];
       for (final image in images) {
         try {
-          final photo = await _processImage(image);
+          final photo = await _processMedia(image);
           photos.add(photo);
         } catch (e) {
           debugPrint('이미지 처리 실패: ${image.path}, 오류: $e');
@@ -145,24 +143,24 @@ class PhotoService {
   }
 
   /// 이미지 처리 및 저장
-  Future<PhotoModel> _processImage(XFile image) async {
+  Future<PhotoModel> _processMedia(XFile media) async {
     try {
       // 앱 전용 디렉토리 생성
       final appDir = await _getAppDirectory();
-      final photosDir = Directory('${appDir.path}/photos');
+      final mediasDir = Directory('${appDir.path}/medias');
 
-      if (!await photosDir.exists()) {
-        await photosDir.create(recursive: true);
+      if (!await mediasDir.exists()) {
+        await mediasDir.create(recursive: true);
       }
 
       // 고유한 파일명 생성
-      final fileExtension = image.path.split('.').last;
+      final fileExtension = media.path.split('.').last;
       final fileName = '${_uuid.v4()}.$fileExtension';
-      final filePath = '${photosDir.path}/$fileName';
+      final filePath = '${mediasDir.path}/$fileName';
       // final thumbnailPath = '${thumbnailsDir.path}/$fileName';
 
       // 원본 이미지 복사
-      final originalFile = File(image.path);
+      final originalFile = File(media.path);
       final savedFile = await originalFile.copy(filePath);
 
       // 썸네일 생성
@@ -171,7 +169,10 @@ class PhotoService {
       // 파일 정보 가져오기
       final fileSize = await savedFile.length();
       final fileStat = await savedFile.stat();
-
+      final mediaType = lookupMimeType(filePath)?.split('/').first;
+      if (mediaType == null) {
+        throw Exception('미디어 파일 형식이 올바르지 않습니다.');
+      }
       // PhotoModel 생성
       return PhotoModel(
         id: _uuid.v4(),
@@ -181,6 +182,7 @@ class PhotoService {
         takenAt: fileStat.modified,
         fileSize: fileSize,
         thumbnailPath: null,
+        mediaType: mediaType,
       );
     } catch (e) {
       debugPrint('이미지 처리 오류: $e');
@@ -380,7 +382,11 @@ class PhotoService {
       // 동영상 길이 및 기타 정보 가져오기
       // final videoDuration = await _getVideoDuration(filePath);
       // final aspectRatio = await _getVideoAspectRatio(filePath);
-
+      final mediaType = lookupMimeType(filePath)?.split('/').first;
+      if (mediaType == null) {
+        throw Exception('동영상 파일 형식이 올바르지 않습니다.');
+      }
+      debugPrint('mediaType: $mediaType');
       // PhotoModel 생성 (동영상용)
       return PhotoModel(
         id: _uuid.v4(),
@@ -390,7 +396,7 @@ class PhotoService {
         takenAt: fileStat.modified,
         fileSize: fileSize,
         thumbnailPath: null,
-        mediaType: 'video',
+        mediaType: mediaType,
       );
     } catch (e) {
       debugPrint('동영상 처리 오류: $e');

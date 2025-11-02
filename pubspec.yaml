@@ -32,8 +32,8 @@ dependencies:
     sdk: flutter
 
   flutter_common:
-    # path: /Users/junyoungkim/Desktop/junyoung/app/source/flutter_common
-    path: C:/Users/junyoung/junyoung/source/flutter_common
+    path: /Users/junyoungkim/Desktop/junyoung/app/source/flutter_common
+    # path: C:/Users/junyoung/junyoung/source/flutter_common
     # git:
     #   url: https://github.com/jun-young1993/flutter_common.git
     #   ref: v1.0.72
@@ -97,6 +97,7 @@ dependencies:
   flutter_local_notifications: ^19.0.0
 
   timezone: ^0.10.0
+  mime: ^2.0.0
 
 dev_dependencies:
   flutter_test:
