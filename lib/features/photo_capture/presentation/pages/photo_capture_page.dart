@@ -1,15 +1,12 @@
 import 'dart:io';
-import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_common/flutter_common.dart';
+import 'package:flutter_common/widgets/error_view.dart';
 import 'package:go_router/go_router.dart';
 import 'package:google_mobile_ads/google_mobile_ads.dart' hide AdError;
 import 'package:loading_animation_widget/loading_animation_widget.dart';
 import '../../../../core/services/photo_service.dart';
 import '../../../../core/models/photo_model.dart';
-import 'package:flutter_bloc/flutter_bloc.dart';
-import 'package:flutter_common/state/aws/s3/s3_object_bloc.dart';
-import 'package:flutter_common/state/aws/s3/s3_object_state.dart';
 
 class PhotoCaptureInterstitialAdCallback extends AdCallback {
   final onAdLoadedCallback;
@@ -152,7 +149,9 @@ class _PhotoCapturePageState extends State<PhotoCapturePage> {
         if (_uploadRequested && state.isUploading == false) {
           _uploadRequested = false;
           setState(() {
-            _capturedPhotos.clear();
+            if (state.uploadError == null) {
+              _capturedPhotos.clear();
+            }
           });
           _adMaster.createInterstitialAd(
             adUnitId: Platform.isIOS
@@ -160,9 +159,10 @@ class _PhotoCapturePageState extends State<PhotoCapturePage> {
                 : 'ca-app-pub-4656262305566191/5146333745',
             callback: PhotoCaptureInterstitialAdCallback(
               onAdLoadedCallback: () {
-                debugPrint(
-                  'PhotoCaptureInterstitialAdCallback onAdLoadedCallback',
-                );
+                if (state.uploadError != null) {
+                  return false;
+                }
+
                 if (mounted) {
                   if (context.canPop()) {
                     context.pop();
@@ -184,22 +184,30 @@ class _PhotoCapturePageState extends State<PhotoCapturePage> {
             onPressed: () => context.pop(),
           ),
         ),
-        body: S3ObjectIsUploadingSelector((isUploading) {
-          if (isUploading) {
-            return Center(
-              child: Column(
-                children: [
-                  LoadingAnimationWidget.staggeredDotsWave(
-                    color: Theme.of(context).colorScheme.onSurface,
-                    size: 24,
-                  ),
-                  SizedBox(height: SizeConstants.getColumnSpacing(context)),
-                  Text(Tr.common.loadingMessage.tr()),
-                ],
-              ),
+        body: S3ObjectUploadErrorSelector((error) {
+          if (error != null) {
+            return ErrorView(
+              error: error,
+              onRetry: () => s3ObjectBloc.add(S3ObjectEvent.clearUploadError()),
             );
           }
-          return buildBody();
+          return S3ObjectIsUploadingSelector((isUploading) {
+            if (isUploading) {
+              return Center(
+                child: Column(
+                  children: [
+                    LoadingAnimationWidget.staggeredDotsWave(
+                      color: Theme.of(context).colorScheme.onSurface,
+                      size: 24,
+                    ),
+                    SizedBox(height: SizeConstants.getColumnSpacing(context)),
+                    Text(Tr.common.loadingMessage.tr()),
+                  ],
+                ),
+              );
+            }
+            return buildBody();
+          });
         }),
       ),
     );
@@ -276,7 +284,7 @@ class _PhotoCapturePageState extends State<PhotoCapturePage> {
                   ],
                 ),
         ),
-        if (_isBannerAdLoaded) ...[
+        if (_isBannerAdLoaded)
           Center(
             child: SizedBox(
               height: _bannerAd!.size.height.toDouble(),
@@ -284,8 +292,13 @@ class _PhotoCapturePageState extends State<PhotoCapturePage> {
               child: AdWidget(ad: _bannerAd!),
             ),
           ),
-          SizedBox(height: SizeConstants.getColumnSpacing(context)),
-        ],
+
+        if (!_isBannerAdLoaded)
+          SizedBox(height: _bannerAd!.size.height.toDouble()),
+
+        SizedBox(height: SizeConstants.getColumnSpacing(context)),
+        SizedBox(height: SizeConstants.getColumnSpacing(context)),
+        SizedBox(height: SizeConstants.getColumnSpacing(context)),
       ],
     );
   }
@@ -609,6 +622,7 @@ class _PhotoCapturePageState extends State<PhotoCapturePage> {
       showSnackBar('${_capturedPhotos.length}개 파일 업로드 시작');
 
       _uploadRequested = true;
+
       s3ObjectBloc.add(
         S3ObjectEvent.uploadFiles(
           _capturedPhotos.map((photo) => File(photo.filePath)).toList(),
