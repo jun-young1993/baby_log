@@ -76,8 +76,9 @@ void main() async {
 
   DioClient dioClient = DioClient(
     baseUrl: JunyConstants.apiBaseUrl,
-    debugBaseUrl: JunyConstants.apiBaseUrl,
+    // debugBaseUrl: JunyConstants.apiBaseUrl,
     // debugBaseUrl: 'http://127.0.0.1:3000',
+    debugBaseUrl: 'http://10.0.2.2:3000',
     xIncludeUserGroupAdmin: true,
     useLogInterceptor: false,
     appKey: AppKeys.babyLog,

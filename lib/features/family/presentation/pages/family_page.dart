@@ -8,6 +8,7 @@ import 'package:flutter_common/state/user_group/user_group_bloc.dart';
 import 'package:flutter_common/state/user_group/user_group_event.dart';
 import 'package:flutter_common/state/user_group/user_group_selector.dart';
 import 'package:flutter_common/widgets/error_view.dart';
+import 'package:go_router/go_router.dart';
 import 'package:share_plus/share_plus.dart';
 
 class FamilyPage extends StatefulWidget {
@@ -75,7 +76,13 @@ class _FamilyPageState extends State<FamilyPage> {
         centerTitle: true,
         leading: IconButton(
           icon: const Icon(Icons.arrow_back),
-          onPressed: () => Navigator.pop(context),
+          onPressed: () {
+            if (context.canPop()) {
+              context.pop();
+            } else {
+              context.go('/dashboard');
+            }
+          },
         ),
       ),
       body: SingleChildScrollView(

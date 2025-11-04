@@ -4,20 +4,12 @@ import 'package:flutter/material.dart';
 import 'package:flutter_common/flutter_common.dart';
 import 'package:go_router/go_router.dart';
 import 'package:google_mobile_ads/google_mobile_ads.dart' hide AdError;
-import 'package:loading_animation_widget/loading_animation_widget.dart';
 import '../../../../core/services/photo_service.dart';
 import '../../../../core/models/photo_model.dart';
-import 'package:flutter_bloc/flutter_bloc.dart';
-import 'package:flutter_common/state/aws/s3/s3_object_bloc.dart';
-import 'package:flutter_common/state/aws/s3/s3_object_state.dart';
 
 class PhotoCaptureInterstitialAdCallback extends AdCallback {
   final onAdLoadedCallback;
-  final VoidCallback? onAdClosedCallback;
-  PhotoCaptureInterstitialAdCallback({
-    required this.onAdLoadedCallback,
-    this.onAdClosedCallback,
-  });
+  PhotoCaptureInterstitialAdCallback({required this.onAdLoadedCallback});
   @override
   void onAdClicked() {
     debugPrint('PhotoCaptureInterstitialAdCallback onAdClicked');
@@ -27,7 +19,7 @@ class PhotoCaptureInterstitialAdCallback extends AdCallback {
   @override
   void onAdClosed() {
     debugPrint('PhotoCaptureInterstitialAdCallback onAdClosed');
-    onAdClosedCallback?.call();
+    // TODO: implement onAdClosed
   }
 
   @override
@@ -81,12 +73,11 @@ class _PhotoCapturePageState extends State<PhotoCapturePage> {
   UserBloc get userBloc => context.read<UserBloc>();
   bool _isLoading = false;
   final List<PhotoModel> _capturedPhotos = []; // 여러 장의 사진/비디오
-
+  final bool _isVideoMode = false; // 동영상 모드 여부
   BannerAd? _bannerAd;
   bool _isBannerAdLoaded = false;
 
   final AdMaster _adMaster = AdMaster();
-  bool _uploadRequested = false;
 
   @override
   void initState() {
@@ -146,153 +137,71 @@ class _PhotoCapturePageState extends State<PhotoCapturePage> {
 
   @override
   Widget build(BuildContext context) {
-    return BlocListener<S3ObjectBloc, S3ObjectState>(
-      listenWhen: (prev, curr) => prev.isUploading != curr.isUploading,
-      listener: (context, state) {
-        if (_uploadRequested && state.isUploading == false) {
-          _uploadRequested = false;
-          setState(() {
-            _capturedPhotos.clear();
-          });
-          _adMaster.createInterstitialAd(
-            adUnitId: Platform.isIOS
-                ? 'ca-app-pub-4656262305566191/5748242622'
-                : 'ca-app-pub-4656262305566191/5146333745',
-            callback: PhotoCaptureInterstitialAdCallback(
-              onAdLoadedCallback: () {
-                debugPrint(
-                  'PhotoCaptureInterstitialAdCallback onAdLoadedCallback',
-                );
-                if (mounted) {
-                  if (context.canPop()) {
-                    context.pop();
-                  } else {
-                    context.go('/gallery');
-                  }
-                }
-              },
-            ),
-          );
-        }
-      },
-      child: Scaffold(
-        appBar: AppBar(
-          title: Text(Tr.photo.takePhoto.tr()),
-          centerTitle: true,
-          leading: IconButton(
-            icon: const Icon(Icons.arrow_back),
-            onPressed: () => context.pop(),
-          ),
+    return Scaffold(
+      appBar: AppBar(
+        title: Text(Tr.photo.takePhoto.tr()),
+        centerTitle: true,
+        leading: IconButton(
+          icon: const Icon(Icons.arrow_back),
+          onPressed: () => context.pop(),
         ),
-        body: S3ObjectIsUploadingSelector((isUploading) {
-          if (isUploading) {
-            return Center(
-              child: Column(
-                children: [
-                  LoadingAnimationWidget.staggeredDotsWave(
-                    color: Theme.of(context).colorScheme.onSurface,
-                    size: 24,
-                  ),
-                  SizedBox(height: SizeConstants.getColumnSpacing(context)),
-                  Text(Tr.common.loadingMessage.tr()),
-                ],
-              ),
-            );
-          }
-          return buildBody();
-        }),
       ),
+      body: buildBody(),
     );
   }
 
   Widget buildBody() {
-    return Column(
-      children: [
-        Expanded(
-          child: Stack(
-            children: [
-              if (_capturedPhotos.isNotEmpty)
-                buildPhotosPreview()
-              else
-                buildCaptureOptions(),
-              if (_isLoading)
-                Container(
-                  color: Colors.black.withOpacity(0.3),
-                  child: Center(
-                    child: Column(
-                      mainAxisAlignment: MainAxisAlignment.center,
-                      children: [
-                        const CircularProgressIndicator(),
-                        SizedBox(
-                          height: SizeConstants.getColumnSpacing(context),
-                        ),
-                        Text(Tr.photo.processing.tr()),
-                      ],
-                    ),
-                  ),
-                ),
-            ],
-          ),
+    if (_isLoading) {
+      return Center(
+        child: Column(
+          mainAxisAlignment: MainAxisAlignment.center,
+          children: [
+            CircularProgressIndicator(),
+            SizedBox(height: SizeConstants.getColumnSpacing(context)),
+            Text(Tr.photo.processing.tr()),
+          ],
         ),
-        Padding(
-          padding: const EdgeInsets.all(16.0),
-          child: _capturedPhotos.isNotEmpty
-              ? Row(
-                  children: [
-                    Expanded(
-                      child: OutlinedButton.icon(
-                        onPressed: () {
-                          final user = userBloc.state.user;
-                          if (user == null) return;
-                          pickFromGallery();
-                        },
-                        icon: const Icon(Icons.add_photo_alternate),
-                        label: const Text('더 추가'),
-                      ),
-                    ),
-                    const SizedBox(width: 12),
-                    Expanded(
-                      child: ElevatedButton.icon(
-                        onPressed: () => saveAllPhotos(userBloc.state.user!),
-                        icon: const Icon(Icons.cloud_upload),
-                        label: const Text('지금 업로드'),
-                      ),
-                    ),
-                  ],
-                )
-              : Row(
-                  children: [
-                    Expanded(
-                      child: OutlinedButton.icon(
-                        onPressed: () {
-                          final user = userBloc.state.user;
-                          if (user == null) return;
-                          pickFromGallery();
-                        },
-                        icon: const Icon(Icons.photo_library),
-                        label: Text(Tr.baby.galleryTitle.tr()),
-                      ),
-                    ),
-                  ],
-                ),
-        ),
-        if (_isBannerAdLoaded) ...[
-          Center(
-            child: SizedBox(
-              height: _bannerAd!.size.height.toDouble(),
-              width: _bannerAd!.size.width.toDouble(),
-              child: AdWidget(ad: _bannerAd!),
-            ),
-          ),
-          SizedBox(height: SizeConstants.getColumnSpacing(context)),
-        ],
-      ],
-    );
+      );
+    }
+
+    if (_capturedPhotos.isNotEmpty) {
+      return buildPhotosPreview();
+    }
+
+    return buildCaptureOptions();
   }
 
   Widget buildCaptureOptions() {
     return Column(
       children: [
+        // 사진/동영상 토글 (상단 고정)
+        // Padding(
+        //   padding: const EdgeInsets.all(24.0),
+        //   child: Container(
+        //     decoration: BoxDecoration(
+        //       border: Border.all(color: Theme.of(context).colorScheme.outline),
+        //       borderRadius: BorderRadius.circular(50),
+        //     ),
+        //     child: Row(
+        //       mainAxisSize: MainAxisSize.min,
+        //       children: [
+        //         buildModeToggleButton(
+        //           icon: Icons.camera_alt,
+        //           label: Tr.photo.title.tr(),
+        //           isSelected: !_isVideoMode,
+        //           onTap: () => setState(() => _isVideoMode = false),
+        //         ),
+        //         buildModeToggleButton(
+        //           icon: Icons.videocam,
+        //           label: Tr.video.title.tr(),
+        //           isSelected: _isVideoMode,
+        //           onTap: () => setState(() => _isVideoMode = true),
+        //         ),
+        //       ],
+        //     ),
+        //   ),
+        // ),
+
         // 스크롤 가능한 컨텐츠
         Expanded(
           child: SingleChildScrollView(
@@ -310,7 +219,7 @@ class _PhotoCapturePageState extends State<PhotoCapturePage> {
                     borderRadius: BorderRadius.circular(100),
                   ),
                   child: Icon(
-                    Icons.camera_alt,
+                    _isVideoMode ? Icons.videocam : Icons.camera_alt,
                     size: 100,
                     color: Theme.of(context).colorScheme.primary,
                   ),
@@ -335,11 +244,129 @@ class _PhotoCapturePageState extends State<PhotoCapturePage> {
                   ),
                   textAlign: TextAlign.center,
                 ),
+                // 웹 플랫폼 안내
+                if (kIsWeb) ...[
+                  SizedBox(height: SizeConstants.getColumnSpacing(context)),
+                  Container(
+                    padding: const EdgeInsets.all(12),
+                    decoration: BoxDecoration(
+                      color: Theme.of(
+                        context,
+                      ).colorScheme.surfaceContainerHighest,
+                      borderRadius: BorderRadius.circular(8),
+                    ),
+                    child: Row(
+                      children: [
+                        Icon(
+                          Icons.info_outline,
+                          size: 20,
+                          color: Theme.of(context).colorScheme.primary,
+                        ),
+                        SizedBox(
+                          width: SizeConstants.getColumnSpacing(context),
+                        ),
+                        Expanded(
+                          child: Text(
+                            '웹에서는 파일 선택만 가능합니다',
+                            style: Theme.of(context).textTheme.bodySmall
+                                ?.copyWith(
+                                  color: Theme.of(
+                                    context,
+                                  ).colorScheme.onSurface,
+                                ),
+                          ),
+                        ),
+                      ],
+                    ),
+                  ),
+                ],
+                SizedBox(height: SizeConstants.getColumnSpacing(context)),
+
+                // 촬영 버튼 (웹에서는 비활성화)
+                if (!kIsWeb) ...[
+                  SizedBox(
+                    width: double.infinity,
+                    height: 56,
+                    child: ElevatedButton(
+                      onPressed: _isVideoMode ? captureVideo : capturePhoto,
+                      style: ElevatedButton.styleFrom(
+                        backgroundColor: Theme.of(context).colorScheme.primary,
+                        foregroundColor: Theme.of(
+                          context,
+                        ).colorScheme.onPrimary,
+                      ),
+                      child: Row(
+                        mainAxisSize: MainAxisSize.min,
+                        children: [
+                          Icon(
+                            _isVideoMode ? Icons.videocam : Icons.camera_alt,
+                          ),
+                          const SizedBox(width: 8),
+                          Flexible(
+                            child: Text(
+                              Tr.baby.cameraTitle.tr(),
+                              overflow: TextOverflow.ellipsis,
+                              maxLines: 1,
+                            ),
+                          ),
+                        ],
+                      ),
+                    ),
+                  ),
+                  SizedBox(height: SizeConstants.getColumnSpacing(context)),
+                ],
+
+                // 갤러리 버튼
+                SizedBox(
+                  width: double.infinity,
+                  height: 56,
+                  child: OutlinedButton(
+                    onPressed: () {
+                      final user = userBloc.state.user;
+                      if (user == null) {
+                        return;
+                      }
+                      pickFromGallery();
+                    },
+                    style: OutlinedButton.styleFrom(
+                      foregroundColor: Theme.of(context).colorScheme.primary,
+                    ),
+                    child: Row(
+                      mainAxisSize: MainAxisSize.min,
+                      children: [
+                        const Icon(Icons.photo_library),
+                        SizedBox(
+                          width: SizeConstants.getColumnSpacing(context),
+                        ),
+                        Flexible(
+                          child: Text(
+                            Tr.baby.galleryTitle.tr(),
+                            overflow: TextOverflow.ellipsis,
+                            maxLines: 1,
+                          ),
+                        ),
+                      ],
+                    ),
+                  ),
+                ),
+
+                // 하단 여백
                 SizedBox(height: SizeConstants.getColumnSpacing(context)),
               ],
             ),
           ),
         ),
+        if (_isBannerAdLoaded) ...[
+          Center(
+            child: SizedBox(
+              height: _bannerAd!.size.height.toDouble(),
+              width: _bannerAd!.size.width.toDouble(),
+              child: AdWidget(ad: _bannerAd!),
+            ),
+          ),
+          SizedBox(height: SizeConstants.getColumnSpacing(context)),
+          SizedBox(height: SizeConstants.getColumnSpacing(context)),
+        ],
       ],
     );
   }
@@ -430,7 +457,37 @@ class _PhotoCapturePageState extends State<PhotoCapturePage> {
             },
           ),
         ),
-        // 하단 액션 버튼은 상위 buildBody의 액션바에서 제공
+
+        // 하단 액션 버튼들
+        Padding(
+          padding: const EdgeInsets.all(16.0),
+          child: Row(
+            children: [
+              Expanded(
+                child: OutlinedButton.icon(
+                  onPressed: () {
+                    _isVideoMode ? pickVideoFromGallery() : pickFromGallery();
+                  },
+                  icon: const Icon(Icons.add_photo_alternate),
+                  label: const Text('더 추가'),
+                ),
+              ),
+              const SizedBox(width: 16),
+              Expanded(
+                flex: 2,
+                child: ElevatedButton.icon(
+                  onPressed: () => saveAllPhotos(userBloc.state.user!),
+                  icon: const Icon(Icons.cloud_upload),
+                  label: Text('${_capturedPhotos.length}개 업로드'),
+                  style: ElevatedButton.styleFrom(
+                    backgroundColor: Theme.of(context).colorScheme.primary,
+                    foregroundColor: Theme.of(context).colorScheme.onPrimary,
+                  ),
+                ),
+              ),
+            ],
+          ),
+        ),
       ],
     );
   }
@@ -590,6 +647,56 @@ class _PhotoCapturePageState extends State<PhotoCapturePage> {
     }
   }
 
+  Future<void> captureVideo() async {
+    setState(() {
+      _isLoading = true;
+    });
+
+    try {
+      final video = await _photoService.captureVideo();
+      if (video != null) {
+        setState(() {
+          _capturedPhotos.add(video);
+        });
+      } else {
+        showSnackBar(Tr.video.videoTakenCancel.tr());
+      }
+    } catch (e) {
+      showSnackBar(
+        Tr.video.videoTakenError.tr(namedArgs: {'error': e.toString()}),
+      );
+    } finally {
+      setState(() {
+        _isLoading = false;
+      });
+    }
+  }
+
+  Future<void> pickVideoFromGallery() async {
+    setState(() {
+      _isLoading = true;
+    });
+
+    try {
+      final video = await _photoService.pickVideoFromGallery();
+      if (video != null) {
+        setState(() {
+          _capturedPhotos.add(video);
+        });
+      } else {
+        showSnackBar(Tr.video.videoSelectCancel.tr());
+      }
+    } catch (e) {
+      showSnackBar(
+        Tr.video.videoSelectError.tr(namedArgs: {'error': e.toString()}),
+      );
+    } finally {
+      setState(() {
+        _isLoading = false;
+      });
+    }
+  }
+
   void saveAllPhotos(User user) async {
     if (_capturedPhotos.isEmpty) return;
 
@@ -608,11 +715,26 @@ class _PhotoCapturePageState extends State<PhotoCapturePage> {
 
       showSnackBar('${_capturedPhotos.length}개 파일 업로드 시작');
 
-      _uploadRequested = true;
-      s3ObjectBloc.add(
-        S3ObjectEvent.uploadFiles(
-          _capturedPhotos.map((photo) => File(photo.filePath)).toList(),
-          user,
+      // 백그라운드에서 업로드가 진행되는 동안 페이지를 닫음
+      _adMaster.createInterstitialAd(
+        adUnitId: Platform.isIOS
+            ? 'ca-app-pub-4656262305566191/5748242622'
+            : 'ca-app-pub-4656262305566191/5146333745',
+        callback: PhotoCaptureInterstitialAdCallback(
+          onAdLoadedCallback: () {
+            s3ObjectBloc.add(
+              S3ObjectEvent.uploadFiles(
+                _capturedPhotos.map((photo) => File(photo.filePath)).toList(),
+                user,
+              ),
+            );
+            if (mounted) {
+              _capturedPhotos.clear();
+              setState(() {
+                _isLoading = false;
+              });
+            }
+          },
         ),
       );
     } catch (e) {

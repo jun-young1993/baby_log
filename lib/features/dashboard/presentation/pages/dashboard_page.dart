@@ -467,28 +467,25 @@ class _DashboardPageState extends State<DashboardPage>
         ),
         const SizedBox(height: 16),
         S3ObjectIsLoadingSelector((isLoading) {
-          return LoadingOverlay(
-            isLoading: isLoading,
-            child: S3ObjectsSelector((s3Objects) {
-              return GridView.builder(
-                shrinkWrap: true,
-                physics: const NeverScrollableScrollPhysics(),
-                gridDelegate: const SliverGridDelegateWithFixedCrossAxisCount(
-                  crossAxisCount: 2,
-                  mainAxisSpacing: 8,
-                  crossAxisSpacing: 8,
-                  childAspectRatio: 0.75,
-                ),
-                itemCount: maxRecentPhotoCount,
-                itemBuilder: (context, index) {
-                  final s3Object = s3Objects.length > index
-                      ? s3Objects[index]
-                      : null;
-                  return _buildPhotoCard(s3Object);
-                },
-              );
-            }),
-          );
+          return S3ObjectsSelector((s3Objects) {
+            return GridView.builder(
+              shrinkWrap: true,
+              physics: const NeverScrollableScrollPhysics(),
+              gridDelegate: const SliverGridDelegateWithFixedCrossAxisCount(
+                crossAxisCount: 2,
+                mainAxisSpacing: 8,
+                crossAxisSpacing: 8,
+                childAspectRatio: 0.75,
+              ),
+              itemCount: maxRecentPhotoCount,
+              itemBuilder: (context, index) {
+                final s3Object = s3Objects.length > index
+                    ? s3Objects[index]
+                    : null;
+                return _buildPhotoCard(s3Object);
+              },
+            );
+          });
         }),
       ],
     );
