@@ -32,6 +32,7 @@ void main() async {
   String? fcmToken;
   try {
     fcmToken = await FirebaseMessaging.instance.getToken();
+
     debugPrint('fcmToken: $fcmToken');
   } catch (e) {
     debugPrint('⚠️ FCM 토큰 가져오기 실패: $e');
