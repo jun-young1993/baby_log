@@ -32,6 +32,7 @@ class _SettingsPageState extends State<SettingsPage> {
         onUserDeleted: (user) {
           userBloc.add(UserEvent.deleteUserData(user));
         },
+        useAppUsers: true,
       ),
     );
   }
