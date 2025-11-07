@@ -81,7 +81,11 @@ class _DashboardPageState extends State<DashboardPage>
         noticeGroupBloc.add(
           NoticeGroupEvent.initialize(widget.user.id, withNotices: false),
         );
-        userStorageLimitBloc.add(UserStorageLimitEvent.s3Initialize());
+        userStorageLimitBloc.add(
+          UserStorageLimitEvent.groupAdminDefaultStorageLimit(
+            StorageLimitType.s3Storage,
+          ),
+        );
       }
     });
     userGroupBloc.stream.listen((state) {
@@ -230,8 +234,10 @@ class _DashboardPageState extends State<DashboardPage>
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
-        UserStorageLimitS3Selector((userStorageLimitS3) {
-          if (userStorageLimitS3 == null) {
+        UserStorageLimitGroupAdminDefaultStorageLimitSelector((
+          groupAdminDefaultStorageLimit,
+        ) {
+          if (groupAdminDefaultStorageLimit == null) {
             return Center(
               child: LoadingAnimationWidget.staggeredDotsWave(
                 color: Theme.of(context).colorScheme.onSurface,
@@ -244,8 +250,10 @@ class _DashboardPageState extends State<DashboardPage>
             child: Padding(
               padding: const EdgeInsets.all(16.0),
               child: AnimatedStorageUsageWidget(
-                usedStorage: userStorageLimitS3.currentUsage.toDouble(),
-                totalStorage: userStorageLimitS3.limitValue.toDouble(),
+                usedStorage: groupAdminDefaultStorageLimit.currentUsage
+                    .toDouble(),
+                totalStorage: groupAdminDefaultStorageLimit.limitValue
+                    .toDouble(),
                 label: Tr.common.storageUsage.tr(),
                 animationDuration: Duration(milliseconds: 2000),
               ),
