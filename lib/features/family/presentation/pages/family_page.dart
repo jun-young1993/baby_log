@@ -88,7 +88,6 @@ class _FamilyPageState extends State<FamilyPage> {
       body: SingleChildScrollView(
         padding: const EdgeInsets.all(24.0),
         child: UserGroupErrorSelector((error) {
-          debugPrint('family page error: $error');
           if (error != null) {
             return ErrorView(
               error: error,

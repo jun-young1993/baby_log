@@ -48,6 +48,8 @@ class _AlbumListPageState extends State<AlbumListPage> {
   Widget _buildAlbumGrid() {
     return AwsS3ObjectAlbumInfinityGrid(
       user: widget.user,
+      enableDateTextVisibility: true,
+      enableEmotionVisibility: true,
       initState: () {
         s3ObjectPageBloc.add(ClearS3Object());
         s3ObjectPageBloc.add(FetchNextS3Object());

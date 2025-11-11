@@ -14,6 +14,8 @@ class AwsS3ObjectAlbumInfinityGrid extends StatefulWidget {
   final User user;
   final VoidCallback initState;
   final VoidCallback fetchNextPage;
+  final bool enableDateTextVisibility;
+  final bool enableEmotionVisibility;
 
   final Widget? Function(int index)? customWidgetBuilder;
 
@@ -22,7 +24,8 @@ class AwsS3ObjectAlbumInfinityGrid extends StatefulWidget {
     required this.user,
     required this.initState,
     required this.fetchNextPage,
-
+    this.enableDateTextVisibility = false,
+    this.enableEmotionVisibility = false,
     this.customWidgetBuilder,
   });
 
@@ -126,8 +129,8 @@ class _AwsS3ObjectAlbumInfinityGridState
   Widget _buildAlbumCard(S3Object object) {
     return AwsS3ObjectPhotoCard(
       s3Object: object,
-      enableDateTextVisibility: false,
-      enableEmotionVisibility: false,
+      enableDateTextVisibility: widget.enableDateTextVisibility,
+      enableEmotionVisibility: widget.enableEmotionVisibility,
       onTap: () {
         s3ObjectBloc.add(S3ObjectEvent.findOneOrFail(object.id, widget.user));
         context.push('/photo-detail');

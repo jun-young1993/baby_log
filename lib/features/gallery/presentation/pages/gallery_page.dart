@@ -575,7 +575,16 @@ class _GalleryPageState extends State<GalleryPage> {
   Widget _buildPhotosForDate(DateTime date) {
     return AwsS3ObjectAlbumInfinityGrid(
       user: widget.user,
-      initState: () {},
+      initState: () {
+        s3ObjectPageBloc.add(ClearS3Object());
+        s3ObjectPageBloc.add(
+          FetchS3ObjectsByDate(
+            year: date.year.toString(),
+            month: date.month.toString(),
+            day: date.day.toString(),
+          ),
+        );
+      },
       fetchNextPage: () {
         s3ObjectPageBloc.add(
           FetchS3ObjectsByDate(

@@ -8,6 +8,7 @@ import 'package:flutter_common/state/user_group/user_group_selector.dart';
 import 'package:flutter_common/state/user_storage_limit/user_storage_limit_bloc.dart';
 import 'package:flutter_common/state/user_storage_limit/user_storage_limit_event.dart';
 import 'package:flutter_common/state/user_storage_limit/user_storage_limit_selector.dart';
+import 'package:flutter_common/state/aws/s3/s3_object_page_bloc.dart';
 import 'package:go_router/go_router.dart';
 import 'package:flutter_common/flutter_common.dart';
 import 'package:loading_animation_widget/loading_animation_widget.dart';
@@ -26,6 +27,7 @@ class _DashboardPageState extends State<DashboardPage>
   S3ObjectBloc get s3ObjectBloc => context.read<S3ObjectBloc>();
   UserGroupBloc get userGroupBloc => context.read<UserGroupBloc>();
   NoticeGroupBloc get noticeGroupBloc => context.read<NoticeGroupBloc>();
+  S3ObjectPageBloc get s3ObjectPageBloc => context.read<S3ObjectPageBloc>();
   UserBloc get userBloc => context.read<UserBloc>();
   UserStorageLimitBloc get userStorageLimitBloc =>
       context.read<UserStorageLimitBloc>();
@@ -407,6 +409,8 @@ class _DashboardPageState extends State<DashboardPage>
                 icon: Icons.photo_album,
                 color: Colors.orange,
                 onTap: () {
+                  s3ObjectPageBloc.add(ClearS3Object());
+                  s3ObjectPageBloc.add(FetchNextS3Object());
                   context.push('/albums');
                 },
               ),

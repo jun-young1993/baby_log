@@ -72,8 +72,56 @@ class AwsS3ObjectPhotoCard extends StatelessWidget {
                         ),
                 ),
               ),
-
-              // Gradient overlay
+              Positioned(
+                left: 8,
+                top: 8,
+                child: DecoratedBox(
+                  decoration: BoxDecoration(
+                    color: (s3Object?.isVideo ?? false)
+                        ? Colors.black.withOpacity(0.75)
+                        : Colors.white.withOpacity(0.85),
+                    borderRadius: BorderRadius.circular(32),
+                    boxShadow: [
+                      BoxShadow(
+                        color: Colors.black.withOpacity(0.2),
+                        blurRadius: 8,
+                        offset: const Offset(0, 2),
+                      ),
+                    ],
+                  ),
+                  child: Padding(
+                    padding: const EdgeInsets.symmetric(
+                      horizontal: 12,
+                      vertical: 6,
+                    ),
+                    child: Row(
+                      mainAxisSize: MainAxisSize.min,
+                      children: [
+                        Icon(
+                          (s3Object?.isVideo ?? false)
+                              ? Icons.play_circle_fill
+                              : Icons.photo_outlined,
+                          size: 18,
+                          color: (s3Object?.isVideo ?? false)
+                              ? Colors.white
+                              : Colors.black87,
+                        ),
+                        // const SizedBox(width: 6),
+                        // Text(
+                        //   (s3Object?.isVideo ?? false) ? 'VIDEO' : 'PHOTO',
+                        //   style: Theme.of(context).textTheme.labelSmall
+                        //       ?.copyWith(
+                        //         color: (s3Object?.isVideo ?? false)
+                        //             ? Colors.white
+                        //             : Colors.black87,
+                        //         fontWeight: FontWeight.bold,
+                        //       ),
+                        // ),
+                      ],
+                    ),
+                  ),
+                ),
+              ), // Gradient overlay
               Positioned(
                 bottom: 0,
                 left: 0,
@@ -146,8 +194,7 @@ class AwsS3ObjectPhotoCard extends StatelessWidget {
                                   size: SizeConstants.getSmallIconSize(context),
                                 ),
                               ),
-                            )
-                            ,
+                            ),
                         // Show +N if more than 3
                         if (s3Object!.emotions.length > 3)
                           Text(
@@ -171,6 +218,7 @@ class AwsS3ObjectPhotoCard extends StatelessWidget {
 
   /// Parses hex color string to Color
   /// Supports formats: #ffffff, #fff, ffffff, fff
+  // ignore: unused_element
   Color _parseColor(String? colorString) {
     if (colorString == null || colorString.isEmpty) {
       return Colors.white; // Default color
