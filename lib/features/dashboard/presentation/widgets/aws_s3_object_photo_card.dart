@@ -176,33 +176,71 @@ class AwsS3ObjectPhotoCard extends StatelessWidget {
                       vertical: 6,
                     ),
                     decoration: BoxDecoration(
-                      color: Colors.black.withOpacity(0.5),
+                      color: Colors.black.withOpacity(0.35),
                       borderRadius: BorderRadius.circular(20),
                     ),
                     child: Row(
                       mainAxisSize: MainAxisSize.min,
                       children: [
-                        // Show max 3 icons
-                        ...s3Object!.emotions
-                            .take(3)
-                            .map(
-                              (tag) => Padding(
-                                padding: const EdgeInsets.only(right: 4),
+                        // Up to 3 chips with strong contrast (colored dot + white icon)
+                        ...s3Object!.emotions.take(3).map((tag) {
+                          final Color chipColor =
+                              (tag?.emotionColorValue ?? Colors.grey)
+                                  .withOpacity(0.95);
+                          return Padding(
+                            padding: const EdgeInsets.only(right: 4),
+                            child: Tooltip(
+                              message: tag?.name ?? '',
+                              child: Container(
+                                width: 24,
+                                height: 24,
+                                decoration: BoxDecoration(
+                                  color: chipColor,
+                                  shape: BoxShape.circle,
+                                  border: Border.all(
+                                    color: Colors.white,
+                                    width: 1.5,
+                                  ),
+                                  boxShadow: [
+                                    BoxShadow(
+                                      color: Colors.black.withOpacity(0.15),
+                                      blurRadius: 4,
+                                      offset: const Offset(0, 2),
+                                    ),
+                                  ],
+                                ),
                                 child: Icon(
                                   tag?.icon ?? Icons.help_outline,
-                                  color: tag?.emotionColorValue ?? Colors.white,
-                                  size: SizeConstants.getSmallIconSize(context),
+                                  size: 14,
+                                  color: Colors.white,
                                 ),
                               ),
                             ),
+                          );
+                        }),
                         // Show +N if more than 3
                         if (s3Object!.emotions.length > 3)
-                          Text(
-                            '+${s3Object!.emotions.length - 3}',
-                            style: TextStyle(
-                              color: Colors.white,
-                              fontSize: SizeConstants.getSmallIconSize(context),
-                              fontWeight: FontWeight.bold,
+                          Container(
+                            padding: const EdgeInsets.symmetric(
+                              horizontal: 6,
+                              vertical: 2,
+                            ),
+                            decoration: BoxDecoration(
+                              color: Colors.white.withOpacity(0.95),
+                              borderRadius: BorderRadius.circular(12),
+                              border: Border.all(
+                                color: Colors.black.withOpacity(0.1),
+                              ),
+                            ),
+                            child: Text(
+                              '+${s3Object!.emotions.length - 3}',
+                              style: TextStyle(
+                                color: Colors.black87,
+                                fontSize: SizeConstants.getSmallIconSize(
+                                  context,
+                                ),
+                                fontWeight: FontWeight.w700,
+                              ),
                             ),
                           ),
                       ],
