@@ -5,6 +5,7 @@ import 'package:flutter_common/flutter_common.dart';
 import 'package:flutter_common/models/aws/s3/s3_object_tag.dart';
 import 'package:flutter_common/state/aws/s3/s3_object_page_bloc.dart';
 import 'package:flutter_common/widgets/buttons/loading_icon_button.dart';
+import 'package:shared_preferences/shared_preferences.dart';
 
 class AlbumListPage extends StatefulWidget {
   final User user;
@@ -20,10 +21,52 @@ class _AlbumListPageState extends State<AlbumListPage> {
 
   List<S3ObjectTag> _selectedEmotionTags = <S3ObjectTag>[];
 
+  final List<int> _gridOptions = [1, 2, 3, 4];
+  int _gridIndex = 0;
+  final String _gridIndexKey = 'baby_log.album_list_page.grid_index';
+
+  void _cycleGridColumns() {
+    setState(() {
+      _gridIndex = (_gridIndex + 1) % _gridOptions.length;
+    });
+    SharedPreferences.getInstance().then((value) {
+      value.setInt(_gridIndexKey, _gridIndex);
+    });
+  }
+
+  IconData _gridIconFor(int cols) {
+    switch (cols) {
+      case 1:
+        return Icons.view_list;
+      case 2:
+        return Icons.view_module;
+      case 3:
+        return Icons.view_comfy_alt;
+      case 4:
+        return Icons.grid_view;
+      default:
+        return Icons.grid_on;
+    }
+  }
+
   @override
   void initState() {
     super.initState();
     s3ObjectBloc.add(S3ObjectEvent.initializeEmotionTags());
+    SharedPreferences.getInstance().then((value) {
+      setState(() {
+        _gridIndex = value.getInt(_gridIndexKey) ?? 0;
+      });
+    });
+  }
+
+  void onRefresh() async {
+    s3ObjectBloc.add(S3ObjectEvent.initializeEmotionTags());
+    setState(() {
+      _selectedEmotionTags = [];
+    });
+    s3ObjectPageBloc.add(ClearS3Object());
+    s3ObjectPageBloc.add(FetchNextS3Object(tags: []));
   }
 
   @override
@@ -40,6 +83,12 @@ class _AlbumListPageState extends State<AlbumListPage> {
           onPressed: () => Navigator.pop(context),
         ),
         actions: [
+          // 그리드 열 개수 선택 버튼 (순환 + 아이콘 변경)
+          IconButton(
+            tooltip: '${_gridOptions[_gridIndex]}',
+            icon: Icon(_gridIconFor(_gridOptions[_gridIndex])),
+            onPressed: _cycleGridColumns,
+          ),
           S3ObjectUploadErrorSelector((emotionTagError) {
             return S3ObjectEmotionTagsSelector((emotionTags) {
               return S3ObjectIsEmotionTagsLoadingSelector((emotionTagLoding) {
@@ -54,6 +103,7 @@ class _AlbumListPageState extends State<AlbumListPage> {
                       isLoading: emotionTagLoding,
                       error: emotionTagError,
                       initialSelected: _selectedEmotionTags,
+                      onRefresh: () async => onRefresh(),
                       onRetry: () {
                         s3ObjectBloc.add(S3ObjectEvent.initializeEmotionTags());
                       },
@@ -72,7 +122,10 @@ class _AlbumListPageState extends State<AlbumListPage> {
           }),
         ],
       ),
-      body: Column(children: [Expanded(child: _buildAlbumGrid())]),
+      body: RefreshIndicator(
+        onRefresh: () async => onRefresh(),
+        child: Column(children: [Expanded(child: _buildAlbumGrid())]),
+      ),
     );
   }
 
@@ -81,6 +134,7 @@ class _AlbumListPageState extends State<AlbumListPage> {
       user: widget.user,
       enableDateTextVisibility: true,
       enableEmotionVisibility: true,
+      crossAxisCount: _gridOptions[_gridIndex],
       initState: () {
         s3ObjectPageBloc.add(ClearS3Object());
         s3ObjectPageBloc.add(FetchNextS3Object(tags: _selectedEmotionTags));

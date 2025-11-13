@@ -20,6 +20,28 @@ class AwsS3ObjectPhotoCard extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    // 카드 크기에 따라 감정 아이콘 크기를 동적으로 결정하는 로직
+    final double width = MediaQuery.of(context).size.width;
+
+    // 감정 아이콘 컨테이너 및 아이콘 크기 결정
+    // 작은 카드에서는 작게, 큰 카드에서는 적당히 크게 설정하여
+    // 카드 이미지를 방해하지 않으면서도 가독성을 유지
+    double emotionIconSize;
+    double emotionContainerSize;
+
+    if (width <= 300) {
+      // 작은 카드: 최소 크기로 설정
+      emotionIconSize = 8;
+      emotionContainerSize = 10;
+    } else if (width <= 500) {
+      // 중간 카드: 기본 크기
+      emotionIconSize = 12;
+      emotionContainerSize = 14;
+    } else {
+      // 큰 카드: 약간 크게
+      emotionIconSize = 14;
+      emotionContainerSize = 16;
+    }
     return InkWell(
       onTap: onTap,
       borderRadius: BorderRadius.circular(12),
@@ -101,22 +123,11 @@ class AwsS3ObjectPhotoCard extends StatelessWidget {
                           (s3Object?.isVideo ?? false)
                               ? Icons.play_circle_fill
                               : Icons.photo_outlined,
-                          size: 18,
+                          size: emotionIconSize,
                           color: (s3Object?.isVideo ?? false)
                               ? Colors.white
                               : Colors.black87,
                         ),
-                        // const SizedBox(width: 6),
-                        // Text(
-                        //   (s3Object?.isVideo ?? false) ? 'VIDEO' : 'PHOTO',
-                        //   style: Theme.of(context).textTheme.labelSmall
-                        //       ?.copyWith(
-                        //         color: (s3Object?.isVideo ?? false)
-                        //             ? Colors.white
-                        //             : Colors.black87,
-                        //         fontWeight: FontWeight.bold,
-                        //       ),
-                        // ),
                       ],
                     ),
                   ),
@@ -192,8 +203,8 @@ class AwsS3ObjectPhotoCard extends StatelessWidget {
                             child: Tooltip(
                               message: tag?.name ?? '',
                               child: Container(
-                                width: 24,
-                                height: 24,
+                                width: emotionContainerSize,
+                                height: emotionContainerSize,
                                 decoration: BoxDecoration(
                                   color: chipColor,
                                   shape: BoxShape.circle,
@@ -211,7 +222,7 @@ class AwsS3ObjectPhotoCard extends StatelessWidget {
                                 ),
                                 child: Icon(
                                   tag?.icon ?? Icons.help_outline,
-                                  size: 14,
+                                  size: emotionIconSize,
                                   color: Colors.white,
                                 ),
                               ),

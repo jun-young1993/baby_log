@@ -16,6 +16,7 @@ class AwsS3ObjectAlbumInfinityGrid extends StatefulWidget {
   final VoidCallback fetchNextPage;
   final bool enableDateTextVisibility;
   final bool enableEmotionVisibility;
+  final int crossAxisCount;
 
   final Widget? Function(int index)? customWidgetBuilder;
 
@@ -27,6 +28,7 @@ class AwsS3ObjectAlbumInfinityGrid extends StatefulWidget {
     this.enableDateTextVisibility = false,
     this.enableEmotionVisibility = false,
     this.customWidgetBuilder,
+    this.crossAxisCount = 2,
   });
 
   @override
@@ -64,7 +66,7 @@ class _AwsS3ObjectAlbumInfinityGridState
           state: state,
           fetchNextPage: widget.fetchNextPage,
           gridDelegate: SliverGridDelegateWithFixedCrossAxisCount(
-            crossAxisCount: 1, // 전폭 1열
+            crossAxisCount: widget.crossAxisCount, // 전폭 1열
             mainAxisSpacing: 8,
             crossAxisSpacing: 8,
             mainAxisExtent: 220, // 행 높이 고정 (광고/이미지 동일)

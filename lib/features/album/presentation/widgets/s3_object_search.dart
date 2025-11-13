@@ -14,6 +14,7 @@ class S3ObjectSearch extends StatefulWidget {
   final String? initialQuery;
   final bool isLoading;
   final List<S3ObjectTag>? initialSelected;
+  final VoidCallback? onRefresh;
 
   const S3ObjectSearch({
     super.key,
@@ -24,6 +25,7 @@ class S3ObjectSearch extends StatefulWidget {
     this.initialQuery,
     this.isLoading = false,
     this.initialSelected,
+    this.onRefresh,
   });
 
   @override
@@ -35,8 +37,8 @@ class _S3ObjectSearchState extends State<S3ObjectSearch> {
     text: widget.initialQuery ?? '',
   );
   String _query = '';
-  late final Set<String> _selectedNames = {
-    ...(widget.initialSelected?.map((e) => e.name) ?? const Iterable.empty()),
+  late final Map<String, S3ObjectTag> _selectedTags = {
+    for (final tag in widget.initialSelected ?? []) tag.id: tag,
   };
 
   @override
@@ -87,15 +89,30 @@ class _S3ObjectSearchState extends State<S3ObjectSearch> {
                       ),
                     ),
                   ),
-                  if (widget.onConfirm != null)
-                    TextButton(
-                      onPressed: _selectedNames.isEmpty
+                  if (widget.onRefresh != null)
+                    IconButton(
+                      disabledColor: Theme.of(
+                        context,
+                      ).colorScheme.onSurface.withOpacity(0.3),
+
+                      icon: Icon(Icons.refresh),
+                      onPressed: _selectedTags.isEmpty
                           ? null
                           : () {
-                              final selected = widget.emotionTags
-                                  .where((t) => _selectedNames.contains(t.name))
-                                  .toList(growable: false);
-                              widget.onConfirm?.call(selected);
+                              setState(() {
+                                _selectedTags.clear();
+                              });
+                              widget.onRefresh?.call();
+                            },
+                    ),
+                  if (widget.onConfirm != null)
+                    TextButton(
+                      onPressed: _selectedTags.isEmpty
+                          ? null
+                          : () {
+                              widget.onConfirm?.call(
+                                _selectedTags.values.toList(),
+                              );
                               Navigator.of(context).maybePop();
                             },
                       child: Text(Tr.app.confirm.tr()),
@@ -182,7 +199,7 @@ class _S3ObjectSearchState extends State<S3ObjectSearch> {
                             for (final tag in filtered)
                               _EmotionChip(
                                 tag: tag,
-                                selected: _selectedNames.contains(tag.name),
+                                selected: _selectedTags.containsKey(tag.id),
                                 onTap: () {
                                   if (widget.onConfirm == null) {
                                     widget.onSelected?.call(tag);
@@ -190,11 +207,10 @@ class _S3ObjectSearchState extends State<S3ObjectSearch> {
                                     return;
                                   }
                                   setState(() {
-                                    final key = tag.name;
-                                    if (_selectedNames.contains(key)) {
-                                      _selectedNames.remove(key);
+                                    if (_selectedTags.containsKey(tag.id)) {
+                                      _selectedTags.remove(tag.id);
                                     } else {
-                                      _selectedNames.add(key);
+                                      _selectedTags[tag.id] = tag;
                                     }
                                   });
                                 },
@@ -280,6 +296,7 @@ Future<void> showS3ObjectSearchBottomSheet({
   bool isLoading = false,
   AppException? error,
   VoidCallback? onRetry,
+  VoidCallback? onRefresh,
 }) {
   return showModalBottomSheet(
     context: context,
@@ -307,6 +324,8 @@ Future<void> showS3ObjectSearchBottomSheet({
             onConfirm: onConfirm,
             title: title,
             initialQuery: initialQuery,
+            initialSelected: initialSelected,
+            onRefresh: onRefresh,
           );
         },
       );
