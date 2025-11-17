@@ -30,6 +30,10 @@
 	<string>ca-app-pub-4656262305566191~2700600087</string>
 	<key>LSRequiresIPhoneOS</key>
 	<true/>
+	<key>BGTaskSchedulerPermittedIdentifiers</key>
+	<array>
+		<string>$(PRODUCT_BUNDLE_IDENTIFIER)</string>
+	</array>
 	<key>NSCameraUsageDescription</key>
 	<string>아기의 소중한 순간을 기록하기 위해 카메라 접근이 필요합니다.</string>
 	<key>NSMicrophoneUsageDescription</key>
