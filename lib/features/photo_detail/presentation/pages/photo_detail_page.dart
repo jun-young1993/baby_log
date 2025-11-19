@@ -62,12 +62,21 @@ class _PhotoDetailPageState extends State<PhotoDetailPage> {
           ),
         ),
         actions: [
-          Container(
-            margin: const EdgeInsets.all(8),
-            decoration: BoxDecoration(
-              color: Colors.black.withOpacity(0.5),
-              borderRadius: BorderRadius.circular(12),
-            ),
+          S3ObjectFindOneSelector((s3Object) {
+            if (s3Object == null) {
+              return const SizedBox.shrink();
+            }
+            return _buildActionButton(
+              child: IconButton(
+                icon: Icon(
+                  s3Object.isHidden ? Icons.hide_image : Icons.remove_red_eye,
+                  color: Colors.white,
+                ),
+                onPressed: () => _showMoreOptions(context),
+              ),
+            );
+          }),
+          _buildActionButton(
             child: Builder(
               builder: (buttonContext) => IconButton(
                 icon: const Icon(Icons.share, color: Colors.white),
@@ -95,24 +104,14 @@ class _PhotoDetailPageState extends State<PhotoDetailPage> {
               ),
             ),
           ),
-          Container(
-            margin: const EdgeInsets.all(8),
-            decoration: BoxDecoration(
-              color: Colors.black.withOpacity(0.5),
-              borderRadius: BorderRadius.circular(12),
-            ),
+          _buildActionButton(
             child: ReportButton(
               onReport: () => _showReportDialog(context),
               color: Colors.white,
               style: IconButton.styleFrom(),
             ),
           ),
-          Container(
-            margin: const EdgeInsets.all(8),
-            decoration: BoxDecoration(
-              color: Colors.black.withOpacity(0.5),
-              borderRadius: BorderRadius.circular(12),
-            ),
+          _buildActionButton(
             child: IconButton(
               icon: const Icon(Icons.more_vert, color: Colors.white),
               onPressed: () => _showMoreOptions(context),
@@ -923,6 +922,17 @@ class _PhotoDetailPageState extends State<PhotoDetailPage> {
           //     : const SizedBox.shrink(),
         ],
       ),
+    );
+  }
+
+  Widget _buildActionButton({required Widget child}) {
+    return Container(
+      margin: const EdgeInsets.all(8),
+      decoration: BoxDecoration(
+        color: Colors.black.withOpacity(0.5),
+        borderRadius: BorderRadius.circular(12),
+      ),
+      child: child,
     );
   }
 }

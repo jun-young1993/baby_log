@@ -43,12 +43,6 @@ class _MediaInfoOverlayState extends State<MediaInfoOverlay> {
 
   @override
   Widget build(BuildContext context) {
-    debugPrint('🔍 MediaInfoOverlay build called');
-    debugPrint('🔍 CreatedAt: ${widget.createdAt}');
-    debugPrint('🔍 FileSize: ${widget.fileSize}');
-    debugPrint('🔍 IsSurroundLoading: ${widget.isSurroundLoading}');
-    debugPrint('🔍 Surround: ${widget.surround}');
-
     return Positioned(
       bottom: 0,
       left: 0,
