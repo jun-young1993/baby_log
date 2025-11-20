@@ -29,6 +29,7 @@ class NavigationThumbnails extends StatelessWidget {
                 return _buildThumbnailImage(
                   imageUrl: object.thumbnailUrl,
                   onTap: () => onThumbnailTap(object.id),
+                  isHidden: object.isHidden,
                 );
               }).toList() ??
               [
@@ -45,6 +46,7 @@ class NavigationThumbnails extends StatelessWidget {
                 return _buildThumbnailImage(
                   imageUrl: object.thumbnailUrl,
                   onTap: () => onThumbnailTap(object.id),
+                  isHidden: object.isHidden,
                 );
               }).toList() ??
               [
@@ -63,6 +65,7 @@ class NavigationThumbnails extends StatelessWidget {
     String? imageUrl,
     required VoidCallback onTap,
     bool isSelected = false,
+    bool isHidden = false,
   }) {
     return GestureDetector(
       onTap: onTap,
@@ -88,7 +91,7 @@ class NavigationThumbnails extends StatelessWidget {
         ),
         child: ClipRRect(
           borderRadius: BorderRadius.circular(7),
-          child: imageUrl != null
+          child: imageUrl != null && isHidden == false
               ? Image.network(
                   imageUrl,
                   fit: BoxFit.cover,
@@ -124,7 +127,7 @@ class NavigationThumbnails extends StatelessWidget {
               : Container(
                   color: Colors.grey[800],
                   child: Icon(
-                    Icons.image,
+                    isHidden ? Icons.visibility_off_rounded : Icons.image,
                     color: Colors.white.withOpacity(0.5),
                     size: thumbnailSize * 0.4,
                   ),

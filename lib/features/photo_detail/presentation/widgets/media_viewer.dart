@@ -7,12 +7,14 @@ class MediaViewer extends StatelessWidget {
   final String? url;
   final String? mimetype;
   final String? thumbnailUrl;
+  final bool isHidden;
 
   const MediaViewer({
     super.key,
     required this.url,
     this.mimetype,
     this.thumbnailUrl,
+    this.isHidden = false,
   });
 
   /// Determines if the media is a video based on mimetype
@@ -28,6 +30,11 @@ class MediaViewer extends StatelessWidget {
   Widget build(BuildContext context) {
     if (url == null) {
       return _buildErrorState(context);
+    }
+
+    // 숨김 처리된 미디어는 별도의 프라이버시 UI로 표시
+    if (isHidden) {
+      return _buildHiddenState(context);
     }
 
     // Video doesn't need InteractiveViewer (zoom), and it can cause conflicts
@@ -132,6 +139,67 @@ class MediaViewer extends StatelessWidget {
             ),
           ),
         ],
+      ),
+    );
+  }
+
+  /// Builds hidden state when media is marked as hidden (privacy mode)
+  Widget _buildHiddenState(BuildContext context) {
+    return Center(
+      child: Container(
+        padding: const EdgeInsets.symmetric(horizontal: 24, vertical: 28),
+        decoration: BoxDecoration(
+          color: Colors.black.withOpacity(0.65),
+          borderRadius: BorderRadius.circular(20),
+          border: Border.all(color: Colors.white.withOpacity(0.12), width: 1.2),
+          boxShadow: [
+            BoxShadow(
+              color: Colors.black.withOpacity(0.35),
+              blurRadius: 18,
+              offset: const Offset(0, 10),
+            ),
+          ],
+        ),
+        child: Column(
+          mainAxisSize: MainAxisSize.min,
+          children: [
+            Container(
+              width: 64,
+              height: 64,
+              decoration: BoxDecoration(
+                shape: BoxShape.circle,
+                color: Colors.white.withOpacity(0.12),
+                border: Border.all(
+                  color: Colors.white.withOpacity(0.2),
+                  width: 1.4,
+                ),
+              ),
+              child: Icon(
+                Icons.visibility_off_rounded,
+                size: 34,
+                color: Colors.white.withOpacity(0.9),
+              ),
+            ),
+            const SizedBox(height: 18),
+            Text(
+              isVideo ? '숨김 처리된 동영상입니다' : '숨김 처리된 사진입니다',
+              textAlign: TextAlign.center,
+              style: Theme.of(context).textTheme.titleMedium?.copyWith(
+                color: Colors.white,
+                fontWeight: FontWeight.w700,
+              ),
+            ),
+            const SizedBox(height: 8),
+            Text(
+              '이 콘텐츠는 현재 숨김 상태입니다.\n설정에서 다시 표시하도록 변경할 수 있어요.',
+              textAlign: TextAlign.center,
+              style: Theme.of(context).textTheme.bodySmall?.copyWith(
+                color: Colors.white.withOpacity(0.75),
+                height: 1.4,
+              ),
+            ),
+          ],
+        ),
       ),
     );
   }

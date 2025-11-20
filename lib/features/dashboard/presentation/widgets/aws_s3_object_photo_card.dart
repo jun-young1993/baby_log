@@ -9,13 +9,14 @@ class AwsS3ObjectPhotoCard extends StatelessWidget {
   final VoidCallback onTap;
   final bool enableDateTextVisibility;
   final bool enableEmotionVisibility;
-
+  final bool enableCaptionVisibility;
   const AwsS3ObjectPhotoCard({
     super.key,
     this.s3Object,
     required this.onTap,
     this.enableDateTextVisibility = true,
     this.enableEmotionVisibility = true,
+    this.enableCaptionVisibility = true,
   });
 
   @override
@@ -41,6 +42,23 @@ class AwsS3ObjectPhotoCard extends StatelessWidget {
       // 큰 카드: 약간 크게
       emotionIconSize = 14;
       emotionContainerSize = 16;
+    }
+    bool isHidden = s3Object?.isHidden ?? false;
+    if (isHidden) {
+      return Center(
+        child: Column(
+          mainAxisAlignment: MainAxisAlignment.center,
+          mainAxisSize: MainAxisSize.min,
+          children: [
+            Icon(
+              Icons.visibility_off_rounded,
+              size: 48,
+              color: Theme.of(context).colorScheme.onSurfaceVariant,
+            ),
+            Text(s3Object?.metadata?.caption ?? 'no caption'),
+          ],
+        ),
+      );
     }
     return InkWell(
       onTap: onTap,
@@ -163,6 +181,12 @@ class AwsS3ObjectPhotoCard extends StatelessWidget {
                                   s3Object?.createdAt ?? DateTime.now(),
                                 )
                               : Tr.photo.noPhoto.tr(),
+                          style: Theme.of(context).textTheme.bodySmall
+                              ?.copyWith(color: Colors.white.withOpacity(0.8)),
+                        ),
+                      if (enableCaptionVisibility)
+                        Text(
+                          s3Object?.metadata?.caption ?? '',
                           style: Theme.of(context).textTheme.bodySmall
                               ?.copyWith(color: Colors.white.withOpacity(0.8)),
                         ),

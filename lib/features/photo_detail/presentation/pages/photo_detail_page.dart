@@ -72,7 +72,11 @@ class _PhotoDetailPageState extends State<PhotoDetailPage> {
                   s3Object.isHidden ? Icons.hide_image : Icons.remove_red_eye,
                   color: Colors.white,
                 ),
-                onPressed: () => _showMoreOptions(context),
+                onPressed: () {
+                  s3ObjectBloc.add(
+                    S3ObjectEvent.hideToggleS3Object(s3Object, widget.user),
+                  );
+                },
               ),
             );
           }),
@@ -89,7 +93,7 @@ class _PhotoDetailPageState extends State<PhotoDetailPage> {
                   final Size size = box?.size ?? const Size(0, 0);
 
                   Share.share(
-                    s3ObjectBloc.state.s3Object!.url!,
+                    '${s3ObjectBloc.state.s3Object?.caption ?? ''}\n\n${s3ObjectBloc.state.s3Object!.url!}',
                     subject: '${widget.user.username}(${Tr.app.share.tr()})',
                     sharePositionOrigin: Platform.isIOS
                         ? Rect.fromLTWH(
@@ -188,6 +192,7 @@ class _PhotoDetailPageState extends State<PhotoDetailPage> {
         Positioned.fill(
           child: MediaViewer(
             url: s3Object.url,
+            isHidden: s3Object.isHidden,
             mimetype: s3Object.mimetype,
             thumbnailUrl: s3Object.thumbnailUrl,
           ),
@@ -246,6 +251,14 @@ class _PhotoDetailPageState extends State<PhotoDetailPage> {
               ),
             ),
             const SizedBox(height: 20),
+            _buildMoreOption(
+              context,
+              Icons.visibility_off_rounded,
+              Tr.common.metadata.tr(),
+              () => _showMetadata(context),
+            ),
+
+            const SizedBox(height: 20),
             // _buildMoreOption(context, Icons.folder_outlined, '앨범으로 이동'),
             _buildMoreOption(
               context,
@@ -300,6 +313,79 @@ class _PhotoDetailPageState extends State<PhotoDetailPage> {
       onTap: () {
         onTap?.call();
       },
+    );
+  }
+
+  void _showMetadata(BuildContext context) {
+    final s3Object = s3ObjectBloc.state.s3Object;
+    if (s3Object == null) return;
+    showModalBottomSheet(
+      context: context,
+      backgroundColor: Colors.transparent,
+      isScrollControlled: true,
+      builder: (context) => DraggableScrollableSheet(
+        initialChildSize: 0.85,
+        builder: (context, scrollController) => Container(
+          height: MediaQuery.of(context).size.height * 0.7,
+          decoration: const BoxDecoration(
+            color: Colors.black87,
+            borderRadius: BorderRadius.vertical(top: Radius.circular(20)),
+          ),
+          child: Column(
+            children: [
+              // Drag handle
+              Container(
+                margin: const EdgeInsets.only(top: 12),
+                width: 40,
+                height: 4,
+                decoration: BoxDecoration(
+                  color: Colors.white.withOpacity(0.3),
+                  borderRadius: BorderRadius.circular(2),
+                ),
+              ),
+              const SizedBox(height: 20),
+              // Header
+              Padding(
+                padding: const EdgeInsets.symmetric(horizontal: 20),
+                child: Row(
+                  mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                  children: [
+                    Text(
+                      Tr.common.metadata.tr(),
+                      style: TextStyle(
+                        color: Colors.white,
+                        fontSize: 20,
+                        fontWeight: FontWeight.bold,
+                      ),
+                    ),
+                    IconButton(
+                      icon: Icon(Icons.close, color: Colors.white),
+                      onPressed: () => Navigator.of(context).pop(),
+                    ),
+                  ],
+                ),
+              ),
+              const Divider(color: Colors.white24),
+              // Content
+              Expanded(
+                child: SingleChildScrollView(
+                  padding: const EdgeInsets.all(20),
+                  child: Column(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: [
+                      _buildInfoRow(
+                        icon: Icons.description,
+                        label: 'caption',
+                        value: s3Object.caption ?? 'unknown',
+                      ),
+                    ],
+                  ),
+                ),
+              ),
+            ],
+          ),
+        ),
+      ),
     );
   }
 
