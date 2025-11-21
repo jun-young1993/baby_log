@@ -45,6 +45,7 @@ class AwsS3ObjectPhotoCard extends StatelessWidget {
     }
     bool isHidden = s3Object?.isHidden ?? false;
     if (isHidden) {
+      final caption = s3Object?.caption(context) ?? '';
       return Center(
         child: Column(
           mainAxisAlignment: MainAxisAlignment.center,
@@ -55,7 +56,7 @@ class AwsS3ObjectPhotoCard extends StatelessWidget {
               size: 48,
               color: Theme.of(context).colorScheme.onSurfaceVariant,
             ),
-            Text(s3Object?.metadata?.caption ?? 'no caption'),
+            Text(caption),
           ],
         ),
       );
@@ -186,7 +187,7 @@ class AwsS3ObjectPhotoCard extends StatelessWidget {
                         ),
                       if (enableCaptionVisibility)
                         Text(
-                          s3Object?.metadata?.caption ?? '',
+                          s3Object?.caption(context) ?? '',
                           style: Theme.of(context).textTheme.bodySmall
                               ?.copyWith(color: Colors.white.withOpacity(0.8)),
                         ),

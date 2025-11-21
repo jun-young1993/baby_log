@@ -72,19 +72,17 @@ void main() async {
   await EasyLocalization.ensureInitialized();
 
   final sharedPreferences = await SharedPreferences.getInstance();
-
+  final AppKeys appKey = AppKeys.babyLog;
   DioClient dioClient = DioClient(
     baseUrl: JunyConstants.apiBaseUrl,
     debugBaseUrl: JunyConstants.apiBaseUrl,
     // debugBaseUrl: 'http://127.0.0.1:3000',
     // debugBaseUrl: 'http://10.0.2.2:3000',
     xIncludeUserGroupAdmin: true,
-    useLogInterceptor: false,
-    appKey: AppKeys.babyLog,
+    useLogInterceptor: true,
+    appKey: appKey,
     sharedPreferences: sharedPreferences,
   );
-
-  final AppKeys appKey = AppKeys.babyLog;
 
   runApp(
     MultiRepositoryProvider(

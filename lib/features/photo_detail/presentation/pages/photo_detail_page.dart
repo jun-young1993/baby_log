@@ -63,9 +63,10 @@ class _PhotoDetailPageState extends State<PhotoDetailPage> {
         ),
         actions: [
           S3ObjectFindOneSelector((s3Object) {
-            if (s3Object == null) {
+            if (s3Object == null || widget.user.isAdmin == false) {
               return const SizedBox.shrink();
             }
+
             return _buildActionButton(
               child: IconButton(
                 icon: Icon(
@@ -91,9 +92,10 @@ class _PhotoDetailPageState extends State<PhotoDetailPage> {
                       ? box.localToGlobal(Offset.zero)
                       : const Offset(0, 0);
                   final Size size = box?.size ?? const Size(0, 0);
-
+                  final caption =
+                      s3ObjectBloc.state.s3Object?.caption(context) ?? '';
                   Share.share(
-                    '${s3ObjectBloc.state.s3Object?.caption ?? ''}\n\n${s3ObjectBloc.state.s3Object!.url!}',
+                    '${caption}\n\n${s3ObjectBloc.state.s3Object!.url!}',
                     subject: '${widget.user.username}(${Tr.app.share.tr()})',
                     sharePositionOrigin: Platform.isIOS
                         ? Rect.fromLTWH(
@@ -193,7 +195,7 @@ class _PhotoDetailPageState extends State<PhotoDetailPage> {
           child: MediaViewer(
             url: s3Object.url,
             isHidden: s3Object.isHidden,
-            mimetype: s3Object.mimetype,
+            isVideo: s3Object.isVideo,
             thumbnailUrl: s3Object.thumbnailUrl,
           ),
         ),
@@ -376,7 +378,7 @@ class _PhotoDetailPageState extends State<PhotoDetailPage> {
                       _buildInfoRow(
                         icon: Icons.description,
                         label: 'caption',
-                        value: s3Object.caption ?? 'unknown',
+                        value: s3Object.caption(context) ?? 'unknown',
                       ),
                     ],
                   ),

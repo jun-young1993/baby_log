@@ -5,26 +5,19 @@ import 'package:baby_log/core/widgets/url_video_player.dart';
 /// Handles image zoom and video playback
 class MediaViewer extends StatelessWidget {
   final String? url;
-  final String? mimetype;
+  final bool isVideo;
   final String? thumbnailUrl;
   final bool isHidden;
 
   const MediaViewer({
     super.key,
     required this.url,
-    this.mimetype,
+    required this.isVideo,
     this.thumbnailUrl,
     this.isHidden = false,
   });
 
   /// Determines if the media is a video based on mimetype
-  bool get isVideo {
-    if (mimetype == null) return false;
-    return mimetype!.toLowerCase().contains('video') ||
-        mimetype!.toLowerCase().contains('mp4') ||
-        mimetype!.toLowerCase().contains('mov') ||
-        mimetype!.toLowerCase().contains('avi');
-  }
 
   @override
   Widget build(BuildContext context) {
@@ -57,9 +50,12 @@ class MediaViewer extends StatelessWidget {
 
   /// Builds image viewer for image media
   Widget _buildImageViewer(BuildContext context) {
+    final width = MediaQuery.of(context).size.width;
+
     return Image.network(
       url!,
       fit: BoxFit.contain,
+      cacheWidth: width.toInt(),
       loadingBuilder: (context, child, loadingProgress) {
         if (loadingProgress == null) return child;
 
