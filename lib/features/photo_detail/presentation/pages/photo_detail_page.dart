@@ -193,7 +193,7 @@ class _PhotoDetailPageState extends State<PhotoDetailPage> {
         // Full screen media viewer (handles both image and video)
         Positioned.fill(
           child: MediaViewer(
-            url: s3Object.url,
+            url: s3Object.lowResUrlOrOriginalUrl,
             isHidden: s3Object.isHidden,
             isVideo: s3Object.isVideo,
             thumbnailUrl: s3Object.thumbnailUrl,
