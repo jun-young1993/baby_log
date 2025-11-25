@@ -69,7 +69,7 @@ class _AwsS3ObjectAlbumInfinityGridState
             crossAxisCount: widget.crossAxisCount, // 전폭 1열
             mainAxisSpacing: 8,
             crossAxisSpacing: 8,
-            mainAxisExtent: 220, // 행 높이 고정 (광고/이미지 동일)
+            mainAxisExtent: 170, // 행 높이 고정 (광고/이미지 동일)
           ),
           builderDelegate: PagedChildBuilderDelegate<S3Object>(
             itemBuilder: (context, item, index) {

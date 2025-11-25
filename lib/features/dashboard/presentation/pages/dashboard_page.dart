@@ -515,4 +515,17 @@ class _DashboardPageState extends State<DashboardPage>
       },
     );
   }
+
+  void _showGroupBottomSelectModal({
+    required BuildContext context,
+    required List<User> users,
+    required User selectedUser,
+  }) {
+    BottomSelectModal.show<User>(
+      context: context,
+      title: Tr.app.profileList.tr(),
+      items: users,
+      initialValue: selectedUser,
+    );
+  }
 }

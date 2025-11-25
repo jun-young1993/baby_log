@@ -32,12 +32,12 @@ class AwsS3ObjectPhotoCard extends StatelessWidget {
 
     if (width <= 300) {
       // 작은 카드: 최소 크기로 설정
-      emotionIconSize = 8;
-      emotionContainerSize = 10;
+      emotionIconSize = 0;
+      emotionContainerSize = 0;
     } else if (width <= 500) {
       // 중간 카드: 기본 크기
-      emotionIconSize = 12;
-      emotionContainerSize = 14;
+      emotionIconSize = 8;
+      emotionContainerSize = 7;
     } else {
       // 큰 카드: 약간 크게
       emotionIconSize = 14;

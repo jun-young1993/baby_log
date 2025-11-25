@@ -79,7 +79,7 @@ void main() async {
     // debugBaseUrl: 'http://127.0.0.1:3000',
     // debugBaseUrl: 'http://10.0.2.2:3000',
     xIncludeUserGroupAdmin: true,
-    useLogInterceptor: true,
+    useLogInterceptor: false,
     appKey: appKey,
     sharedPreferences: sharedPreferences,
   );
