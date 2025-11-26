@@ -75,6 +75,7 @@ class _DashboardPageState extends State<DashboardPage>
   void initialize() {
     userBloc.add(UserEvent.clearError());
     userBloc.add(UserEvent.initialize());
+    userBloc.add(UserEvent.getAppUsers());
     userBloc.stream.listen((state) {
       if (state.user != null) {
         userGroupBloc.add(UserGroupEvent.findAll());
@@ -116,6 +117,22 @@ class _DashboardPageState extends State<DashboardPage>
         elevation: 0,
         backgroundColor: Theme.of(context).colorScheme.surface,
         foregroundColor: Theme.of(context).colorScheme.onSurface,
+        leading: UserListSelector((users) {
+          print('users: $users');
+          if (users.isEmpty) {
+            return const SizedBox.shrink();
+          }
+          return IconButton(
+            onPressed: () {
+              _showGroupBottomSelectModal(
+                context: context,
+                users: [widget.user, ...users],
+                selectedUser: widget.user,
+              );
+            },
+            icon: const Icon(Icons.group),
+          );
+        }),
         actions: [
           UserGroupFindSelector((userGroup) {
             return Stack(
@@ -526,6 +543,18 @@ class _DashboardPageState extends State<DashboardPage>
       title: Tr.app.profileList.tr(),
       items: users,
       initialValue: selectedUser,
+      labelBuilder: (user) {
+        final userGroupName = user.userGroups?.firstOrNull?.name;
+        return '${user.username ?? 'no name'} (${userGroupName ?? 'no group'})';
+      },
+      onConfirm: (user) {
+        if (user != null) {
+          userBloc.add(UserEvent.changeAppUser(user));
+          if (context.mounted) {
+            // Navigator.pop(context);
+          }
+        }
+      },
     );
   }
 }
