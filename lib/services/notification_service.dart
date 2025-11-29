@@ -22,8 +22,12 @@ class NotificationService {
     await _initializeLocalNotifications();
 
     NotificationSettings settings = await messaging.requestPermission(
-      badge: true,
       alert: true,
+      announcement: false,
+      badge: true,
+      carPlay: false,
+      criticalAlert: false,
+      provisional: false,
       sound: true,
     );
     debugPrint('settings: ${settings.authorizationStatus}');

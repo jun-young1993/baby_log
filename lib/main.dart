@@ -30,13 +30,28 @@ void main() async {
   await NotificationService().initialize();
   // iOS에서 APNS 토큰 설정 및 FCM 토큰 가져오기
   String? fcmToken;
+
   try {
+    // 이제 FCM 토큰 획득 혹은 주제 구독 진행
     fcmToken = await FirebaseMessaging.instance.getToken();
 
     debugPrint('fcmToken: $fcmToken');
   } catch (e) {
     debugPrint('⚠️ FCM 토큰 가져오기 실패: $e');
+    if (Platform.isIOS) {
+      // APNs 토큰 확인
+
+      await Future.delayed(Duration(seconds: 2));
+      // 잠시 대기
+      fcmToken = await FirebaseMessaging.instance.getAPNSToken();
+
+      debugPrint('fcmToken(APNS): $fcmToken');
+    }
   }
+
+  FirebaseMessaging.instance.onTokenRefresh.listen((token) {
+    debugPrint('🔄 Token refreshed: $token');
+  });
 
   // AdMaster 초기화 - 에러가 발생해도 앱이 계속 실행되도록
   try {
