@@ -40,6 +40,8 @@
 	<string>We need access to your microphone to record audio.</string>
 	<key>NSPhotoLibraryUsageDescription</key>
 	<string>갤러리에서 사진을 선택하기 위해 접근이 필요합니다.</string>
+	<key>FirebaseAppDelegateProxyEnabled</key>
+	<true/>
 	<key>SKAdNetworkItems</key>
 	<array>
 		<dict>
