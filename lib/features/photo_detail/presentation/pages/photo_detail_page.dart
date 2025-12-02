@@ -95,7 +95,7 @@ class _PhotoDetailPageState extends State<PhotoDetailPage> {
                   final caption =
                       s3ObjectBloc.state.s3Object?.caption(context) ?? '';
                   Share.share(
-                    '${caption}\n\n${s3ObjectBloc.state.s3Object!.url!}',
+                    '${caption}\n\n${s3ObjectBloc.state.s3Object?.shareUrl}',
                     subject: '${widget.user.username}(${Tr.app.share.tr()})',
                     sharePositionOrigin: Platform.isIOS
                         ? Rect.fromLTWH(
