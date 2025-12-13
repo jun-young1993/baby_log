@@ -42,6 +42,10 @@
 	<string>갤러리에서 사진을 선택하기 위해 접근이 필요합니다.</string>
 	<key>FirebaseAppDelegateProxyEnabled</key>
 	<true/>
+	<key>NSPushKitUsageDescription</key>
+	<string>앱의 알람을 보내기 위해 사용됩니다.</string>
+	<key>NSLocalNotificationUsageDescription</key>
+	<string>앱의 디버깅 및 알람처리를 위해 로컬 네트워크 접근 권한이 필요합니다.</string>
 	<key>SKAdNetworkItems</key>
 	<array>
 		<dict>

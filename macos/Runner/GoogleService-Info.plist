@@ -9,7 +9,7 @@
 	<key>PLIST_VERSION</key>
 	<string>1</string>
 	<key>BUNDLE_ID</key>
-	<string>juny.babyLog</string>
+	<string>com.example.babyLog</string>
 	<key>PROJECT_ID</key>
 	<string>baby-log-894ac</string>
 	<key>STORAGE_BUCKET</key>
@@ -25,6 +25,6 @@
 	<key>IS_SIGNIN_ENABLED</key>
 	<true></true>
 	<key>GOOGLE_APP_ID</key>
-	<string>1:695875489529:ios:9146ccdc73aa5cfcbf1c28</string>
+	<string>1:695875489529:ios:bd5de05d835e56e1bf1c28</string>
 </dict>
 </plist>
