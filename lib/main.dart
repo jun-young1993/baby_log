@@ -1,6 +1,7 @@
 import 'dart:io';
 
 import 'package:baby_log/firebase_options.dart';
+import 'package:baby_log/push_notification_service.dart';
 import 'package:baby_log/services/notification_service.dart';
 import 'package:firebase_core/firebase_core.dart';
 import 'package:firebase_messaging/firebase_messaging.dart';
@@ -23,36 +24,29 @@ import 'package:shared_preferences/shared_preferences.dart';
 import 'package:baby_log/baby_photo_vault_app.dart';
 import 'package:baby_log/core/models/photo_model.dart';
 
+@pragma('vm:entry-point')
+Future<void> firebaseMessagingBackgroundHandler(RemoteMessage message) async {
+  await Firebase.initializeApp(options: DefaultFirebaseOptions.currentPlatform);
+  print('백그라운드 메시지: ${message.messageId}');
+  print('제목: ${message.notification?.title}');
+  print('내용: ${message.notification?.body}');
+}
+
 void main() async {
   WidgetsFlutterBinding.ensureInitialized();
 
   // Firebase 먼저 초기화 (AdMob보다 안정적)
-  await Firebase.initializeApp(options: DefaultFirebaseOptions.currentPlatform);
-  await NotificationService().initialize();
+
   // iOS에서 APNS 토큰 설정 및 FCM 토큰 가져오기
-  String? fcmToken;
 
-  try {
-    // 이제 FCM 토큰 획득 혹은 주제 구독 진행
-    fcmToken = await FirebaseMessaging.instance.getToken();
+  // Firebase 초기화
+  await Firebase.initializeApp(options: DefaultFirebaseOptions.currentPlatform);
 
-    debugPrint('fcmToken: $fcmToken');
-  } catch (e) {
-    debugPrint('⚠️ FCM 토큰 가져오기 실패: $e');
-    if (Platform.isIOS) {
-      // APNs 토큰 확인
+  // 백그라운드 메시지 핸들러 등록
+  FirebaseMessaging.onBackgroundMessage(firebaseMessagingBackgroundHandler);
 
-      await Future.delayed(Duration(seconds: 2));
-      // 잠시 대기
-      fcmToken = await FirebaseMessaging.instance.getAPNSToken();
-
-      debugPrint('fcmToken(APNS): $fcmToken');
-    }
-  }
-
-  FirebaseMessaging.instance.onTokenRefresh.listen((token) {
-    debugPrint('🔄 Token refreshed: $token');
-  });
+  // 푸시 알림 서비스 초기화
+  String? fcmToken = await PushNotificationService.initialize();
 
   // AdMaster 초기화 - 에러가 발생해도 앱이 계속 실행되도록
   try {
