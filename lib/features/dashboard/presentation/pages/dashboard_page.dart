@@ -1,7 +1,14 @@
 import 'package:baby_log/core/widgets/storage_usage_widget.dart';
 import 'package:baby_log/features/dashboard/presentation/widgets/aws_s3_object_photo_card.dart';
+import 'dart:io';
+
+import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:flutter_common/models/aws/s3/s3_object.dart';
+import 'package:flutter_common/state/app_reward/app_reward_bloc.dart';
+import 'package:flutter_common/state/app_reward/app_reward_event.dart';
+import 'package:flutter_common/state/app_reward/app_reward_state.dart';
 import 'package:flutter_common/state/user_group/user_group_bloc.dart';
 import 'package:flutter_common/state/user_group/user_group_event.dart';
 import 'package:flutter_common/state/user_group/user_group_selector.dart';
@@ -23,6 +30,13 @@ class DashboardPage extends StatefulWidget {
 
 class _DashboardPageState extends State<DashboardPage>
     with TickerProviderStateMixin {
+  // TODO: Replace with your production Rewarded Ad unit ids before release.
+  // These are Google's official test unit ids and are safe for local development.
+  static const _rewardedAdUnitIdAndroid =
+      'ca-app-pub-3940256099942544/5224354917';
+  static const _rewardedAdUnitIdIos = 'ca-app-pub-3940256099942544/1712485313';
+  static const _storageRewardName = 'storage_boost';
+
   final TextEditingController _searchController = TextEditingController();
   S3ObjectBloc get s3ObjectBloc => context.read<S3ObjectBloc>();
   UserGroupBloc get userGroupBloc => context.read<UserGroupBloc>();
@@ -31,6 +45,7 @@ class _DashboardPageState extends State<DashboardPage>
   UserBloc get userBloc => context.read<UserBloc>();
   UserStorageLimitBloc get userStorageLimitBloc =>
       context.read<UserStorageLimitBloc>();
+  AppRewardBloc get appRewardBloc => context.read<AppRewardBloc>();
 
   final maxRecentPhotoCount = 6;
   late AnimationController _animationController;
@@ -98,6 +113,26 @@ class _DashboardPageState extends State<DashboardPage>
     });
   }
 
+  String _getRewardedAdUnitId() {
+    if (kIsWeb) return '';
+    return Platform.isIOS ? _rewardedAdUnitIdIos : _rewardedAdUnitIdAndroid;
+  }
+
+  void _showStorageBoostAd() {
+    final adUnitId = _getRewardedAdUnitId();
+    if (adUnitId.isEmpty) {
+      ScaffoldMessenger.of(
+        context,
+      ).showSnackBar(const SnackBar(content: Text('현재 환경에서는 광고를 지원하지 않아요.')));
+      return;
+    }
+
+    appRewardBloc.add(const AppRewardEvent.clearError());
+    appRewardBloc.add(
+      AppRewardEvent.showRewardAd(adUnitId, _storageRewardName),
+    );
+  }
+
   @override
   Widget build(BuildContext context) {
     return Scaffold(
@@ -118,7 +153,6 @@ class _DashboardPageState extends State<DashboardPage>
         backgroundColor: Theme.of(context).colorScheme.surface,
         foregroundColor: Theme.of(context).colorScheme.onSurface,
         leading: UserListSelector((users) {
-          print('users: $users');
           if (users.isEmpty) {
             return const SizedBox.shrink();
           }
@@ -249,93 +283,231 @@ class _DashboardPageState extends State<DashboardPage>
   }
 
   Widget _buildStatisticsCards() {
-    return Column(
-      crossAxisAlignment: CrossAxisAlignment.start,
-      children: [
-        UserStorageLimitGroupAdminDefaultStorageLimitSelector((
-          groupAdminDefaultStorageLimit,
-        ) {
-          if (groupAdminDefaultStorageLimit == null) {
-            return Center(
-              child: LoadingAnimationWidget.staggeredDotsWave(
-                color: Theme.of(context).colorScheme.onSurface,
-                size: 50,
-              ),
+    return BlocListener<AppRewardBloc, AppRewardState>(
+      listenWhen: (prev, curr) =>
+          (prev as dynamic).isRewardAdLoading !=
+              (curr as dynamic).isRewardAdLoading ||
+          prev.error != curr.error,
+      listener: (context, state) async {
+        final isRewardAdLoading = (state as dynamic).isRewardAdLoading == true;
+        // Rewarded ad flow finished (either success or failure).
+        if (!isRewardAdLoading) {
+          if (state.error != null) {
+            ScaffoldMessenger.of(context).showSnackBar(
+              SnackBar(content: Text(state.error?.message ?? '광고를 불러오지 못했어요.')),
             );
+            return;
           }
-          return Card(
-            elevation: 2,
-            child: Padding(
-              padding: const EdgeInsets.all(16.0),
-              child: AnimatedStorageUsageWidget(
-                usedStorage: groupAdminDefaultStorageLimit.currentUsage
-                    .toDouble(),
-                totalStorage: groupAdminDefaultStorageLimit.limitValue
-                    .toDouble(),
-                label: Tr.common.storageUsage.tr(),
-                animationDuration: Duration(milliseconds: 2000),
-              ),
+
+          // Refresh storage usage after reward (server-side may reflect shortly).
+          userStorageLimitBloc.add(
+            UserStorageLimitEvent.groupAdminDefaultStorageLimit(
+              StorageLimitType.s3Storage,
             ),
           );
-        }),
-        const SizedBox(height: 8),
-        Row(
-          children: [
-            Expanded(
-              child: S3ObjectAllCountSelector((count) {
-                return S3ObjectIsAllCountLoadingSelector((isLoading) {
-                  return AdaptiveLoadingBar(
-                    isLoading: isLoading,
-                    minHeight: 10,
-                    type: LoadingBarType.minimal,
-                    child: _buildStatCard(
-                      title: Tr.photo.takenPhotos.tr(),
-                      value: count.toString(),
-                      unit: Tr.photo.unit.tr(),
-                      icon: Icons.photo_camera,
-                      color: Theme.of(context).colorScheme.primary,
+
+          ScaffoldMessenger.of(context).showSnackBar(
+            const SnackBar(content: Text('고마워요! 저장공간이 반영되면 자동으로 업데이트돼요.')),
+          );
+        }
+      },
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          UserStorageLimitGroupAdminDefaultStorageLimitSelector((
+            groupAdminDefaultStorageLimit,
+          ) {
+            if (groupAdminDefaultStorageLimit == null) {
+              return Center(
+                child: LoadingAnimationWidget.staggeredDotsWave(
+                  color: Theme.of(context).colorScheme.onSurface,
+                  size: 50,
+                ),
+              );
+            }
+
+            final usedStorage = groupAdminDefaultStorageLimit.currentUsage
+                .toDouble();
+            final totalStorage = groupAdminDefaultStorageLimit.limitValue
+                .toDouble();
+
+            return Column(
+              children: [
+                Card(
+                  elevation: 2,
+                  child: Padding(
+                    padding: const EdgeInsets.all(16.0),
+                    child: AnimatedStorageUsageWidget(
+                      usedStorage: usedStorage,
+                      totalStorage: totalStorage,
+                      label: Tr.common.storageUsage.tr(),
+                      animationDuration: const Duration(milliseconds: 2000),
                     ),
+                  ),
+                ),
+                const SizedBox(height: 12),
+                UserInfoSelector((user) {
+                  final isAdmin = user?.isAdmin ?? false;
+                  if (!isAdmin) return const SizedBox.shrink();
+                  return _buildStorageBoostCtaCard(
+                    usedStorage: usedStorage,
+                    totalStorage: totalStorage,
                   );
-                });
-              }),
+                }),
+              ],
+            );
+          }),
+          const SizedBox(height: 8),
+          Row(
+            children: [
+              Expanded(
+                child: S3ObjectAllCountSelector((count) {
+                  return S3ObjectIsAllCountLoadingSelector((isLoading) {
+                    return AdaptiveLoadingBar(
+                      isLoading: isLoading,
+                      minHeight: 10,
+                      type: LoadingBarType.minimal,
+                      child: _buildStatCard(
+                        title: Tr.photo.takenPhotos.tr(),
+                        value: count.toString(),
+                        unit: Tr.photo.unit.tr(),
+                        icon: Icons.photo_camera,
+                        color: Theme.of(context).colorScheme.primary,
+                      ),
+                    );
+                  });
+                }),
+              ),
+            ],
+          ),
+        ],
+      ),
+    );
+  }
+
+  Widget _buildStorageBoostCtaCard({
+    required double usedStorage,
+    required double totalStorage,
+  }) {
+    final ratio = totalStorage <= 0
+        ? 0.0
+        : (usedStorage / totalStorage).clamp(0.0, 1.0);
+
+    final title = ratio >= 0.85 ? '저장공간이 거의 찼어요' : '필요할 때 저장공간을 넉넉하게';
+    final description = ratio >= 0.85
+        ? '새 사진을 추가하기 전에, 짧은 광고를 보고 용량을 확보할 수 있어요.'
+        : '원할 때만 짧게 보고, 저장공간을 조금 더 확보할 수 있어요.';
+
+    return BlocBuilder<AppRewardBloc, AppRewardState>(
+      buildWhen: (prev, curr) =>
+          (prev as dynamic).isRewardAdLoading !=
+          (curr as dynamic).isRewardAdLoading,
+      builder: (context, state) {
+        final isLoading = (state as dynamic).isRewardAdLoading == true;
+
+        return Card(
+          elevation: 0,
+          color: Theme.of(context).colorScheme.surface,
+          shape: RoundedRectangleBorder(
+            borderRadius: BorderRadius.circular(16),
+          ),
+          child: Container(
+            decoration: BoxDecoration(
+              borderRadius: BorderRadius.circular(16),
+              border: Border.all(
+                color: Theme.of(
+                  context,
+                ).colorScheme.outlineVariant.withOpacity(0.7),
+              ),
+              gradient: LinearGradient(
+                begin: Alignment.topLeft,
+                end: Alignment.bottomRight,
+                colors: [
+                  Theme.of(
+                    context,
+                  ).colorScheme.primaryContainer.withOpacity(0.65),
+                  Theme.of(
+                    context,
+                  ).colorScheme.secondaryContainer.withOpacity(0.45),
+                ],
+              ),
             ),
-            // const SizedBox(width: 12),
-            // Expanded(
-            //   child: _buildStatCard(
-            //     title: '행복한 순간',
-            //     value: '18',
-            //     unit: '개',
-            //     icon: Icons.sentiment_very_satisfied,
-            //     color: Colors.orange,
-            //   ),
-            // ),
-          ],
-        ),
-        // const SizedBox(height: 12),
-        // Row(
-        //   children: [
-        //     Expanded(
-        //       child: _buildStatCard(
-        //         title: '첫 순간',
-        //         value: '3',
-        //         unit: '개',
-        //         icon: Icons.star,
-        //         color: Colors.amber,
-        //       ),
-        //     ),
-        //     const SizedBox(width: 12),
-        //     Expanded(
-        //       child: _buildStatCard(
-        //         title: '가족 공유',
-        //         value: '12',
-        //         unit: '장',
-        //         icon: Icons.share,
-        //         color: Colors.green,
-        //       ),
-        //     ),
-        //   ],
-        // ),
-      ],
+            padding: const EdgeInsets.all(16),
+            child: Row(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                Container(
+                  width: 44,
+                  height: 44,
+                  decoration: BoxDecoration(
+                    color: Theme.of(
+                      context,
+                    ).colorScheme.primary.withOpacity(0.12),
+                    borderRadius: BorderRadius.circular(12),
+                  ),
+                  child: Icon(
+                    Icons.cloud_upload_outlined,
+                    color: Theme.of(context).colorScheme.primary,
+                  ),
+                ),
+                const SizedBox(width: 12),
+                Expanded(
+                  child: Column(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: [
+                      Text(
+                        title,
+                        style: Theme.of(context).textTheme.titleMedium
+                            ?.copyWith(fontWeight: FontWeight.w700),
+                      ),
+                      const SizedBox(height: 4),
+                      Text(
+                        description,
+                        style: Theme.of(context).textTheme.bodyMedium?.copyWith(
+                          color: Theme.of(context).colorScheme.onSurfaceVariant,
+                          height: 1.25,
+                        ),
+                      ),
+                      const SizedBox(height: 12),
+                      Row(
+                        children: [
+                          Expanded(
+                            child: FilledButton.icon(
+                              onPressed: isLoading ? null : _showStorageBoostAd,
+                              icon: isLoading
+                                  ? SizedBox(
+                                      width: 18,
+                                      height: 18,
+                                      child: CircularProgressIndicator(
+                                        strokeWidth: 2,
+                                        color: Theme.of(
+                                          context,
+                                        ).colorScheme.onPrimary,
+                                      ),
+                                    )
+                                  : const Icon(Icons.play_circle_outline),
+                              label: Text(
+                                isLoading ? '불러오는 중…' : '짧게 보고 용량 확보',
+                              ),
+                            ),
+                          ),
+                        ],
+                      ),
+                      const SizedBox(height: 8),
+                      Text(
+                        '광고 시청은 선택사항이에요. 보상은 광고를 끝까지 시청했을 때 적용돼요.',
+                        style: Theme.of(context).textTheme.bodySmall?.copyWith(
+                          color: Theme.of(context).colorScheme.onSurfaceVariant,
+                        ),
+                      ),
+                    ],
+                  ),
+                ),
+              ],
+            ),
+          ),
+        );
+      },
     );
   }
 

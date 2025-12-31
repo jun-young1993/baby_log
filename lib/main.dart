@@ -8,6 +8,7 @@ import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 
 import 'package:flutter_common/flutter_common.dart';
+import 'package:flutter_common/repositories/app_reward_repository.dart';
 import 'package:flutter_common/repositories/user_group_repository.dart';
 import 'package:flutter_common/repositories/user_storage_limit_repository.dart';
 import 'package:flutter_common/state/aws/s3/s3_object_page_bloc.dart';
@@ -140,6 +141,9 @@ void main() async {
           create: (context) =>
               UserStorageLimitDefaultRepository(dioClient: dioClient),
         ),
+        RepositoryProvider<AppRewardRepository>(
+          create: (context) => AppRewardDefaultRepository(dioClient: dioClient),
+        ),
       ],
       child: MultiBlocProvider(
         providers: [
@@ -197,6 +201,14 @@ void main() async {
             create: (context) => UserStorageLimitBloc(
               userStorageLimitRepository: context
                   .read<UserStorageLimitRepository>(),
+            ),
+          ),
+          BlocProvider(
+            create: (context) => AppRewardBloc(
+              appRewardRepository: context.read<AppRewardRepository>(),
+              userRepository: context.read<UserRepository>(),
+              adMaster: AdMaster(),
+              appKeys: appKey,
             ),
           ),
         ],
