@@ -35,7 +35,6 @@ class _DashboardPageState extends State<DashboardPage>
   static const _rewardedAdUnitIdAndroid =
       'ca-app-pub-3940256099942544/5224354917';
   static const _rewardedAdUnitIdIos = 'ca-app-pub-3940256099942544/1712485313';
-  static const _storageRewardName = 'storage_boost';
 
   final TextEditingController _searchController = TextEditingController();
   S3ObjectBloc get s3ObjectBloc => context.read<S3ObjectBloc>();
@@ -129,7 +128,12 @@ class _DashboardPageState extends State<DashboardPage>
 
     appRewardBloc.add(const AppRewardEvent.clearError());
     appRewardBloc.add(
-      AppRewardEvent.showRewardAd(adUnitId, _storageRewardName),
+      AppRewardEvent.showRewardAd(
+        Platform.isIOS
+            ? 'ca-app-pub-4656262305566191/8755681664'
+            : 'ca-app-pub-4656262305566191/8677706330',
+        'baby_log_group_leader_storage_increase',
+      ),
     );
   }
 
@@ -389,126 +393,145 @@ class _DashboardPageState extends State<DashboardPage>
     required double usedStorage,
     required double totalStorage,
   }) {
-    final ratio = totalStorage <= 0
-        ? 0.0
-        : (usedStorage / totalStorage).clamp(0.0, 1.0);
+    return AppRewardRewardAdErrorSelector((error) {
+      debugPrint('error: $error');
+      final ratio = totalStorage <= 0
+          ? 0.0
+          : (usedStorage / totalStorage).clamp(0.0, 1.0);
 
-    final title = ratio >= 0.85 ? '저장공간이 거의 찼어요' : '필요할 때 저장공간을 넉넉하게';
-    final description = ratio >= 0.85
-        ? '새 사진을 추가하기 전에, 짧은 광고를 보고 용량을 확보할 수 있어요.'
-        : '원할 때만 짧게 보고, 저장공간을 조금 더 확보할 수 있어요.';
+      final title = ratio >= 0.85 ? '저장공간이 거의 찼어요' : '필요할 때 저장공간을 넉넉하게';
+      String description = ratio >= 0.85
+          ? '새 사진을 추가하기 전에, 짧은 광고를 보고 용량을 확보할 수 있어요.'
+          : '원할 때만 짧게 보고, 저장공간을 조금 더 확보할 수 있어요.';
+      if (error != null) {
+        description = error.message ?? '';
+      }
+      return BlocBuilder<AppRewardBloc, AppRewardState>(
+        buildWhen: (prev, curr) =>
+            (prev as dynamic).isRewardAdLoading !=
+            (curr as dynamic).isRewardAdLoading,
+        builder: (context, state) {
+          final isLoading = (state as dynamic).isRewardAdLoading == true;
 
-    return BlocBuilder<AppRewardBloc, AppRewardState>(
-      buildWhen: (prev, curr) =>
-          (prev as dynamic).isRewardAdLoading !=
-          (curr as dynamic).isRewardAdLoading,
-      builder: (context, state) {
-        final isLoading = (state as dynamic).isRewardAdLoading == true;
-
-        return Card(
-          elevation: 0,
-          color: Theme.of(context).colorScheme.surface,
-          shape: RoundedRectangleBorder(
-            borderRadius: BorderRadius.circular(16),
-          ),
-          child: Container(
-            decoration: BoxDecoration(
+          return Card(
+            elevation: 0,
+            color: Theme.of(context).colorScheme.surface,
+            shape: RoundedRectangleBorder(
               borderRadius: BorderRadius.circular(16),
-              border: Border.all(
-                color: Theme.of(
-                  context,
-                ).colorScheme.outlineVariant.withOpacity(0.7),
+            ),
+            child: Container(
+              decoration: BoxDecoration(
+                borderRadius: BorderRadius.circular(16),
+                border: Border.all(
+                  color: Theme.of(
+                    context,
+                  ).colorScheme.outlineVariant.withOpacity(0.7),
+                ),
+                gradient: LinearGradient(
+                  begin: Alignment.topLeft,
+                  end: Alignment.bottomRight,
+                  colors: [
+                    Theme.of(
+                      context,
+                    ).colorScheme.primaryContainer.withOpacity(0.65),
+                    Theme.of(
+                      context,
+                    ).colorScheme.secondaryContainer.withOpacity(0.45),
+                  ],
+                ),
               ),
-              gradient: LinearGradient(
-                begin: Alignment.topLeft,
-                end: Alignment.bottomRight,
-                colors: [
-                  Theme.of(
-                    context,
-                  ).colorScheme.primaryContainer.withOpacity(0.65),
-                  Theme.of(
-                    context,
-                  ).colorScheme.secondaryContainer.withOpacity(0.45),
+              padding: const EdgeInsets.all(16),
+              child: Row(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  Container(
+                    width: 44,
+                    height: 44,
+                    decoration: BoxDecoration(
+                      color: Theme.of(
+                        context,
+                      ).colorScheme.primary.withOpacity(0.12),
+                      borderRadius: BorderRadius.circular(12),
+                    ),
+                    child: Icon(
+                      Icons.cloud_upload_outlined,
+                      color: Theme.of(context).colorScheme.primary,
+                    ),
+                  ),
+                  const SizedBox(width: 12),
+                  Expanded(
+                    child: Column(
+                      crossAxisAlignment: CrossAxisAlignment.start,
+                      children: [
+                        Text(
+                          title,
+                          style: Theme.of(context).textTheme.titleMedium
+                              ?.copyWith(fontWeight: FontWeight.w700),
+                        ),
+                        const SizedBox(height: 4),
+                        Text(
+                          description,
+                          style: Theme.of(context).textTheme.bodyMedium
+                              ?.copyWith(
+                                color: Theme.of(
+                                  context,
+                                ).colorScheme.onSurfaceVariant,
+                                height: 1.25,
+                              ),
+                        ),
+                        const SizedBox(height: 12),
+                        Row(
+                          children: [
+                            Expanded(
+                              child: FilledButton.icon(
+                                onPressed: () {
+                                  if (error != null) {
+                                    appRewardBloc.add(
+                                      const AppRewardEvent.clearError(),
+                                    );
+                                    return;
+                                  }
+                                  _showStorageBoostAd();
+                                },
+                                icon: isLoading
+                                    ? SizedBox(
+                                        width: 18,
+                                        height: 18,
+                                        child: CircularProgressIndicator(
+                                          strokeWidth: 2,
+                                          color: Theme.of(
+                                            context,
+                                          ).colorScheme.onPrimary,
+                                        ),
+                                      )
+                                    : const Icon(Icons.play_circle_outline),
+                                label: Text(
+                                  isLoading ? '불러오는 중…' : '짧게 보고 용량 확보',
+                                ),
+                              ),
+                            ),
+                          ],
+                        ),
+                        const SizedBox(height: 8),
+                        Text(
+                          '광고 시청은 선택사항이에요. 보상은 광고를 끝까지 시청했을 때 적용돼요.',
+                          style: Theme.of(context).textTheme.bodySmall
+                              ?.copyWith(
+                                color: Theme.of(
+                                  context,
+                                ).colorScheme.onSurfaceVariant,
+                              ),
+                        ),
+                      ],
+                    ),
+                  ),
                 ],
               ),
             ),
-            padding: const EdgeInsets.all(16),
-            child: Row(
-              crossAxisAlignment: CrossAxisAlignment.start,
-              children: [
-                Container(
-                  width: 44,
-                  height: 44,
-                  decoration: BoxDecoration(
-                    color: Theme.of(
-                      context,
-                    ).colorScheme.primary.withOpacity(0.12),
-                    borderRadius: BorderRadius.circular(12),
-                  ),
-                  child: Icon(
-                    Icons.cloud_upload_outlined,
-                    color: Theme.of(context).colorScheme.primary,
-                  ),
-                ),
-                const SizedBox(width: 12),
-                Expanded(
-                  child: Column(
-                    crossAxisAlignment: CrossAxisAlignment.start,
-                    children: [
-                      Text(
-                        title,
-                        style: Theme.of(context).textTheme.titleMedium
-                            ?.copyWith(fontWeight: FontWeight.w700),
-                      ),
-                      const SizedBox(height: 4),
-                      Text(
-                        description,
-                        style: Theme.of(context).textTheme.bodyMedium?.copyWith(
-                          color: Theme.of(context).colorScheme.onSurfaceVariant,
-                          height: 1.25,
-                        ),
-                      ),
-                      const SizedBox(height: 12),
-                      Row(
-                        children: [
-                          Expanded(
-                            child: FilledButton.icon(
-                              onPressed: isLoading ? null : _showStorageBoostAd,
-                              icon: isLoading
-                                  ? SizedBox(
-                                      width: 18,
-                                      height: 18,
-                                      child: CircularProgressIndicator(
-                                        strokeWidth: 2,
-                                        color: Theme.of(
-                                          context,
-                                        ).colorScheme.onPrimary,
-                                      ),
-                                    )
-                                  : const Icon(Icons.play_circle_outline),
-                              label: Text(
-                                isLoading ? '불러오는 중…' : '짧게 보고 용량 확보',
-                              ),
-                            ),
-                          ),
-                        ],
-                      ),
-                      const SizedBox(height: 8),
-                      Text(
-                        '광고 시청은 선택사항이에요. 보상은 광고를 끝까지 시청했을 때 적용돼요.',
-                        style: Theme.of(context).textTheme.bodySmall?.copyWith(
-                          color: Theme.of(context).colorScheme.onSurfaceVariant,
-                        ),
-                      ),
-                    ],
-                  ),
-                ),
-              ],
-            ),
-          ),
-        );
-      },
-    );
+          );
+        },
+      );
+    });
   }
 
   Widget _buildStatCard({
