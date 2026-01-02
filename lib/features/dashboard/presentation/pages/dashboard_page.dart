@@ -350,14 +350,10 @@ class _DashboardPageState extends State<DashboardPage>
                   ),
                 ),
                 const SizedBox(height: 12),
-                UserInfoSelector((user) {
-                  final isAdmin = user?.isAdmin ?? false;
-                  if (!isAdmin) return const SizedBox.shrink();
-                  return _buildStorageBoostCtaCard(
-                    usedStorage: usedStorage,
-                    totalStorage: totalStorage,
-                  );
-                }),
+                _buildStorageBoostCtaCard(
+                  usedStorage: usedStorage,
+                  totalStorage: totalStorage,
+                ),
               ],
             );
           }),
@@ -394,7 +390,6 @@ class _DashboardPageState extends State<DashboardPage>
     required double totalStorage,
   }) {
     return AppRewardRewardAdErrorSelector((error) {
-      debugPrint('error: $error');
       final ratio = totalStorage <= 0
           ? 0.0
           : (usedStorage / totalStorage).clamp(0.0, 1.0);
